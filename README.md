@@ -50,9 +50,7 @@ AD15 系列通用MCU SDK 固件程序
 
 即将发布：
 
-* 蓝牙应用 ：`IoT (ipv6 / 6lowpan)`
-
-SDK 同时支持Codeblock 和 Make 编译环境，请确保编译前已经搭建好编译环境，
+SDK 支持Codeblock编译环境，请确保编译前已经搭建好编译环境，
 
 * Codeblock 编译 : 进入对应的工程目录并找到后缀为 `.cbp` 的文件, 双击打开便可进行编译.
 
