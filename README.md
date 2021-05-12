@@ -1,8 +1,8 @@
 # fw-AD15N
 About Firmware for Generic MCU SDK（AD15N series）, Support AD15N
 
-[tag download]:https://github.com/Jieli-Tech/fw-AC63_BT_SDK/tags
-[tag_badgen]:https://img.shields.io/github/v/tag/Jieli-Tech/fw-AC63_BT_SDK?style=plastic&logo=bluetooth&labelColor=ffffff&color=informational&label=Tag&logoColor=blue
+[tag download]:https://github.com/Jieli-Tech/fw-AD15N/tags
+[tag_badgen]:https://img.shields.io/github/v/tag/Jieli-Tech/fw-AD15N?style=plastic&labelColor=ffffff&color=informational&label=Tag&
 
 # fw-AD15N_SDK   [![tag][tag_badgen]][tag download]
 
