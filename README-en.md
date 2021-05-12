@@ -51,9 +51,7 @@ Select a project to build. The following folders contains buildable projects:
 
 Comming Soon：
 
-* APP_Bluetooth ：`IoT (ipv6 / 6lowpan)`
-
-SDK support Codeblock & Make to build to project,make sure you already setup the enviroment
+SDK support Codeblock to build to project,make sure you already setup the enviroment
 
 * Codeblock build : enter the project directory and find the `.cbp`,double click and build.
 
@@ -71,6 +69,31 @@ Hardware
 
 * Wireless Tester : Over the air update/RF Calibration/Fast production test, please accuire the tool from the [link](https://item.taobao.com/item.htm?spm=a1z10.1-c-s.w4004-22883854875.10.504d246bXKwyeH&id=620942507511),check [doc](./doc/stuff/AC690x_1T2测试盒使用说明.pdf) for more infomation.
 
+SDK function
+-------------
+* Supports decoding and playback of built-in FLASH
+* Support the decoding and playback of external FLASH
+* Support decoding MIO function
+* Support the decoding and playback of the two formats of .a/.b/.e, .f1a/.f1b/.f1c
+* Support MIDI playback
+* Support variable speed modulation (but need to adjust the system clock above 100Mhz)
+* Supports up to .a/.b/.e + .f1a/.f1b/.f1c two channels of audio decoding and playback at the same time
+* DAC supports PWM differential output and external single-ended power amplifier
+* DAC supports 8K, 12k, 16K, 24K, 32K sampling rates
+* Support hardware resampling
+* Shutdown power consumption 1.7uA+
+  
+MCU information
+-------------
+* RISC / 160MHz /20K+8K
+* flash / 2Mbit
+* UART * 2 / IIC / SPI * 2
+* 10bit ADC
+* 16bit dac
+* SD IO
+* IR
+* PWM * 4
+* 16bit timer * 3
 
 Community
 --------------
