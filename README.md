@@ -26,6 +26,7 @@ AD15 系列通用MCU SDK 固件程序
 关于如何获取`杰理工具链` 和 如何进行环境搭建，请阅读以下内容：
 
 * 编译工具 ：请安装杰理编译工具来搭建起编译环境, [下载链接](https://pan.baidu.com/s/1f5pK7ZaBNnvbflD-7R22zA) 提取码: `ukgx`
+* 编译器邀请码：4VlZaQCq-lImlZX2u-GBeCs501-ektNxDGu
 
 * USB 升级工具 : 在开发完成后，需要使用杰理烧写工具将对应的`hex`文件烧录到目标板，进行开发调试, 关于如何获取工具请进入申请 [链接](https://item.taobao.com/item.htm?spm=a1z10.1-c-s.w4004-22883854875.5.504d246bXKwyeH&id=620295020803) 并详细阅读对应的[文档](doc/stuff/usb%20updater.pdf)，以及相关下载脚本[配置](doc/stuff/ISD_CONFIG.INI配置文件说明.pdf)
 
