@@ -45,9 +45,9 @@ Build
 -------------
 Select a project to build. The following folders contains buildable projects:
 
-* APP_TOY: [Toy](./apps/spp_and_le), usage: 
+* APP_TOY: ./sdk/AD15N_app_mg.cbp), usage: 
 
-* APP_MCU: [MCU](./apps/hid), usage: 
+* APP_SIMPLE: ./sdk/AD15N_simple.cbp, usage: 
 
 
 Comming Soon：

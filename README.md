@@ -45,9 +45,9 @@ AD15 系列通用MCU SDK 固件程序
 -------------
 请选择以下一个工程进行编译，下列目录包含了便于开发的工程文件：
 
-* 玩具类应用 : [Toy](./apps/spp_and_le) , 适用领域：
+* 玩具类应用 : ./sdk/AD15N_app_mg.cbp , 适用领域：
 
-* 通用MCU类应用 : [Generic MCU](./apps/hid)，适用领域：
+* 示例类应用 : ./sdk/AD15N_simple.cbp)，适用领域：
 
 即将发布：
 
