@@ -22,7 +22,7 @@ static const char dir_inner_flash_table[][16] = {
     "dir_eng",
     "dir_poetry",
     "dir_story",
-//    "dir_midi",
+    /* "dir_midi", */
 };
 static const char *const dir_a = {
     "dir_a",
@@ -165,8 +165,8 @@ static int app_music_close(void)
     }
 #endif
 
-    music_play_destroy(music_obj);
-    music_play_destroy(music_a_obj);
+    music_play_destroy(&music_obj);
+    music_play_destroy(&music_a_obj);
     music_decode_succ_cb_regist(NULL);
     return 0;
 }
@@ -298,10 +298,10 @@ int app_music(void *param)
         case MSG_F1A2_FILE_ERR:
         case MSG_MP3_FILE_ERR:
         case MSG_MIDI_FILE_ERR:
-            music_play_destroy(music_obj);
+            music_play_destroy(&music_obj);
             break;
         case MSG_A_FILE_ERR:
-            music_play_destroy(music_a_obj);
+            music_play_destroy(&music_a_obj);
             break;
 
         case MSG_NEXT_MODE:

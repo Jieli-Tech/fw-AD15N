@@ -56,7 +56,7 @@ static int app_poweroff_init(void *param)
 static int app_poweroff_close(void)
 {
     log_info("app_poweroff_close \n");
-    music_play_destroy(music_obj);
+    music_play_destroy(&music_obj);
     return 0;
 }
 
@@ -88,7 +88,7 @@ int app_poweroff(void *param)
         case MSG_F1A2_FILE_END:
         case MSG_MIDI_FILE_END:
             log_info("decode end :%d \n", music_play_get_decoder_type(music_obj));
-            music_play_destroy(music_obj);
+            music_play_destroy(&music_obj);
             power_set_soft_poweroff();
             break;
 

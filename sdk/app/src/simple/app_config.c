@@ -21,7 +21,7 @@ const char LRC_TRIM_DISABLE = FALSE;  //LRC trim 主时钟
 //内存管理
 const char MM_ASSERT     = TRUE;  //malloc内部断言
 //
-const char MIC_CAPLESS_EN   = FALSE; // MIC省电容的使能
+const char MIC_CAPLESS_EN   = TRUE; // MIC省电容的使能
 const char MIC_RES_BUILT_IN = TRUE;  // MIC使用内置偏置电阻的使能
 //00000:NA;     00001:2;   00010:5;   00011:1.425; 00100:7;   00101:1.555; 00110:2.916; 00111:1.186;
 //01000:NA;     01001:3;   01010:6;   01011:2.428; 01100:8;   01101:2.555; 01110:3.916; 01111:2.186;
@@ -41,8 +41,13 @@ const u8   AUDIO_VCMCAP     = FALSE;	 //TRUE:VCM有电容   FALSE:VCM没有电�
 //
 const char ADC_VBG_TRIM_EN	= TRUE; // VBG TRIM
 
+//midi主轨选择方式
+const int MAINTRACK_USE_CHN	= 0;//0:用track号来区分  1:用channel号来区分。
+
 //升级使用的区域，0：VM区， 1：eeprom区
 const u8 dev_update_use_eeprom = 0;
+//ufw升级文件的vid要求： 0：vid要相同  1：vid要不一样
+const u8 ufw_vid_need_to_be_different = 0;
 
 //内核异常打印
 const u8 config_asser = 1;
@@ -163,3 +168,8 @@ const char log_tag_const_i_VM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(0);
 const char log_tag_const_d_VM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(0);
 const char log_tag_const_e_VM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(1);
 const char log_tag_const_c_VM AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(0);
+
+const char log_tag_const_i_CPU AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(0);
+const char log_tag_const_d_CPU AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(0);
+const char log_tag_const_e_CPU AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(0);
+const char log_tag_const_c_CPU AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(0);

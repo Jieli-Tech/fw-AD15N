@@ -24,9 +24,40 @@
 
 #define NORFLASH_NO_SYS                      1     //0:使用操作系统,1:不使用操作系统
 #if NORFLASH_NO_SYS
-static inline void os_mutex_create(OS_MUTEX *mutex) {}
-static inline void os_mutex_pend(OS_MUTEX *mutex, int i) {}
-static inline void os_mutex_post(OS_MUTEX *mutex) {}
+// static inline void os_mutex_create(OS_MUTEX *mutex) {}
+// static inline void os_mutex_pend(OS_MUTEX *mutex, int i) {}
+// static inline void os_mutex_post(OS_MUTEX *mutex) {}
+#include "jiffies.h"
+#include "wdt.h"
+typedef volatile u32 flash_mutex;
+static inline void flash_mutex_create(flash_mutex *sem, u32 count)//初始化
+{
+    *sem = count;
+}
+static inline void flash_mutex_post(flash_mutex *sem)//
+{
+    (*sem) = 1;
+}
+static inline u32 flash_mutex_pend(flash_mutex *sem, u32 timeout)// 当为timeout=0时，死等
+{
+    u32 _timeout = timeout + jiffies;
+    extern void wdt_clear();
+    while (1) {
+        if (*sem) {
+            (*sem) = 0;
+            break;
+        }
+        if ((timeout != 0) && (_timeout < jiffies)) {
+            return -1;
+        }
+        wdt_clear();
+    }
+    return 0;
+}
+static inline void flash_mutex_set(flash_mutex *sem, u32 count)
+{
+    *sem = count;
+}
 #else
 #endif
 /*************************************************/

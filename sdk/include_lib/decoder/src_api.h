@@ -7,6 +7,7 @@
 void src_mode_init(void);
 void src_reless(void **pp_eobj);
 void *src_api(void *obuf, u32 insample, void **ppsound);
+void *src_hld_malloc();
 
 #endif
 

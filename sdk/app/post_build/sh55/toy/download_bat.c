@@ -26,7 +26,9 @@ copy app.bin toy/app.bin
 
 
 cd toy
-isd_download.exe -tonorflash -dev sh55 -boot 0x0 -div8 -wait 300 -uboot uboot.boot  -uboot_compress -app app.bin 0x20000 -res dir_a dir_song dir_eng dir_poetry dir_story dir_notice dir_midi midi_cfg -wflash dir_song 0 [PA05_1B_NULL]
+isd_download.exe -tonorflash -dev sh55 -boot 0x0 -div8 -wait 300 -uboot uboot.boot  -uboot_compress -app app.bin 0x20000 -res dir_a dir_song dir_eng dir_poetry dir_story dir_notice dir_midi midi_cfg
+@rem isd_download.exe -tonorflash -dev sh55 -boot 0x0 -div8 -wait 300 -uboot uboot.boot  -uboot_compress -app app.bin 0x20000 -res dir_a dir_song dir_eng dir_poetry dir_story dir_notice dir_midi midi_cfg -wflash dir_song 0 [PA05_1B_NULL]
+
 
 @REM
 @rem -format vm
@@ -36,11 +38,14 @@ isd_download.exe -tonorflash -dev sh55 -boot 0x0 -div8 -wait 300 -uboot uboot.bo
 
 @REM //烧写外置flash 命令说明：
 @rem -wflash dir_song 0 [PA05_1B_NULL]
-@rem //        dir_song : 要烧写的文件名（文件需在download.bat文件夹下）
-@rem //        0        : 文件烧录到外置flash的起始地址
-@rem //        [PA05_1B_NULL]: PA05：外置flash片选引脚（注意：不能选USBDP/USBDM）
-@rem //                        1B  ：spi1 ,B端口
-@rem //                        NULL: power_io，连接到外置flash vcc引脚 可控制flash电源（例:PA00, 不能选USBDP/USBDM）
+@rem //   dir_song : 要烧写的文件名（文件需在download.bat文件夹下）
+@rem //   0        : 文件烧录到外置flash的起始地址
+@rem //   [PA05_1B_NULL]: PA05：外置flash片选引脚（注意：不能选USBDP/USBDM）
+@rem //                  1B  ：spi1 ,B端口
+@rem //                  NULL: power_io & spi1_data_width，power_io连接到外置flash vcc引脚 可控制flash电源;spi1_data_width:0:单线；1：双向
+@rem //                        例:NULL/PA00：power_io:无/pa0;  spi1: 双向模式  (注：power_io不能选USBDP/USBDM)
+@rem //                           NUL0/B010：power_io:无/pb1;  spi1: 单线模式
+@rem //                           NUL1/A081：power_io:无/pa8;  spi1: 双向模式
 @rem //注意：spi端口只能选B/C（B:PA11,PA12,PA10[CLK,DO,DI]; C:PA4,PA5,PA6[CLK,DO,DI]）
 
 

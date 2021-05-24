@@ -3,6 +3,8 @@
 #include "typedef.h"
 #include "errno-base.h"
 #include "app_config.h"
+#include "audio.h"
+
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -54,7 +56,11 @@ void simple_next(void)
 /* void test_openfile_by_file(void); */
 void app(void)
 {
+#if ENCODER_EN
+    ladc_capless_init(30);
+#endif
     sys_mode = SIM_AUX;
+    /* sys_mode = SIM_DEC; */
     log_info("app run\n");
 
     /* test_openfile_by_file(); */

@@ -24,6 +24,7 @@
 #include "my_malloc.h"
 #include "mio_api.h"
 #include "sine_play.h"
+#include "list/midi_ctrl_api.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -136,6 +137,7 @@ void system_init(void)
     vfs_init();
 #if DECODER_MIDI_EN
     midi_decode_init();
+    midi_ctrl_decode_init();
 #endif
 
     dac_mode_init();

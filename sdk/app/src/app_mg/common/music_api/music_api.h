@@ -99,9 +99,10 @@ typedef struct _music_play_obj {
 } music_play_obj;
 typedef void(*decode_succ_callback_t)(music_play_obj *hdl);
 
-int music_play_destroy(music_play_obj *hdl);
+int music_play_destroy(music_play_obj **hdl);
 int music_play(music_play_obj **hdl, const char *dir,  u32 index, u32 decoder_type, \
                void *device, PLAY_MODE play_mode, void *fs_type, void *bpbuff);
+int music_midi_ctrl_play(music_play_obj **_hdl);
 int music_play_end_operation(music_play_obj *hdl);
 int music_play_next_file(music_play_obj *hdl);
 int music_play_priv_file(music_play_obj *hdl);

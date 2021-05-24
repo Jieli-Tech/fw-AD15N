@@ -15,4 +15,5 @@ void audio_init(void);
 void audio_off(void);
 void audio_lookup(void);
 
+bool ladc_capless_init(u32 delay);
 #endif

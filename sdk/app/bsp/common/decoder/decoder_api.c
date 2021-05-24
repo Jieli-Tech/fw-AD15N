@@ -9,6 +9,7 @@
 #include "dac.h"
 #include "ump3_api.h"
 #include "midi_api.h"
+#include "list/midi_ctrl_api.h"
 #include "f1a_api.h"
 #include "a_api.h"
 #include "mp3_standard_api.h"
@@ -35,6 +36,7 @@ u32 dec_hld_tab[] = {
     UMP3_LST
     A_LST
     MIDI_LST
+    MIDI_CTRL_LST
     WAV_LST
     MP3_ST_LST
 };
@@ -46,6 +48,7 @@ const u32 decoder_tab[] = {
     UMP3_API
     A_API
     MIDI_API
+    MIDI_CTRL_API
     WAV_API
     MP3_ST_API
 };
@@ -57,6 +60,7 @@ const u32 decoder_mutual[] = {
     UMP3_MUT_TAB
     A_MUT_TAB
     MIDI_MUT_TAB
+    MIDI_CTRL_MUT_TAB
     WAV_MUT_TAB
     MP3_ST_MUT_TAB
 };
@@ -147,13 +151,7 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
         }
         p_curr_sound = &p_dec->sound;
         p_curr_sound->enable = 0;
-#if HAS_MIO_EN
-        void *mio_pfile = NULL;
-        res = vfs_openbyfile(pfile, &mio_pfile, "mio");
-        if (0 == res) {
-            d_mio_open(&p_curr_sound->mio, mio_pfile, (void *)mio_a_hook_init);
-        }
-#endif
+        sound_out_obj *first_sound = p_curr_sound;
 
 #if AUDIO_SPEED_EN
         //变速变调
@@ -179,11 +177,21 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
                 /* log_info("src init succ\n"); */
             } else {
                 log_info("src init fail\n");
-
             }
         } else {
+            void *src_tmp = src_hld_malloc();
+            src_reless((void **)&src_tmp);
             log_info("do't need src\n");
         }
+#if HAS_MIO_EN
+        if (pfile) {
+            void *mio_pfile = NULL;
+            res = vfs_openbyfile(pfile, &mio_pfile, "mio");
+            if (0 == res) {
+                d_mio_open(&first_sound->mio, mio_pfile, (void *)mio_a_hook_init);
+            }
+        }
+#endif
 
         p_curr_sound->mio = p_dec->sound.mio;
 
@@ -209,8 +217,18 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
     return p_dec;
 }
 
+__attribute__((weak))
+void midi_error_play_end_cb(dec_obj *obj, u32 ret)
+{
+
+}
+
 void irq_decoder_ret(dec_obj *obj, u32 ret)
 {
+    if (MAD_ERROR_PLAY_END == ret) {
+        midi_error_play_end_cb(obj, ret);
+        return;
+    }
     if (0 != ret) {
         log_info("decoder ret : 0x%x\n", ret);
         post_event(obj->event_tab[ret & 0x0f]);

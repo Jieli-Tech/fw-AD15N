@@ -31,7 +31,6 @@ struct norflash_partition {
     u32 size;
     struct device device;
 };
-static u8 is4byte_address = 0;
 static struct norflash_partition nor_part[MAX_NORFLASH_PART_NUM];
 
 struct norflash_info {//last
@@ -44,7 +43,7 @@ struct norflash_info {//last
     u8 part_num;
     u8 open_cnt;
     struct norflash_partition *const part_list;
-    OS_MUTEX mutex;
+    flash_mutex mutex;
     u32 max_end_addr;
 };
 
@@ -55,7 +54,6 @@ static struct norflash_info _norflash = {
 
 int _norflash_read(u32 addr, u8 *buf, u32 len, u8 cache);
 int _norflash_eraser(u8 eraser, u32 addr);
-
 
 #define spi_cs_init() \
     do { \
@@ -169,6 +167,9 @@ static u8 *flash_cache_buf = NULL; //缓存4K的数据，与flash里的数据一
 #if (MALLOC_EN==0)
 static u8 norfs_cache_buf[4096]  __attribute__((aligned(4)))SEC(.norflash_cache_buf);
 #endif
+static u8 flash_cache_is_dirty;
+static volatile u8 flash_cache_timer;
+
 static int _check_0xff(u8 *buf, u32 len)
 {
     for (u32 i = 0; i < len; i ++) {
@@ -219,6 +220,7 @@ static void _norflash_send_write_enable()
     spi_cs_h();
 }
 
+static u8 is4byte_address = 0;
 static void _norflash_send_addr(u32 addr)
 {
     if (is4byte_address == 1) {
@@ -261,7 +263,7 @@ int _norflash_init(const char *name, struct norflash_dev_platform_data *pdata)
         _norflash.spi_r_width = pdata->spi_read_width;
         _norflash.flash_id = 0;
         _norflash.flash_capacity = 0;
-        os_mutex_create(&_norflash.mutex);
+        flash_mutex_create(&_norflash.mutex, 1);
         _norflash.max_end_addr = 0;
         _norflash.part_num = 0;
     }
@@ -293,12 +295,25 @@ static void clock_critical_exit()
 }
 /* CLOCK_CRITICAL_HANDLE_REG(spi_norflash, clock_critical_enter, clock_critical_exit); */
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-static u8 norflash_enter_4byte_addr(u32 id);
+static u8 S25FL512_enter_4byte_addr(u32 id);
+void norflash_enter_4byte_addr()
+{
+    spi_cs_l();
+    spi_write_byte(0xb7);
+    spi_cs_h();
+}
+void norflash_exit_4byte_addr()
+{
+    spi_cs_l();
+    spi_write_byte(0xe9);
+    spi_cs_h();
+}
+static int _norflash_write_pages(u32 addr, u8 *buf, u32 len);
 int _norflash_open(void *arg)
 {
     int reg = 0;
     u32 temporary_flash_addr = 0;
-    os_mutex_pend(&_norflash.mutex, 0);
+    flash_mutex_pend(&_norflash.mutex, 2);
     log_info("norflash open\n");
     if (!_norflash.open_cnt) {
         spi_cs_init();
@@ -306,6 +321,7 @@ int _norflash_open(void *arg)
         reg = _norflash_wait_ok();
         if (reg) {
             log_error("wait id fail\n");
+            flash_mutex_post(&_norflash.mutex);
             return 1;
         }
         _norflash.flash_id = _norflash_read_id();//ID=0xEF4016
@@ -325,11 +341,17 @@ int _norflash_open(void *arg)
         _norflash.flash_capacity = 64 * _pow(2, (_norflash.flash_id & 0xff) - 0x10) * 1024;
         log_info("norflash_capacity: 0x%x\n", _norflash.flash_capacity);
         is4byte_address = 0;
-        if ((((temporary_flash_addr >> 16) & 0xff) == 0x01) && (_norflash.flash_capacity > 0x1000000)) {
-            is4byte_address = 1;
-            if (norflash_enter_4byte_addr(temporary_flash_addr)) {
-                is4byte_address = 0;
-                return 1;
+        if (_norflash.flash_capacity > 0x1000000) { //容量大于16M
+            if ((((temporary_flash_addr >> 16) & 0xff) == 0x01)) {//S25FL512芯片
+                is4byte_address = 1;
+                if (S25FL512_enter_4byte_addr(temporary_flash_addr)) {
+                    is4byte_address = 0;
+                    flash_mutex_post(&_norflash.mutex);
+                    return 1;
+                }
+            } else if ((((temporary_flash_addr >> 16) & 0xff) == 0xef)) { //W25Q128芯片
+                norflash_enter_4byte_addr();
+                is4byte_address = 1;
             }
         }
 
@@ -340,11 +362,12 @@ int _norflash_open(void *arg)
         flash_cache_buf = norfs_cache_buf;
 #endif
         ASSERT(flash_cache_buf, "flash_cache_buf is not ok\n");
+        flash_cache_addr = 2;
         if (flash_read_use_cache == 1) {
             flash_cache_addr = 4096;//先给一个大于4096的数
             _norflash_read(0, flash_cache_buf, 4096, 0);
+            flash_cache_addr = 0;
         }
-        flash_cache_addr = 0;
 #endif
         log_info("norflash open success !\n");
     }
@@ -357,35 +380,39 @@ int _norflash_open(void *arg)
     _norflash.open_cnt++;
 
 __exit:
-    os_mutex_post(&_norflash.mutex);
+    flash_mutex_post(&_norflash.mutex);
     return reg;
 }
 
 int _norflash_close(void)
 {
-    os_mutex_pend(&_norflash.mutex, 0);
+    flash_mutex_pend(&_norflash.mutex, 2);
     log_info("norflash close\n");
     if (_norflash.open_cnt) {
         _norflash.open_cnt--;
     }
     if (!_norflash.open_cnt) {
-        spi_close(_norflash.spi_num);
-        spi_cs_uninit();
 
 #if FLASH_CACHE_ENABLE
+        if (flash_cache_is_dirty) {
+            flash_cache_is_dirty = 0;
+            flash_cache_timer = 0;
+            _norflash_eraser(FLASH_SECTOR_ERASER, flash_cache_addr);
+            _norflash_write_pages(flash_cache_addr, flash_cache_buf, 4096);
+        }
+        flash_cache_addr = 2;
 #if MALLOC_EN
         free(flash_cache_buf);
         flash_cache_buf = NULL;
 #else
         flash_cache_buf = NULL;
 #endif
-
-
-
 #endif
+        spi_close(_norflash.spi_num);
+        spi_cs_uninit();
         log_info("norflash close done\n");
     }
-    os_mutex_post(&_norflash.mutex);
+    flash_mutex_post(&_norflash.mutex);
     return 0;
 }
 
@@ -393,22 +420,25 @@ int _norflash_read(u32 addr, u8 *buf, u32 len, u8 cache)
 {
     int reg = 0;
     u32 align_addr;
-    os_mutex_pend(&_norflash.mutex, 0);
+    /* flash_mutex_pend(&_norflash.mutex, 2); */
     /* y_printf("flash read  addr = %d, len = %d\n", addr, len); */
+    /* putchar('a'); */
 #if FLASH_CACHE_ENABLE
     if (!cache) {
         goto __no_cache1;
     }
     u32 r_len = 4096 - (addr % 4096);
-    if ((addr >= flash_cache_addr) && (addr < (flash_cache_addr + 4096))) {
-        if (len <= r_len) {
-            memcpy(buf, flash_cache_buf + (addr - flash_cache_addr), len);
-            goto __exit;
-        } else {
-            memcpy(buf, flash_cache_buf + (addr - flash_cache_addr), r_len);
-            addr += r_len;
-            buf += r_len;
-            len -= r_len;
+    if (!(flash_cache_addr % 4096)) {
+        if ((addr >= flash_cache_addr) && (addr < (flash_cache_addr + 4096))) {
+            if (len <= r_len) {
+                memcpy(buf, flash_cache_buf + (addr - flash_cache_addr), len);
+                goto __exit;
+            } else {
+                memcpy(buf, flash_cache_buf + (addr - flash_cache_addr), r_len);
+                addr += r_len;
+                buf += r_len;
+                len -= r_len;
+            }
         }
     }
 __no_cache1:
@@ -421,6 +451,14 @@ __no_cache1:
         spi_set_width(SPI_MODE_UNIDIR_2BIT);
         spi_dma_read(buf, len);
         spi_set_width(SPI_MODE_BIDIR_1BIT);
+    } else if (_norflash.spi_r_width == 4) {
+        log_error("flash write error!SPI1 don't support 4BIT!");
+        /* spi_write_byte(0x6b); */
+        /* _norflash_send_addr(addr); */
+        /* spi_write_byte(0); */
+        /* spi_set_width(SPI_MODE_UNIDIR_4BIT); */
+        /* spi_dma_read(buf, len); */
+        /* spi_set_width(SPI_MODE_BIDIR_1BIT);	 */
     } else {
         spi_write_byte(WINBOND_FAST_READ_DATA);
         _norflash_send_addr(addr);
@@ -428,29 +466,13 @@ __no_cache1:
         spi_dma_read(buf, len);
     }
     spi_cs_h();
-#if FLASH_CACHE_ENABLE
-    if (!cache) {
-        goto __no_cache2;
-    }
-    align_addr = (addr + len) / 4096 * 4096;
-    if ((int)len - (int)((addr + len) - align_addr) >= 4096) {
-        align_addr -= 4096;
-        if (flash_cache_addr != align_addr) {
-            flash_cache_addr = align_addr;
-            memcpy(flash_cache_buf, buf + (align_addr - addr), 4096);
-        }
-    }
-__no_cache2:
-#endif
 __exit:
-    os_mutex_post(&_norflash.mutex);
+    /* flash_mutex_post(&_norflash.mutex); */
     return reg;
 }
 
 static int _norflash_write_pages(u32 addr, u8 *buf, u32 len)
 {
-    /* y_printf("flash write addr = %d, num = %d\n", addr, len); */
-
     int reg;
     u32 first_page_len = 256 - (addr % 256);
     first_page_len = len > first_page_len ? first_page_len : len;
@@ -467,6 +489,7 @@ static int _norflash_write_pages(u32 addr, u8 *buf, u32 len)
     addr += first_page_len;
     buf += first_page_len;
     len -= first_page_len;
+    /* putchar('+'); */
     while (len) {
         u32 cnt = len > 256 ? 256 : len;
         _norflash_send_write_enable();
@@ -485,11 +508,40 @@ static int _norflash_write_pages(u32 addr, u8 *buf, u32 len)
     }
     return 0;
 }
+u8 get_flash_cache_timer(void)
+{
+#if FLASH_CACHE_ENABLE
+    return flash_cache_timer;
+#else
+    return 0;
+#endif
+}
+void _norflash_cache_sync_timer()
+{
+#if FLASH_CACHE_ENABLE
+    int reg = 0;
+    flash_mutex_pend(&_norflash.mutex, 5);//若flash忙，等待5*10ms；形参为0：死等
+    if (flash_cache_is_dirty) {
+        /* putchar('x'); */
+        flash_cache_is_dirty = 0;
+        if (flash_cache_timer) {
+            flash_cache_timer = 0;
+        }
+        reg = _norflash_eraser(FLASH_SECTOR_ERASER, flash_cache_addr);
+        if (reg) {
+            goto __exit;
+        }
+        reg = _norflash_write_pages(flash_cache_addr, flash_cache_buf, 4096);
+    }
+__exit:
+    flash_mutex_post(&_norflash.mutex);
+#endif
+}
 
 int _norflash_write(u32 addr, void *buf, u32 len, u8 cache)
 {
     int reg = 0;
-    os_mutex_pend(&_norflash.mutex, 0);
+    flash_mutex_pend(&_norflash.mutex, 2);
 
     u8 *w_buf = (u8 *)buf;
     u32 w_len = len;
@@ -503,31 +555,43 @@ int _norflash_write(u32 addr, void *buf, u32 len, u8 cache)
     u32 align_addr = addr / 4096 * 4096;
     u32 align_len = 4096 - (addr - align_addr);
     align_len = w_len > align_len ? align_len : w_len;
-    if (flash_read_use_cache == 2) {
-        flash_read_use_cache = 1;
+    //空间共享：必须close flash写入异步数据使地址不等，否则可能写入共享空间数据
+    if (align_addr != flash_cache_addr) {
+        if (flash_cache_is_dirty) {
+            /* putchar('c'); */
+            flash_cache_is_dirty = 0;
+            flash_cache_timer = 0;
+            reg = _norflash_eraser(FLASH_SECTOR_ERASER, flash_cache_addr);
+            if (reg) {
+                goto __exit;
+            }
+            reg = _norflash_write_pages(flash_cache_addr, flash_cache_buf, 4096);
+            if (reg) {
+                goto __exit;
+            }
+        }
         _norflash_read(align_addr, flash_cache_buf, 4096, 0);
         flash_cache_addr = align_addr;
-    } else if (flash_read_use_cache == 1) {
-        if (align_addr != flash_cache_addr) {
-            _norflash_read(align_addr, flash_cache_buf, 4096, 1);
-            flash_cache_addr = align_addr;
+        if (flash_read_use_cache == 2) {
+            flash_read_use_cache = 1;
+        }
+    }
+    memcpy(flash_cache_buf + (addr - align_addr), w_buf, align_len);
+    if ((addr + align_len) % 4096) {
+        /* putchar('d'); */
+        flash_cache_is_dirty = 1;
+        if (flash_cache_timer) { //上次未写入
+        } else {
+            flash_cache_timer = 1;
         }
     } else {
-        _norflash_read(align_addr, flash_cache_buf, 4096, 0);
-    }
-    if (_check_0xff(flash_cache_buf + (addr - align_addr), align_len)) {
-        memcpy(flash_cache_buf + (addr - align_addr), w_buf, align_len);
+        /* putchar('e'); */
+        flash_cache_is_dirty = 0;
         reg = _norflash_eraser(FLASH_SECTOR_ERASER, align_addr);
         if (reg) {
             goto __exit;
         }
         reg = _norflash_write_pages(align_addr, flash_cache_buf, 4096);
-        if (reg) {
-            goto __exit;
-        }
-    } else {
-        memcpy(flash_cache_buf + (addr - align_addr), w_buf, align_len);
-        reg = _norflash_write_pages(addr, w_buf, align_len);
         if (reg) {
             goto __exit;
         }
@@ -539,19 +603,22 @@ int _norflash_write(u32 addr, void *buf, u32 len, u8 cache)
         u32 cnt = w_len > 4096 ? 4096 : w_len;
         _norflash_read(addr, flash_cache_buf, 4096, 0);
         flash_cache_addr = addr;
-        if (_check_0xff(flash_cache_buf, cnt)) {
-            memcpy(flash_cache_buf, w_buf, cnt);
+        memcpy(flash_cache_buf, w_buf, cnt);
+        if ((addr + cnt) % 4096) {
+            /* putchar('f'); */
+            flash_cache_is_dirty = 1;
+            if (flash_cache_timer) { //上次数据未写入
+            } else {
+                flash_cache_timer = 1;
+            }
+        } else {
+            /* putchar('g'); */
+            flash_cache_is_dirty = 0;
             reg = _norflash_eraser(FLASH_SECTOR_ERASER, addr);
             if (reg) {
                 goto __exit;
             }
             reg = _norflash_write_pages(addr, flash_cache_buf, 4096);
-            if (reg) {
-                goto __exit;
-            }
-        } else {
-            memcpy(flash_cache_buf, w_buf, cnt);
-            reg = _norflash_write_pages(addr, w_buf, cnt);
             if (reg) {
                 goto __exit;
             }
@@ -564,13 +631,14 @@ int _norflash_write(u32 addr, void *buf, u32 len, u8 cache)
     reg = _norflash_write_pages(addr, w_buf, w_len);
 #endif
 __exit:
-    os_mutex_post(&_norflash.mutex);
+    flash_mutex_post(&_norflash.mutex);
     return reg;
 }
 
 int _norflash_eraser(u8 eraser, u32 addr)
 {
     u8 eraser_cmd;
+    /* putchar('h'); */
     switch (eraser) {
     case FLASH_PAGE_ERASER:
         eraser_cmd = WINBOND_PAGE_ERASE;
@@ -603,7 +671,7 @@ int _norflash_ioctl(u32 cmd, u32 arg, u32 unit, void *_part)
 {
     int reg = 0;
     struct norflash_partition *part = _part;
-    os_mutex_pend(&_norflash.mutex, 0);
+    flash_mutex_pend(&_norflash.mutex, 2);
     switch (cmd) {
     case IOCTL_GET_STATUS:
         *(u32 *)arg = 1;
@@ -652,12 +720,19 @@ int _norflash_ioctl(u32 cmd, u32 arg, u32 unit, void *_part)
         }
         break;
 #endif
+    case IOCTL_GET_PART_INFO:
+        u32 *info = (u32 *)arg;
+        u32 *start_addr = &info[0];
+        u32 *part_size = &info[1];
+        *start_addr = part->start_addr;
+        *part_size = part->size;
+        break;
     default:
         reg = -EINVAL;
         break;
     }
 __exit:
-    os_mutex_post(&_norflash.mutex);
+    flash_mutex_post(&_norflash.mutex);
     return reg;
 }
 
@@ -706,11 +781,15 @@ static int norflash_bulk_read(struct device *device, void *buf, u32 len, u32 off
     offset += part->start_addr;
 #if FLASH_CACHE_ENABLE
     if (flash_read_use_cache == 1) {
+        flash_mutex_pend(&_norflash.mutex, 2);
         reg = _norflash_read(offset, buf, len, 1);
+        flash_mutex_post(&_norflash.mutex);
     } else
 #endif
     {
+        flash_mutex_pend(&_norflash.mutex, 2);
         reg = _norflash_read(offset, buf, len, 0);
+        flash_mutex_post(&_norflash.mutex);
     }
     if (reg) {
         r_printf(">>>[r error]:\n");
@@ -801,7 +880,9 @@ static int norflash_byte_read(struct device *device, void *buf, u32 len, u32 off
         return -EFAULT;
     }
     offset += part->start_addr;
+    flash_mutex_pend(&_norflash.mutex, 2);
     reg = _norflash_read(offset, buf, len, 0);
+    flash_mutex_post(&_norflash.mutex);
     if (reg) {
         r_printf(">>>[r error]:\n");
         len = 0;
@@ -874,7 +955,7 @@ const struct device_operations norfs_dev_ops = {
 
 
 
-static u8 norflash_enter_4byte_addr(u32 id)
+static u8 S25FL512_enter_4byte_addr(u32 id)
 {
     u8 read_bank = 0;
     if ((((id >> 16) & 0xff) == 0x01)) { //S25FLxxx系列
@@ -979,19 +1060,20 @@ void norflash_test()
         log_error("w25q32 open fail!\n");
     } else {
         log_info("w25q32 open ok!\n");
-#if 0
-        //块(512byte)操作测试---norflash_dev_ops
-        log_info("flash dev bulk write/read test:");
+#if 0  //块(512byte)操作测试---norflash_dev_ops
+
+        log_info("flash dev bulk write/read test!");
         dev_bulk_write(device, w25q_write_buf, 0, n_n);
         delay(10000);
+        memset(w25q_read_buf, 48, 512);
         log_info("w25q_read_buf_data:%s", w25q_read_buf);
         dev_bulk_read(device, w25q_read_buf, 0, n_n);
         log_info("w25q bulk read buf:");
         log_info_hexdump(w25q_read_buf, n_n * 512);/* log_info("w25q_read_buf:%s\n", w25q_read_buf);//字符打印 */
-#else
-        //字节(1byte)操作测试---norfs_dev_ops
+
+#else  //字节(1byte)操作测试---norfs_dev_ops
         log_char('\n');
-        log_info("flash dev byte write/read test:");
+        log_info("flash dev byte write/read test!");
         log_info("--------------flash sector erase(0)-------------");
         if (dev_ioctl(device, IOCTL_ERASE_SECTOR, 0)) { //返回0：擦出正常；1：擦出等待失败（等flash不忙失败）
             log_error("erase err\n");

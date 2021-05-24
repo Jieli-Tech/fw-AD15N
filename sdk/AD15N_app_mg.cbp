@@ -120,6 +120,7 @@
 <Unit filename="app/bsp/common/decoder/list/a_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/f1a_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/midi_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/decoder/list/midi_ctrl_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/mio_phy.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/mio_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/sine_play.c"><Option compilerVer="CC"/></Unit>
@@ -148,7 +149,7 @@
 <Unit filename="app/bsp/common/sdk_cfg.h" />
 <Unit filename="app/bsp/common/vm/vm_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/clock.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/cpu/sh55/hwi.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh55/dac_cpu.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/irflt.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/irflt.h" />
 <Unit filename="app/bsp/cpu/sh55/pl_cnt.c"><Option compilerVer="CC"/></Unit>
@@ -167,7 +168,6 @@
 <Unit filename="app/bsp/modules/soft_isr/soft_isr.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/modules/soft_isr/soft_isr.h" />
 <Unit filename="app/bsp/modules/timer/tick_timer_driver.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/modules/timer/tick_timer_driver.h" />
 <Unit filename="app/bsp/start/bsp_loop.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/start/bsp_loop.h" />
 <Unit filename="app/bsp/start/device_list.c"><Option compilerVer="CC"/></Unit>
@@ -188,6 +188,8 @@
 <Unit filename="app/src/app_mg/common/music_api/music_file_op/music_file_op.h" />
 <Unit filename="app/src/app_mg/common/music_api/music_midi_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/src/app_mg/common/music_api/music_midi_api.h" />
+<Unit filename="app/src/app_mg/common/music_api/music_midi_ctrl_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/src/app_mg/common/music_api/music_midi_ctrl_api.h" />
 <Unit filename="app/src/app_mg/midi/app_midi.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/src/app_mg/midi/app_midi.h" />
 <Unit filename="app/src/app_mg/midi/app_midi_key.c"><Option compilerVer="CC"/></Unit>
@@ -223,6 +225,7 @@
 <Unit filename="include_lib/cpu/sh55/cpu.h" />
 <Unit filename="include_lib/cpu/sh55/crc16.h" />
 <Unit filename="include_lib/cpu/sh55/csfr.h" />
+<Unit filename="include_lib/cpu/sh55/dac_cpu.h" />
 <Unit filename="include_lib/cpu/sh55/efuse.h" />
 <Unit filename="include_lib/cpu/sh55/gpio.h" />
 <Unit filename="include_lib/cpu/sh55/hwi.h" />
@@ -232,6 +235,7 @@
 <Unit filename="include_lib/cpu/sh55/typedef.h" />
 <Unit filename="include_lib/cpu/sh55/uart.h" />
 <Unit filename="include_lib/cpu/sh55/wdt.h" />
+<Unit filename="include_lib/cpu/tick_timer_driver.h" />
 <Unit filename="include_lib/decoder/MIDI_CTRL_API.h" />
 <Unit filename="include_lib/decoder/MIDI_DEC_API.h" />
 <Unit filename="include_lib/decoder/decoder_api.h" />
@@ -241,6 +245,7 @@
 <Unit filename="include_lib/decoder/list/a_api.h" />
 <Unit filename="include_lib/decoder/list/f1a_api.h" />
 <Unit filename="include_lib/decoder/list/midi_api.h" />
+<Unit filename="include_lib/decoder/list/midi_ctrl_api.h" />
 <Unit filename="include_lib/decoder/list/mio_api.h" />
 <Unit filename="include_lib/decoder/list/mp3_standard_api.h" />
 <Unit filename="include_lib/decoder/list/ump3_api.h" />

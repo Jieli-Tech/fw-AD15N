@@ -101,13 +101,7 @@ void dac_init_api(u32 sr)
 {
     dac_phy_init(dac_sr_lookup(sr));
     delay_10ms(2);
-    if (DAC_MODE_5_A == (JL_ADDA->DAC_CON0 & (7 << 5))) {
-        /* if (0) { */
-        rdac_analog_open();
-    } else {
-        apa_analog_open();
-    }
-    /* dac_analog_init(); */
+    dac_cpu_mode();
 }
 
 void dac_sr_api(u32 sr)
@@ -119,9 +113,9 @@ void dac_sr_api(u32 sr)
 
 void dac_off_api(void)
 {
-    dac_phy_off();
     rdac_analog_close();
     apa_analog_close();
+    dac_phy_off();
 }
 /* void dac_sr_api(u32 sr) */
 /* { */

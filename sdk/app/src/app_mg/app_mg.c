@@ -5,6 +5,7 @@
 #include "app_mg/poweroff/app_poweroff.h"
 #include "usb/device/usb_stack.h"
 #include "usb/device/msd.h"
+#include "audio.h"
 #if APP_MODE_MIDI_EN
 #include "app_mg/midi/app_midi.h"
 #endif
@@ -101,6 +102,7 @@ void app_usb_loop(void *parm)
     usb_start();
     while (1) {
         get_msg(2, &msg[0]);
+        bsp_loop();
         if (common_msg_deal(msg) != (-1)) {
             continue;
         }
@@ -122,6 +124,13 @@ void app_usb_loop(void *parm)
 /* __attribute__((weak)) */
 void app(void)
 {
+#if ENCODER_EN
+    extern const char MIC_CAPLESS_EN;
+    if (MIC_CAPLESS_EN) {
+        ladc_capless_init(30);
+    }
+#endif
+
     ///init
     app_mg_init(APP_MUSIC, NULL);
 

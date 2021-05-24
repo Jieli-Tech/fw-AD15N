@@ -33,6 +33,7 @@
 #define spi_cs_idle_h(reg)                  ((reg)->CON |= BIT(7))
 #define spi_cs_idle_l(reg)                  ((reg)->CON &= ~BIT(7))
 #define spi_data_width(reg, x)              ((reg)->CON = (reg->CON&~(3<<10))|((x&0x3)<<10))
+#define spi_dir(reg)                        ((reg)->CON & BIT(12))
 #define spi_dir_in(reg)                     ((reg)->CON |= BIT(12))
 #define spi_dir_out(reg)                    ((reg)->CON &= ~BIT(12))
 #define spi_ie_en(reg)                      ((reg)->CON |= BIT(13))
@@ -172,6 +173,7 @@ static void spi_io_port_init(u8 port, u8 dir)
         if (dir == 1) {
             gpio_set_direction(port, 1);
         } else {
+            gpio_write(port, 1);
             gpio_set_direction(port, 0);
         }
         gpio_set_die(port, 1);
@@ -257,6 +259,7 @@ void spi_set_bit_mode(spi_dev spi, int mode)
  * @parm spi  spi
  * @return 0 < 0
  */
+static void spi1_isr();
 int spi_open(spi_dev spi)
 {
     int err;
@@ -267,11 +270,14 @@ int spi_open(spi_dev spi)
     pSPI_IOMC_CONFIG[id](spi);
     spi_set_bit_mode(spi, mode);
     spi_cs_dis(spi_regs[id]);
+    spi_clr_pnd(spi_regs[id]);
     if (role == SPI_ROLE_MASTER) {
         spi_role_master(spi_regs[id]);
         spi_dir_out(spi_regs[id]);
     } else if (role == SPI_ROLE_SLAVE) {
         spi_role_slave(spi_regs[id]);
+        spi_ie_en(spi_regs[id]);  //从机默认打开中断接收
+        HWI_Install(IRQ_SPI1_IDX, (u32)spi1_isr, 3); //3:中断优先级递增(0~8)
         spi_dir_in(spi_regs[id]);
     }
     spi_smp_edge_rise(spi_regs[id]);
@@ -285,7 +291,9 @@ int spi_open(spi_dev spi)
         /* return 0; */
     }
     spi_w_reg_buf(spi_regs[id], 0);//spiDO
+    spi_clr_pnd(spi_regs[id]);
     spi_enable(spi_regs[id]);
+
     //无中断bit13，无传送方向bit12
 
 #if 0
@@ -450,15 +458,7 @@ void spi_dma_set_addr_for_isr(spi_dev spi, void *buf, u32 len, u8 rw)
     spi_w_reg_dma_addr(spi_regs[id], (u32)buf);
     spi_w_reg_dma_cnt(spi_regs[id], len);
 }
-///*中断函数*/
-//__attribute__((interrupt("")))
-//static void spi1_isr()
-//{
-//    if(spi_pnd(spi_regs[SPI1]))//发送，接收，DMA收发
-//    {
-//        spi_clr_pnd(spi_regs[SPI1]);
-//    }
-//}
+
 /*
  * @brief
  * @parm spi  spi
@@ -507,3 +507,131 @@ void spi_close(spi_dev spi)
     spi_disable(spi_regs[id]);
 }
 
+/*************************slave ************************/
+u8 *rec_data_byte;
+void spi_dma_set_addr_for_slave(spi_dev spi, void *buf, u32 len, u8 rw)//rw:1-rx; 0-tx
+{
+    u8 id = spi_get_info_id(spi);
+    if (!rw) {
+        rec_data_byte = (u8 *)buf;
+    }
+    /* ASSERT((u32)buf % 4 == 0, "spi dma addr need 4-aligned"); */
+    rw ? spi_dir_in(spi_regs[id]) : spi_dir_out(spi_regs[id]);
+    spi_w_reg_dma_addr(spi_regs[id], (u32)buf);
+    spi_w_reg_dma_cnt(spi_regs[id], len);
+}
+void spi_send_recv_byte_for_slave(spi_dev spi, u8 *byte, u8 rw)//rw:1-rx; 0-tx
+{
+    u8 id = spi_get_info_id(spi);
+    rec_data_byte = byte;
+    if (rw) {
+        spi_dir_in(spi_regs[id]);
+    } else {
+        spi_dir_out(spi_regs[id]);
+        spi_w_reg_buf(spi_regs[id], *byte);
+    }
+}
+/*中断函数*/
+__attribute__((interrupt("")))
+static void spi1_isr()
+{
+    if (spi_pnd(spi_regs[SPI1])) { //byte收发，DMA收发
+        if (spi_dir(spi_regs[SPI1])) { //rx:byte/dma
+            /* log_info("spi rx"); */
+            if (rec_data_byte) {
+                *rec_data_byte = spi_r_reg_buf(spi_regs[SPI1]);
+            }
+        } else {//tx:byte/dma
+            spi_dir_in(spi_regs[SPI1]);
+            *rec_data_byte = 0;
+            /* log_info("spi tx\n"); */
+        }
+    }
+    spi_clr_pnd(spi_regs[SPI1]);
+}
+/***********************slave test**************************/
+#if 1
+//slave init
+u8 tx_buff[512], rx_buff[512];
+u8 tx_byte, rx_byte = 0;
+void spi1_slave_init_test()
+{
+    log_info("----------------start-------------------");
+    for (u16 i = 0; i < 512; i++) {
+        tx_buff[i] = i % 10 + '0';
+        rx_buff[i] = 0;
+    }
+    gpio_set_die(IO_PORTA_05, 1);
+    gpio_set_direction(IO_PORTA_05, 1);//cs
+    spi_open(1);
+    /* spi_send_recv_byte_for_slave(1, &rx_byte, 1);//rw:1-rx; 0-tx */
+    /* spi_dma_set_addr_for_slave(1, rx_buff, 12, 1);//rw:1-rx; 0-tx */
+
+}
+//dma tx
+void spi1_slave_dma_send()
+{
+    spi1_slave_init_test();//init spi slave
+    spi_dma_set_addr_for_slave(1, tx_buff, 12, 0);//rw:1-rx; 0-tx
+    while (1) { //循环发送
+        if (tx_buff[0] == 0) {
+            log_info("---1---");
+            for (u16 i = 0; i < 512; i++) {
+                tx_buff[i] = i % 10 + 'a';
+            }
+            spi_dma_set_addr_for_slave(1, tx_buff, 12, 0);//rw:1-rx; 0-tx
+        }
+        wdt_clear();
+        delay(100);
+    }
+}
+//dma rx
+void spi1_slave_dma_rec()
+{
+    spi1_slave_init_test();//init spi slave
+    for (u16 i = 0; i < 512; i++) {
+        rx_buff[i] = 0;
+    }
+    spi_dma_set_addr_for_slave(1, rx_buff, 12, 1);//rw:1-rx; 0-tx
+    while (1) { //循环接收
+        if (rx_buff[0] != 0) { //接收第一字节不为0
+            log_info(":%s\n", rx_buff);
+            rx_buff[0] = 0;
+            spi_dma_set_addr_for_slave(1, rx_buff, 12, 1);//rw:1-rx; 0-tx
+        }
+        wdt_clear();
+        delay(10);
+    }
+}
+//byte tx
+void spi1_slave_byte_send()
+{
+    spi1_slave_init_test();//init spi slave
+    tx_byte = 'a';
+    spi_send_recv_byte_for_slave(1, &tx_byte, 0);//rw:1-rx; 0-tx
+    while (1) {
+        if (tx_byte == 0) {
+            log_info("----2----");
+            tx_byte = 'n';
+            spi_send_recv_byte_for_slave(1, &tx_byte, 0);//rw:1-rx; 0-tx
+        }
+        wdt_clear();
+        delay(10);
+    }
+}
+//byte rx
+void spi1_slave_byte_rec()
+{
+    spi1_slave_init_test();//init spi slave
+    spi_send_recv_byte_for_slave(1, &rx_byte, 1);//rw:1-rx; 0-tx
+    while (1) {
+        if (rx_byte != 0) {
+            log_info(":%c\n", rx_byte);
+            rx_byte = 0;
+            spi_send_recv_byte_for_slave(1, &rx_byte, 1);//rw:1-rx; 0-tx
+        }
+        wdt_clear();
+        delay(10);
+    }
+}
+#endif

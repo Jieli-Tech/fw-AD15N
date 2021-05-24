@@ -11,6 +11,27 @@
 #define AT_NON_VOLATILE_RAM         AT(.non_volatile_ram)
 #define AT_NON_VOLATILE_RAM_CODE    AT(.non_volatile_ram_code)
 
+/*复位原因*/
+enum {
+    /*主系统*/
+    MSYS_P33_RST = 0,
+    MSYS_DVDD_POR_RST = 1,
+    MSYS_SOFT_RST = 2,
+    MSYS_PLPM_RST = 3,
+    /*P33*/
+    P33_VDDIO_POR_RST = 8,
+    P33_VDDIO_LVD_RST = 9,
+    P33_WDT_RST = 10,
+    P33_VCM_RST = 11,
+    P33_MCLR_RST = 12,
+    P33_PINR_RST = 13,
+    P33_SYS_RST = 14,
+    P33_SOFT_RST = 15,
+    P33_POWER_RETURN = 16,
+    /*SUB*/
+    P33_EXCEPTION_SOFT_RST = 17,
+};
+
 extern u32 nvbss_begin;
 extern u32 nvbss_length;
 extern u32 nvdata_begin;
@@ -56,8 +77,11 @@ enum {
 };
 
 enum {
-    LONG_4S_RESET = 0,
+    LONG_1S_RESET = 0,
+    LONG_2S_RESET,
+    LONG_4S_RESET,
     LONG_8S_RESET,
+    LONG_16S_RESET = 4,
 };
 
 //Macro for VDDIOM_VOL_SEL
@@ -162,6 +186,7 @@ struct reset_param {
     u8 mode;
     u8 level;
     u8 iomap;   //Port Group, Port Index
+    int hold_time;
 };
 
 struct low_power_operation {
@@ -267,6 +292,7 @@ u8 is_ldo5v_wakeup(void);
 
 void p33_soft_reset(void);
 /*-----------------------------------------------------------*/
+void power_reset_init(const struct reset_param *rs_param);		//长按复位接口
 
 void power_reset_close();
 

@@ -55,7 +55,7 @@
 #define IOCTL_SET_FORCE_RESET           113
 #define IOCTL_SET_CAPACITY 				114
 #define IOCTL_GET_NORFS_INFO 			115
-
+#define IOCTL_GET_PART_INFO             116
 
 #define IOCTL_ERASE_SECTOR 				200
 #define IOCTL_ERASE_BLOCK 				201

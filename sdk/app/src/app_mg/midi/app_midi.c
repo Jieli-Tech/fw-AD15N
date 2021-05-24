@@ -69,8 +69,8 @@ static int app_midi_init(void *param)
 static int app_midi_close(void)
 {
     log_info("app_midi_close \n");
-    music_play_destroy(music_midi_obj);
-    music_play_destroy(music_a_obj);
+    music_play_destroy(&music_midi_obj);
+    music_play_destroy(&music_a_obj);
     return 0;
 }
 

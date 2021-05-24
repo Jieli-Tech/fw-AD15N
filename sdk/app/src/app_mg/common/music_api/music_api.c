@@ -125,7 +125,7 @@ int music_play(music_play_obj **_hdl, const char *dir,  u32 index, u32 decoder_t
                void *device, PLAY_MODE play_mode, void *fs_type, void *bpbuff)
 {
     if (*_hdl) {
-        music_play_destroy(*_hdl);
+        music_play_destroy(_hdl);
         *_hdl = NULL;
     }
 
@@ -164,6 +164,45 @@ int music_play(music_play_obj **_hdl, const char *dir,  u32 index, u32 decoder_t
 }
 
 /*----------------------------------------------------------------------------*/
+/**@brief  音乐播放接口
+   @param  _hdl:音乐播放句柄
+   @return 0:ok 非0：fail
+   @note
+*/
+/*----------------------------------------------------------------------------*/
+int music_midi_ctrl_play(music_play_obj **_hdl)
+{
+    if (*_hdl) {
+        music_play_destroy(_hdl);
+        *_hdl = NULL;
+    }
+
+    //申请句柄
+    music_play_obj *hdl = music_hdl_alloc();
+    if (hdl == NULL) {
+        music_err_printf("music error !!! hdl null \n");
+        return -1;
+    }
+
+    hdl->en = MUSIC_PLAY_INIT_NONE;
+    hdl->decoder_type = BIT_MIDI_CTRL;
+    dec_obj *obj = decoder_io(NULL, hdl->decoder_type, NULL, hdl->loop);
+    if (obj == 0) {
+        music_hdl_free(hdl);
+        return -1;
+    }
+
+    hdl->decode_api.p_dec = obj;
+    hdl->en = MUSIC_PLAY_INIT_OK;
+    *_hdl = hdl;
+
+    if (decode_succ_cb) {
+        decode_succ_cb(hdl);
+    }
+    return 0;
+}
+
+/*----------------------------------------------------------------------------*/
 /**@brief  音乐播放器结束，下一步动作
    @param  hdl:音乐播放句柄
    @return 0:ok -1:fail
@@ -177,7 +216,7 @@ int music_play_end_operation(music_play_obj *hdl)
     }
 
     if (hdl->play_mode == MUSIC_MODE_PLAY_ONE) {
-        music_play_destroy(hdl);
+        music_play_destroy(&hdl);
         return 0;
     }
 
@@ -193,7 +232,7 @@ int music_play_end_operation(music_play_obj *hdl)
                                    hdl->file.cur_file_index : 1;
 
         if (music_file_reopen_byindex(&hdl->file.pvfs, &hdl->file.pvfile, &hdl->file.cur_file_index, 0) != 0) {
-            music_play_destroy(hdl);
+            music_play_destroy(&hdl);
             return -1;
         }
         break;
@@ -202,7 +241,7 @@ int music_play_end_operation(music_play_obj *hdl)
                                    hdl->file.cur_file_index : hdl->file.total_file_num;
 
         if (music_file_reopen_byindex(&hdl->file.pvfs, &hdl->file.pvfile, &hdl->file.cur_file_index, 1) != 0) {
-            music_play_destroy(hdl);
+            music_play_destroy(&hdl);
             return -1;
         }
         break;
@@ -272,7 +311,7 @@ int music_play_next_file(music_play_obj *hdl)
 
     if (music_file_reopen_byindex(&hdl->file.pvfs, &hdl->file.pvfile, &hdl->file.cur_file_index, 0) != 0) {
         music_err_printf("open file error !!! \n");
-        music_play_destroy(hdl);
+        music_play_destroy(&hdl);
         return -1;
     }
 
@@ -337,7 +376,7 @@ int music_play_priv_file(music_play_obj *hdl)
 
     if (music_file_reopen_byindex(&hdl->file.pvfs, &hdl->file.pvfile, &hdl->file.cur_file_index, 1) != 0) {
         music_err_printf("open file error !!! \n");
-        music_play_destroy(hdl);
+        music_play_destroy(&hdl);
         return -1;
     }
 
@@ -572,8 +611,9 @@ int music_play_speed_set_para(music_play_obj *hdl, SPEED_PITCH_PARA_STRUCT *sp_p
    @note
 */
 /*----------------------------------------------------------------------------*/
-int music_play_destroy(music_play_obj *hdl)
+int music_play_destroy(music_play_obj **music_hdl)
 {
+    music_play_obj *hdl = *music_hdl;
     if (hdl == NULL) {
         return -1;
     }
@@ -592,5 +632,6 @@ int music_play_destroy(music_play_obj *hdl)
     music_file_close(&hdl->file.pvfs, &hdl->file.pvfile);
     music_hdl_free(hdl);
 
+    *music_hdl = NULL;
     return 0;
 }

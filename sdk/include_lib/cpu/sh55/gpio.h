@@ -9,7 +9,7 @@
 #define  __GPIO_H__
 #include "typedef.h"
 
-enum {
+typedef enum {
     CH0_CH0_PWM = 0,
     CH0_CH1_PWM,
     CH0_T2_PWM_OUT0,
@@ -43,7 +43,16 @@ enum {
     CH3_UT1_TX,
     CH3_CLKOUT,
     CH3_PLL24M,
-};
+} OUTCH_SEL_T;
+
+typedef enum {
+    DACN_OUTCH0 = 0,
+    DACN_OUTCH1 = 1,
+    DACN_OUTIO = 2,
+    DACP_OUTCH0 = 3,
+    DACP_OUTCH1 = 4,
+    DACP_OUTIO = 5,
+} DACX_MODE_SEL;
 
 #define IO_GROUP_NUM 		16
 
@@ -123,13 +132,40 @@ struct gpio_platform_data {
     unsigned int gpio;
 };
 
+#define DACN_IO_DIR 	BIT(2)
+#define DACN_IO_PD		BIT(4)
+#define DACN_IO_PU 		BIT(6)
+#define DACN_IO_DIE 	BIT(9)
+
+#define DACP_IO_DIR 	BIT(3)
+#define DACP_IO_PD		BIT(5)
+#define DACP_IO_PU 		BIT(7)
+#define DACP_IO_DIE 	BIT(10)
+
 #define GPIO_PLATFORM_DATA_BEGIN(data) \
 	static const struct gpio_platform_data data = { \
 
 #define GPIO_PLATFORM_DATA_END() \
 	};
 
-
+/*----------------------------------------------------------------------------*/
+/** @brief: DACNO,DACNP作为普通IO输出，或者作为outputch输出
+    @param: mode:选择DACNO,DACPO输出的方式    outchsel：如果是outputch方式，选择output源  out：如果是IO方式选择输出0还是1
+    @return:void
+    @author:
+    @note:  void dacnp_out_mode_init(DACX_MODE_SEL mode,OUTCH_SEL_T outchsel,u8 out)
+*/
+/*----------------------------------------------------------------------------*/
+void gpio_dacnp_out_mode_init(DACX_MODE_SEL mode, OUTCH_SEL_T outchsel, u8 out);
+/*----------------------------------------------------------------------------*/
+/** @brief: DACNO,DACNP作为普通IO输出，输出0还是1
+    @param: mode:DACN_OUTIO或者DACP_OUTIO out：如果是IO方式选择输出0还是1
+    @return:void
+    @author:
+    @note:  void gpio_dacnp_out_set(DACX_MODE_SEL mode,u8 out)
+*/
+/*----------------------------------------------------------------------------*/
+void gpio_dacnp_out_set(DACX_MODE_SEL mode, u8 out);
 /**
  * @brief usb_iomode
  *

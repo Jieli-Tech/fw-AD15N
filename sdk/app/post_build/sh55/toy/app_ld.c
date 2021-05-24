@@ -99,6 +99,12 @@ SECTIONS
     /* . = ORIGIN(ram1); */
     OVERLAY : AT(0x200000)
     {
+        .d_midi_ctrl
+        {
+            PROVIDE(midi_ctrl_buf_start = .);
+            *(.midi_ctrl_buf);
+            PROVIDE(midi_ctrl_buf_end = .);
+        }
         .d_midi
         {
             PROVIDE(midi_buf_start = .);

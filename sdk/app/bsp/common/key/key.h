@@ -26,23 +26,6 @@ typedef int (*key_emit_t)(u8 key_status, u8 key_num, u8 key_type);
 #define KEY_IR_EN				0   ///<IR按键使能
 #define KEY_TOUCH_EN			0   ///<触摸按键使能
 
-#if defined(D_CHGBOX_SDK) && D_CHGBOX_SDK
-
-#undef KEY_IO_EN
-#undef KEY_AD_EN
-#undef KEY_MATRIX_EN
-#undef KEY_IR_EN
-#undef KEY_TOUCH_EN
-
-/*按键类型定义*/
-#define KEY_IO_EN         	    1   ///<IO按键使能
-#define KEY_AD_EN				0	///<AD按键使能
-#define KEY_MATRIX_EN			0	///<矩阵按键使能
-#define KEY_IR_EN				0   ///<IR按键使能
-#define KEY_TOUCH_EN			0   ///<触摸按键使能
-
-#endif
-
 /*双击按键使能*/
 #define KEY_DOUBLE_CLICK_EN		0
 

@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include "config.h"
 #include "device.h"
+#include "asm/power_interface.h"
 
 
 #define LOG_TAG_CONST       NORM
@@ -17,6 +18,8 @@
 #define IDLE_SLEEP_TIME		(30 * 2 * 60)//half second
 static u16 idle_cnt = 0;
 
+extern volatile u8 sys_low_power_request;
+
 void idle_check_deal(u8 is_busy)
 {
 #if IDLE_CHECK_EN
@@ -26,10 +29,17 @@ void idle_check_deal(u8 is_busy)
     }
 
     idle_cnt ++;
+#if 1
     if (IDLE_SLEEP_TIME == idle_cnt) {
         log_info("idle \n");
         post_msg(1, MSG_ENTER_IDLE);
     }
+#else
+    if (!sys_low_power_request) {
+        low_power_sys_request(NULL);
+    }
+#endif
+
 #endif
 }
 

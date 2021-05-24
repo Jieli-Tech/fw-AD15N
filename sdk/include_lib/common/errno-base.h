@@ -83,6 +83,7 @@
 #define E_MIDIFORMAT  (0X9010 + 2)
 #define E_MIDI_TYPE	  (0X9010 + 3)
 #define E_MIDI_NO_CFG (0X9010 + 4)
+#define E_MIDI_FILEHDL (0X9010 + 5)
 
 #define E_A_INDEX	  (0X9020 + 0)
 #define E_A_DBUF	  (0X9020 + 1)

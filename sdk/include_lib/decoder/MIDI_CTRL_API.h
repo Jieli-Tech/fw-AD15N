@@ -18,7 +18,7 @@ typedef struct _MIDI_CTRL_PARM_ {
     char track_num;                //0-16
     unsigned int tempo;             //tempo
     void *priv;
-    void (*output)(void *priv, void *data, int len);
+    int (*output)(void *priv, void *data, int len);
 } MIDI_CTRL_PARM;
 
 typedef struct _MIDI_CTRL_CONTEXT_ {

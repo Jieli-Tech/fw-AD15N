@@ -24,6 +24,7 @@
 #define LOG_TAG             "[normal]"
 #include "debug.h"
 
+#if DECODER_MIDI_EN
 /*----------------------------------------------------------------------------*/
 /**@brief  midi cmd 配置接口
    @param  hdl:音乐播放句柄
@@ -114,7 +115,7 @@ void midi_init_info(MIDI_INIT_STRUCT *init_info)
     log_info(">>>>>>>>>midi information init<<<<<<<<<< \n");
 
     //模式设定
-    init_info->mode_info.mode = CMD_MIDI_CTRL_MODE_0,
+    init_info->mode_info.mode = CMD_MIDI_CTRL_MODE_1,
 
                          //midi节奏初始化
                          init_info->tempo_info.tempo_val = 1042;
@@ -128,6 +129,10 @@ void midi_init_info(MIDI_INIT_STRUCT *init_info)
     for (int i = 0; i < CTRL_CHANNEL_NUM; i++) {
         init_info->vol_info.cc_vol[i] = 4096;
     }
+
+    ///okon info
+    init_info->okon_info.Melody_Key_Mode = CMD_MIDI_MELODY_KEY_0;
+    init_info->okon_info.OKON_Mode = CMD_MIDI_OKON_MODE_0;
 
     ///midi主轨道乐器设置
     init_info->prog_info.prog = 0;
@@ -151,3 +156,4 @@ void midi_init_info(MIDI_INIT_STRUCT *init_info)
     init_info->switch_info = MARK_ENABLE | MELODY_ENABLE | TIM_DIV_ENABLE | BEAT_TRIG_ENABLE | MELODY_PLAY_ENABLE | EX_VOL_ENABLE;
 }
 
+#endif

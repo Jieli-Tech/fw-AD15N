@@ -18,10 +18,7 @@
 //
 #define DAC_DSM_EN   BIT(7)
 //DSM 模式
-#define DAC_DSM2     (0<<5)
-#define DAC_DSM3     (1<<5)
-#define DAC_DSM7     (2<<5)
-#define DAC_DSM11    (3<<5)
+#include "dac_cpu.h"
 //DAC 调制方式
 #define DAC_DSM      DAC_DSM_EN
 #define DAC_PWM      BIT(4)
@@ -36,22 +33,14 @@
 
 #define DAC_ENABLE   BIT(0)
 
-//#define DAC_MODE_      ( DAC_DSM | DAC_DSM11 | DAC_NINV )
 
 #define DAC_MODE_1_A   ( DAC_PWM )
 // 以下DSM模式暂时皆不可用
-#define DAC_MODE_1_B   ( DAC_DSM | DAC_DSM11 )
-#define DAC_MODE_1_D   ( DAC_DSM | DAC_DSM3 )
-
-#define DAC_MODE_2_A   ( DAC_DSM | DAC_DSM7 )
-
-// #define DAC_MODE_3_A   ( DAC_PWM )
-// #define DAC_MODE_3_B   ( DAC_DSM | DAC_DSM11 )
 // #define DAC_MODE_3_C   ( DAC_DSM | DAC_DSM2 )
 // #define DAC_MODE_3_D   ( DAC_DSM | DAC_DSM3 )
+#define DAC_MODE_1_B   ( DAC_DSM | DAC_DSM11 )
 
-// #define DAC_MODE_4_A   ( DAC_DSM | DAC_DSM2)
-#define DAC_MODE_5_A   ( DAC_DSM | DAC_DSM7)
+#define DAC_MODE_5_A   ( DAC_DSM | DAC_DSM7)    //AD150不支持
 
 #ifdef D_APP_MBOX
 #define DAC_CURR_MODE  DAC_MODE_5_A
@@ -77,6 +66,7 @@ void dac_phy_off(void);
 u32 dac_sr_lookup(u32 sr);
 u32 dac_sr_set(u32 sr);
 u32 dac_sr_read(void);
+void dac_cpu_mode(void);
 
 
 #endif

@@ -30,7 +30,7 @@
 // #define 	EXT_FLASH_EN		0
 
 /*---------KEY VOICE Configuration---------------*/
-#define KEY_VOICE_EN   				1
+#define KEY_VOICE_EN   				0
 
 /*---------SD Configuration---------------*/
 #define TFG_SD_EN				0//ENABLE

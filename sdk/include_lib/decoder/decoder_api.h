@@ -23,6 +23,7 @@ typedef enum {
     MAD_ERROR_FF_FR_FILE_START = 0x46,              //快退到头
     MAD_ERROR_LIMIT            = 0x47,              // NO USED
     MAD_ERROR_NODATA           = 0x48,              // NO USED
+    MAD_ERROR_PLAY_END		   = 0x50,				//MIDI CTRL DATA OUTPUT END
 } MAD_INFO ;
 
 typedef enum {
@@ -33,6 +34,7 @@ typedef enum {
     D_TYPE_UMP3 = 2,
     D_TYPE_A,
     D_TYPE_MIDI,
+    D_TYPE_MIDI_CTRL,
     D_TYPE_WAV,
     D_TYPE_MP3_ST,
 } DECOER_TYPE ;
@@ -77,6 +79,7 @@ typedef struct _dp_buff {
 
 extern dec_obj dec_ump3_hld;
 extern dec_obj dec_midi_hld;
+extern dec_obj dec_midi_ctrl_hld;
 extern dec_obj dec_f1a_hld[];
 extern dec_obj dec_a_hld;
 extern dec_obj dec_mp3_st_hld;

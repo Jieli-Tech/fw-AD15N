@@ -47,7 +47,7 @@ int c_main(int cfg_addr)
     //soft_off会Lat io, 唤醒之后电源初始化才会释放io，所以在电源初始化之后才能翻io/打印(注: soft_off不需要查复位源)
     sys_power_init();
 
-    log_info("--------- sh5x apps -------------\n");
+    log_info("--------- sh5x-apps -------------\n");
 
     p33_tx_1byte(P3_PINR_CON, 0);
 

@@ -25,10 +25,16 @@ volatile u8 sys_low_power_request = 0;
 volatile u8 isr_tick_timer_close = 0;
 
 
+#if (CPU_SH55==0)
+#if EXT_FLASH_EN//sh54
+extern u8 get_flash_cache_timer(void);
+#endif
+#endif
+
 void app_timer_loop(void);
+static u8 cnt = 0;
 void tick_timer_loop()
 {
-    static u8 cnt = 0;
 
     cnt ++;
 
@@ -39,12 +45,19 @@ void tick_timer_loop()
         ir_timeout();
         key_scan();
     }
+#if (CPU_SH55==0)
+#if EXT_FLASH_EN
+    if (get_flash_cache_timer()) {
+        if (0 == (cnt % 50)) {//100ms
+            bsp_post_event(B_EVENT_100MS);
+            /* putchar('z'); */
+        }
+    }
+#endif
+#endif
     if (0 == (cnt % 250)) { //500ms
         post_msg(1, MSG_500MS);
         cnt = 0;
-    }
-    if (0 == (cnt % 50)) { //100ms
-        bsp_post_event(B_EVENT_100MS);
     }
 
     if (0 == (cnt % 100)) { //200ms
@@ -61,46 +74,9 @@ void tick_timer_loop()
     }
 
     lrc_scan();
-    if (!sys_low_power_request) {
-        low_power_sys_request(NULL);
-    }
-
 }
 
-__attribute__((weak))
-AT(.tick_timer_code)
-void tick_timer_ram_loop(void)
-{
 
-}
-
-SET(interrupt(""))
-AT(.tick_timer_code)
-void tick_timer_isr()
-{
-    /*
-     *用户的timer函数不能加入到这里,加到tick_timer_loop
-     * */
-    //bit_clr_swi(TIME0_INIT);
-    j32CPU(core_num())->TTMR_CON |= BIT(6);
-
-    tick_timer_ram_loop();
-    if (isr_tick_timer_close) {
-        return;
-    }
-
-    tick_timer_loop();
-}
-
-void tick_timer_init(void)
-{
-    tt_printf("tick timer init \n");
-    HWI_Install(IRQ_TICKTMR_IDX, (u32)tick_timer_isr, IRQ_TICKTMR_IP) ; //timer0_isr
-    j32CPU(core_num())->TTMR_CNT = 0X00;
-    j32CPU(core_num())->TTMR_PRD = (sys_clock_get() / 1000) * 2;
-    j32CPU(core_num())->TTMR_CON = BIT(0);
-    tt_printf("tick timer init end \n");
-}
 
 void os_time_dly(u32 tick)
 {
@@ -131,7 +107,7 @@ extern int eSystemConfirmStopStatus(void);
 #define     APP_IO_DEBUG_0(i,x)       //{JL_PORT##i->DIR &= ~BIT(x), JL_PORT##i->OUT &= ~BIT(x);}
 #define     APP_IO_DEBUG_1(i,x)       //{JL_PORT##i->DIR &= ~BIT(x), JL_PORT##i->OUT |= BIT(x);}
 
-#define configTICK_RATE_HZ						( 100 ) /* In this non-real time simulated environment the tick frequency has to be at least a multiple of the Win32 tick frequency, and therefore very slow. */
+#define configTICK_RATE_HZ						( 500 ) /* In this non-real time simulated environment the tick frequency has to be at least a multiple of the Win32 tick frequency, and therefore very slow. */
 #ifndef configSYSTICK_CLOCK_HZ
 #define configSYSTICK_CLOCK_HZ  clk_get("sys")
 #endif
@@ -139,8 +115,6 @@ extern int eSystemConfirmStopStatus(void);
 static u32 compensation;
 static u32 tick_cnt;
 static void *power_ctrl;
-
-extern int eSystemConfirmStopStatus(void);
 
 #define     APP_IO_DEBUG_0(i,x)       //{JL_PORT##i->DIR &= ~BIT(x), JL_PORT##i->OUT &= ~BIT(x);}
 #define     APP_IO_DEBUG_1(i,x)       //{JL_PORT##i->DIR &= ~BIT(x), JL_PORT##i->OUT |= BIT(x);}
@@ -165,32 +139,66 @@ static void vPortRecoverTimerInterrupt(void)
     j32CPU(core_num())->TTMR_CON = BIT(6) | BIT(0);
 }
 
+typedef enum {
+    eAbortSleep = 0,		/* A task has been made ready or a context switch pended since portSUPPORESS_TICKS_AND_SLEEP() was called - abort entering a sleep mode. */
+    eStandardSleep,			/* Enter a sleep mode that will not last any longer than the expected idle time. */
+    eNoTasksWaitingTimeout	/* No tasks are waiting for a timeout so it is safe to enter a sleep mode that can only be exited by an external interrupt. */
+} eSleepModeStatus;
+
+eSleepModeStatus eTaskConfirmSleepModeStatus(void)
+{
+    return eNoTasksWaitingTimeout;
+}
+
+u32 xGetExpectedIdleTime()
+{
+    return 0;
+}
+
 static u32 __power_get_timeout(void *priv)
 {
     u32 us;
 
+    eSleepModeStatus eSleepStatus;
     int eStopStatus;
+
 
     if (low_power_sys_is_idle() == 0) {
         /*log_error("low_power_sys_is_idle"); */
         return 0;
     }
 
+    /* Ensure it is still ok to enter the sleep mode. */
+    eSleepStatus = eTaskConfirmSleepModeStatus();
 
-    us = 100 * 1000L;
-    /*log_info("eNoTasksWaitingTimeout"); */
+    /* log_info("eSleepStatus : 0x%x", eSleepStatus); */
 
-    eStopStatus = eSystemConfirmStopStatus();
-    switch (eStopStatus) {
-    case 0:
-        break;
-    case 1:
-        us = -2;
-        wdt_close();
-        break;
-    default:
-        us = eStopStatus * 1000L;
-        break;
+    us = xGetExpectedIdleTime() * (1000000L / configTICK_RATE_HZ);
+
+    if (eSleepStatus == eAbortSleep) {
+        us = 0;
+        /* log_error("eAbortSleep"); */
+    } else {
+        /* It is not necessary to configure an interrupt to bring the
+        microcontroller out of its low power state at a fixed time in the
+        future. */
+        if (eSleepStatus == eNoTasksWaitingTimeout) {
+            us = 100 * 1000L;
+            /*log_info("eNoTasksWaitingTimeout");*/
+
+            eStopStatus = eSystemConfirmStopStatus();
+            switch (eStopStatus) {
+            case 0:
+                break;
+            case 1:
+                us = -2;
+                wdt_close();
+                break;
+            default:
+                us = eStopStatus * 1000L;
+                break;
+            }
+        }
     }
 
     //tick to time
@@ -225,7 +233,7 @@ static void __power_resume(void *priv, u32 usec)
         microcontroller spent in its low power state. */
         /*vTaskStepTick(usec / (1000000L / configTICK_RATE_HZ));*/
 
-        jiffies += usec / (1000000L / configTICK_RATE_HZ);
+        cnt += usec / (1000000L / configTICK_RATE_HZ);
 
         //reset tick
         compensation = usec % (1000000L / configTICK_RATE_HZ);
@@ -235,6 +243,7 @@ static void __power_resume(void *priv, u32 usec)
         compensation = (u64)compensation * configSYSTICK_CLOCK_HZ / 1000000L;
 
         /* log_i("1-compensation 0x%x(tick)", compensation); */
+
     };
 
     /* Restart the timer that is generating the tick interrupt. */
