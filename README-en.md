@@ -1,12 +1,12 @@
-# fw-AD15N
-About Firmware for Generic MCU SDK（AD15N series）, Support AD15N
+# fw-AD14N-AD15N
+About Firmware for Generic MCU SDK（AD14N-AD15N series）, Support AD14N,AD15N
 
 [tag download]:https://github.com/Jieli-Tech/fw-AD15N/tags
 [tag_badgen]:https://img.shields.io/github/v/tag/Jieli-Tech/fw-AD15N?style=plastic&logo=bluetooth&labelColor=ffffff&color=informational&label=Tag&logoColor=blue
 
 [中文](./README.md) | EN
 
-firmware for Generic MCU SDK（AD15 series）
+firmware for Generic MCU SDK（AD14 AD15 series）
 
 This repository contains the Jieli source code, aims at helping the developers for the toy & generic MCU applications.
 It must be combined with lib.a and the repositories that use the same
@@ -35,9 +35,9 @@ Documentation
 
 * Chipset brief : [SoC datasheet](./doc)
 
-* SDK Version: [SDK History](doc/AD150_SDK_发布版本信息.pdf)
+* SDK Version: [SDK History](doc/AD14N-AD15N_SDK_发布版本信息.pdf)
 
-* SDK introduction : [SDK quick start guide](./doc/AD150_SDK手册.pdf)
+* SDK introduction : [SDK quick start guide](./doc/AD14N-AD15N_SDK手册.pdf)
 
 * SDK architure : [SDK module architure ](./doc/architure)
 
@@ -45,9 +45,9 @@ Build
 -------------
 Select a project to build. The following folders contains buildable projects:
 
-* APP_TOY: ./sdk/AD15N_app_mg.cbp), usage: 
+* APP_TOY: ./sdk/AD14N_app_mg.cbp ./sdk/AD15N_app_mg.cbp, usage: 
 
-* APP_SIMPLE: ./sdk/AD15N_simple.cbp, usage: 
+* APP_SIMPLE: ./sdk/AD14N_simple.cbp ./sdk/AD15N_simple.cbp, usage: 
 
 
 Comming Soon：
@@ -68,7 +68,6 @@ Hardware
 
 * Production Tool : massive prodution and program the SoC, please accquire the tool from the [link](https://item.taobao.com/item.htm?spm=a1z10.1-c-s.w4004-22883854875.8.504d246bXKwyeH&id=620941819219) and check the releated [doc](./doc/stuff/烧写器使用说明文档.pdf)
 
-* Wireless Tester : Over the air update/RF Calibration/Fast production test, please accuire the tool from the [link](https://item.taobao.com/item.htm?spm=a1z10.1-c-s.w4004-22883854875.10.504d246bXKwyeH&id=620942507511),check [doc](./doc/stuff/AC690x_1T2测试盒使用说明.pdf) for more infomation.
 
 SDK function
 -------------

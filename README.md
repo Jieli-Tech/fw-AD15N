@@ -1,14 +1,14 @@
-# fw-AD15N
-About Firmware for Generic MCU SDK（AD15N series）, Support AD15N
+# fw-AD14N-AD15N
+About Firmware for Generic MCU SDK（AD14N-AD15N series）, Support AD14N,AD15N
 
 [tag download]:https://github.com/Jieli-Tech/fw-AD15N/tags
 [tag_badgen]:https://img.shields.io/github/v/tag/Jieli-Tech/fw-AD15N?style=plastic&labelColor=ffffff&color=informational&label=Tag&
 
-# fw-AD15N_SDK   [![tag][tag_badgen]][tag download]
+# fw-AD14N-AD15N_SDK   [![tag][tag_badgen]][tag download]
 
 中文 | [EN](./README-en.md)
 
-AD15 系列通用MCU SDK 固件程序
+AD14N-AD15N 系列通用MCU SDK 固件程序
 
 本仓库包含SDK release 版本代码，线下线上支持同步发布，支持玩具类产品和通用MCU类应用二次开发.
 
@@ -35,9 +35,9 @@ AD15 系列通用MCU SDK 固件程序
 
 * 芯片简介 : [SoC 数据手册扼要](./doc)
 
-* SDK 版本信息 : [SDK 历史版本](doc/AD150_SDK_发布版本信息.pdf)
+* SDK 版本信息 : [SDK 历史版本](doc/AD14N-AD15N_SDK_发布版本信息.pdf)
 
-* SDK 介绍文档 : [SDK 快速开始简介](./doc/AD150_SDK手册.pdf)
+* SDK 介绍文档 : [SDK 快速开始简介](./doc/AD14N-AD15N_SDK手册.pdf)
 
 * SDK 结构文档 : [SDK 模块结构](./doc/)
 
@@ -45,9 +45,9 @@ AD15 系列通用MCU SDK 固件程序
 -------------
 请选择以下一个工程进行编译，下列目录包含了便于开发的工程文件：
 
-* 玩具类应用 : ./sdk/AD15N_app_mg.cbp , 适用领域：
+* 玩具类应用 : ./sdk/AD14N_app_mg.cbp ./sdk/AD15N_app_mg.cbp , 适用领域：
 
-* 示例类应用 : ./sdk/AD15N_simple.cbp)，适用领域：
+* 示例类应用 : ./sdk/AD14N_simple.cbp ./sdk/AD15N_simple.cbp)，适用领域：
 
 即将发布：
 
