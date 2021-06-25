@@ -22,11 +22,14 @@ extern const decoder_ops_t midi_ctrl_ops;
 static u32 midi_ctrl_tone_tab = 0;
 cbuffer_t cbuf_midi_ctrl AT(.midi_ctrl_buf);
 dec_obj dec_midi_ctrl_hld;
-u8 obuf_midi_ctrl[DAC_DECODER_BUF_SIZE] AT(.midi_ctrl_buf) ;
-u32 midi_ctrl_decode_buff[4696 / 4] AT(.midi_ctrl_buf) ;
+u16 obuf_midi_ctrl[DAC_DECODER_BUF_SIZE / 2] AT(.midi_ctrl_buf) ;
+u32 midi_ctrl_decode_buff[4700 / 4] AT(.midi_ctrl_buf) ;
 #define MIDI_CTRL_CAL_BUF ((void *)&midi_ctrl_decode_buff[0])
 MIDI_CONFIG_PARM midi_ctrl_t_parm AT(.midi_ctrl_buf);
 MIDI_CTRL_PARM midi_ctrl_parmt AT(.midi_ctrl_buf);
+
+//midi琴midi琴最大发声的key数选择,这个值库里面会使用，决定了解码buffer的大小
+const int MAX_PLAYER_CNT = 18;//决定同时发声可配置的最大数，范围[1,32]，值大小会影响解码buf大小
 
 void midi_error_play_end_cb(dec_obj *obj, u32 ret)
 {
@@ -70,7 +73,7 @@ u32 midi_ctrl_decode_api(void *p_file, void **ppdec, void *p_dp_buf)
     dec_midi_ctrl_hld.dec_ops = ops;
     dec_midi_ctrl_hld.event_tab = (u8 *)&midi_evt[0];
     //
-    midi_ctrl_t_parm.player_t = 8;                                //设置需要合成的最多按键个数，8到32可配
+    midi_ctrl_t_parm.player_t = MAX_PLAYER_CNT;                                //设置需要合成的最多按键个数，8到32可配
     midi_ctrl_t_parm.sample_rate = 2;//0:48k,1:44.1k,2:32k,3:24k,4:22.050k,5:16k,6:12k,7:11.025k,8:8k
     midi_ctrl_t_parm.spi_pos = (u8 *)midi_ctrl_tone_tab;                    //spi_memory为音色文件数据起始地址
 

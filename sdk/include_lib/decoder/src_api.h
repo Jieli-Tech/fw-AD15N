@@ -6,7 +6,8 @@
 //void *speed_api(void *obuf,u32 insample, u32 outsample);
 void src_mode_init(void);
 void src_reless(void **pp_eobj);
-void *src_api(void *obuf, u32 insample, void **ppsound);
+void *src_api(void *obuf, u32 insample, u32 outsample, void **ppsound);
+void *link_src_sound(void *p_sound_out, void *p_dac_cbuf, void **pp_effect, u32 insample, u32 outsample);
 void *src_hld_malloc();
 
 #endif

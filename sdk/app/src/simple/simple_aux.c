@@ -12,6 +12,10 @@
 #include "errno-base.h"
 #include "sine_play.h"
 
+#if SPEAKER_EN
+#include "speak_api.h"
+#endif
+
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
 #include "debug.h"
@@ -76,10 +80,13 @@ extern void simple_next(void);
 void aux_demo(void)
 {
 
+    dac_vol(0, 31);
     dac_sr_api(24000);
     /* dac_init_api(24000); */
-    dac_vol(0, 31);
-    aux_init();
+    /* dac_vol(0, 31); */
+    /* aux_init(); */
+    dac_fade_in_api();
+    audio_adc_speaker_start();
     int msg[2];
     char c;
     while (1) {
@@ -115,6 +122,13 @@ void aux_demo(void)
                 if ((c > 'A') && (c <= 'E')) {
                     gain = c - 'A' + 10;
                 }
+#if SPEAKER_EN
+                else if ('o' == c) {
+                    audio_adc_speaker_start();
+                } else if ('c' == c) {
+                    audio_adc_speaker_reless();
+                }
+#endif
                 if (gain <= 14) {
                     log_info(" gain : %d", gain);
                     D_MIC_PGA_G(gain);

@@ -15,6 +15,7 @@
 #include "audio_analog.h"
 #include "mio_api.h"
 #include "sine_play.h"
+#include "app_config.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -34,6 +35,8 @@ typedef struct _DAC_MANAGE {
 } DAC_MANAGE;
 
 #define B_DAC_MUTE		BIT(0)
+#define B_DAC_FADE_EN   BIT(1)
+#define B_DAC_FADE_OUT  BIT(2)
 
 
 const u16 vol_tab[] = {
@@ -81,12 +84,21 @@ u16 double_dac_buf[DAC_PACKET_SIZE * 2] AT(.DAC_BUFFER);
    @param   无
    @return  无
    @author  liujie
-   @note    void dac_init_api(void)
+   @note    void dac_mode_init(u16 vol)
 */
 /*----------------------------------------------------------------------------*/
-void dac_mode_init(void)
+void dac_mode_init(u16 vol)
 {
     memset(&dac_mge, 0, sizeof(dac_mge));
+#if DAC_FADE_ENABLE
+    dac_mge.vol = vol;
+    if (dac_mge.vol > MAX_VOL_LEVEL) {
+        dac_mge.vol = MAX_VOL_LEVEL;
+    }
+#else
+    dac_vol(0, vol);
+#endif
+
     memset(&double_dac_buf[0], 0, sizeof(double_dac_buf));
     JL_PORTB->DIR |= BIT(0);
     JL_PORTB->DIE &= ~BIT(0);
@@ -152,6 +164,9 @@ void fill_dac_fill(u8 *buf, u32 len)
             continue;
         }
         rptr[i] = cbuf_read_alloc(dac_mge.sound[i]->p_obuf, &olen[i]);
+        if (0 == olen[i]) {
+            rptr[i] = 0;
+        }
         d_mio_kick(dac_mge.sound[i]->mio, DAC_PACKET_SIZE);
     }
 
@@ -238,7 +253,12 @@ u8 dac_vol(char set, u8 vol)
         dac_mge.vol = MAX_VOL_LEVEL;
     }
     if (0 == (dac_mge.flag & B_DAC_MUTE)) {
-        dac_mge.vol_phy = vol_tab[dac_mge.vol];
+#if DAC_FADE_ENABLE
+        if (0 == (dac_mge.flag & B_DAC_FADE_EN))
+#endif
+        {
+            dac_mge.vol_phy = vol_tab[dac_mge.vol];
+        }
         dac_mge.flag &= ~B_DAC_MUTE;
     }
     log_info(" dac vol %d, 0x%x\n", dac_mge.vol, dac_mge.vol_phy);
@@ -347,6 +367,87 @@ void  dac_usb_vol(u8 vol_r, u8 vol_l)
     u8 vol = (vol_r + vol_l) / 2;
     dac_vol(0, vol);
 }
+
+
+
+/* #define DAC_FADE_STEP (16384 / 1638) */
+void dac_fade(void)
+{
+    static u16 cnt = 0;
+    if (0 == (dac_mge.flag & B_DAC_FADE_EN)) {
+        return;
+    }
+    if (dac_mge.flag & B_DAC_MUTE) {
+        return;
+    }
+    u16 target_vol = 0;
+    u16 curr_vol = dac_mge.vol_phy;
+    u16 t_fade_step;
+    cnt++;
+    if (curr_vol > 100) {
+        t_fade_step = (curr_vol + 1000) / 60;
+    } else {
+        t_fade_step =  10;
+    }
+
+    if (dac_mge.flag & B_DAC_FADE_OUT) {
+        if (curr_vol > t_fade_step) {
+            curr_vol -= t_fade_step;
+        } else {
+            curr_vol = 0;
+        }
+    } else {
+        target_vol = vol_tab[dac_mge.vol];
+        if (target_vol > curr_vol) {
+            if (curr_vol < (target_vol - t_fade_step)) {
+                curr_vol += t_fade_step;
+            } else {
+                curr_vol = target_vol;
+            }
+
+        } else {
+            if (curr_vol > (target_vol + t_fade_step)) {
+                curr_vol -= t_fade_step;
+            } else {
+                curr_vol = target_vol;
+            }
+        }
+
+    }
+    dac_mge.vol_phy = curr_vol;
+    /* log_info(" fade  %d %d \n",dac_mge.vol_phy, cnt); */
+    if (target_vol == dac_mge.vol_phy) {
+        dac_mge.flag &= ~B_DAC_FADE_EN;
+        cnt = 0;
+    }
+}
+void dac_fade_in(void)
+{
+    CPU_INT_DIS();
+    /* log_info(" fade in  %d \n",dac_mge.vol_phy); */
+    dac_mge.flag &= ~B_DAC_FADE_OUT;
+    dac_mge.flag |= B_DAC_FADE_EN;
+    CPU_INT_EN();
+}
+
+void dac_fade_out(u32 delay)
+{
+    CPU_INT_DIS();
+    /* log_info(" fade out  %d \n",dac_mge.vol_phy); */
+    dac_mge.flag |= B_DAC_FADE_OUT;
+    dac_mge.flag |= B_DAC_FADE_EN;
+    CPU_INT_EN();
+    u32 to_cnt = 0;
+    while (dac_mge.flag & B_DAC_FADE_EN) {
+        wdt_clear();
+        delay_10ms(1);
+        to_cnt++;
+        if (to_cnt > delay) {
+            break;
+        }
+    }
+}
+
 
 
 

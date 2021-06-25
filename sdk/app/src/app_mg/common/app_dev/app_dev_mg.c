@@ -5,12 +5,27 @@
 #include "music_api.h"
 #include "device.h"
 #include "app_config.h"
+#include "msg.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
 #include "debug.h"
 
 static u8 app_active_dev = APP_DEV_INNER_FLASH;
+
+#if (TFG_DEV_UPGRADE_SUPPORT && !CPU_SH55)
+#include "update.h"
+void device_upgrate_try(void)
+{
+    const char *dev_name_buf[] = {
+        __SD0_NANE,
+    };
+    for (int i = 0; i < sizeof(dev_name_buf) / sizeof(dev_name_buf[0]); i++) {
+        try_to_upgrade((char *)dev_name_buf[i], TFG_UPGRADE_FILE_NAM);
+    }
+}
+#endif
+
 
 #if TFG_SD_EN
 static u8 sd_buffer[512];
@@ -26,8 +41,10 @@ int device_status_emit(const char *device_name, const u8 status)
 
     if (!strcmp(device_name, "sd0")) {
         if (status) {
+            post_event(EVENT_SD0_IN);
             log_info(">>>>>>>sd online \n");
         } else {
+            post_event(EVENT_SD0_OUT);
             log_info(">>>>>>>sd offline \n");
         }
     }

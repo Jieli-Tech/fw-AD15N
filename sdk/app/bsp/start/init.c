@@ -140,7 +140,7 @@ void system_init(void)
     midi_ctrl_decode_init();
 #endif
 
-    dac_mode_init();
+    dac_mode_init(16);
     audio_adc_mode_init();
     audio_init();
 
@@ -155,6 +155,6 @@ void system_init(void)
     norfs_init_api();
     //----------------------
     d_mio_module_init();
-    dac_vol(0, 16);
+    /* dac_vol(0, 16); */
 }
 

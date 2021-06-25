@@ -47,6 +47,7 @@ static const u16 event2msg[] = {
     MSG_SDMMCA_OUT,
     MSG_AUX_IN,
     MSG_AUX_OUT,
+    MSG_EXTFLSH_IN,
 
     NO_MSG,
 };
@@ -113,6 +114,7 @@ bool get_event_status(u32 event)
 int get_msg(int len, int *msg)
 {
     u32 param = 0;
+    u16 *t_msg = (u16 *)&param;
     //get_msg
     CPU_SR_ALLOC();
     OS_ENTER_CRITICAL();
@@ -127,7 +129,7 @@ int get_msg(int len, int *msg)
         return MSG_NO_ERROR;
     }
 
-    u32 tlen = cbuf_read(&msg_cbuf, (void *)&param, MSG_HEADER_BYTE_LEN);
+    u32 tlen = cbuf_read(&msg_cbuf, (void *)t_msg, MSG_HEADER_BYTE_LEN);
 
     if (MSG_HEADER_BYTE_LEN != tlen) {
         /* if (MSG_HEADER_BYTE_LEN != cbuf_read(&msg_cbuf, (void *)&param, MSG_HEADER_BYTE_LEN)) { */
@@ -141,14 +143,14 @@ int get_msg(int len, int *msg)
         return MSG_NO_MSG;
     }
     /* log_info(" gm a 0x%x\n",param); */
-    msg[0] = param & (0xffffffff >> (32 - MSG_TYPE_BIT_LEN));
-    u32 param_len = param >> (32 - MSG_PARAM_BIT_LEN);
+    msg[0] = t_msg[0] & (MSG_HEADER_ALL_BIT >> MSG_PARAM_BIT_LEN);
+    u32 param_len = param >> MSG_TYPE_BIT_LEN;
     if (param_len > (len - 1)) {
         OS_EXIT_CRITICAL();
         return MSG_BUF_NOT_ENOUGH;
     }
 
-    if (param_len != cbuf_read(&msg_cbuf, (void *)(msg + 1), param_len)) {
+    if (param_len != cbuf_read(&msg_cbuf, (void *)(msg + 1), param_len * 4)) {
         OS_EXIT_CRITICAL();
         return MSG_CBUF_ERROR;
     }
@@ -170,6 +172,7 @@ int post_event(int event)
 int post_msg(int argc, ...)
 {
     u32 param;
+    u16 *t_msg = (u16 *)&param;
     CPU_SR_ALLOC();
     va_list argptr;
     OS_ENTER_CRITICAL();
@@ -178,10 +181,12 @@ int post_msg(int argc, ...)
         OS_EXIT_CRITICAL();
         return MSG_BUF_NOT_ENOUGH;
     }
-    param = (0xffffffff >> (32 - MSG_TYPE_BIT_LEN)) & va_arg(argptr, int);
-    param = ((argc - 1) << (32 - MSG_PARAM_BIT_LEN)) | param;
-    /* log_info(" msg 0x%x\n", param); */
-    cbuf_write(&msg_cbuf, (void *)&param, MSG_HEADER_BYTE_LEN);
+
+    t_msg[0] = (MSG_HEADER_ALL_BIT >> MSG_PARAM_BIT_LEN) & va_arg(argptr, int);
+    t_msg[0] = ((argc - 1) << (MSG_TYPE_BIT_LEN)) | t_msg[0];
+
+    /* log_info(" msg 0x%x\n", t_msg[0]); */
+    cbuf_write(&msg_cbuf, (void *)&t_msg[0], MSG_HEADER_BYTE_LEN);
 
     for (u32 i = 0; i < argc - 1; i++) {
         param = va_arg(argptr, int);

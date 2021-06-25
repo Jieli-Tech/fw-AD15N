@@ -21,7 +21,7 @@
   strstr = ABSOLUTE(0xc2768);
   strchr = ABSOLUTE(0xc276c);
   cbuf_read = ABSOLUTE(0xc2770);
-  cbuf_write = ABSOLUTE(0xc2774);
+  _cbuf_write = ABSOLUTE(0xc2774);
   cbuf_is_write_able = ABSOLUTE(0xc2778);
   cbuf_write_alloc = ABSOLUTE(0xc277c);
   cbuf_write_updata = ABSOLUTE(0xc2780);

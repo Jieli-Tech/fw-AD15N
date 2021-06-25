@@ -10,6 +10,7 @@
 #include "bsp_loop.h"
 #include "app_power_mg.h"
 #include "vm.h"
+#include "dac_api.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -40,7 +41,7 @@ void tick_timer_loop()
 
     app_timer_loop();
     if (0 == (cnt % 5)) {
-
+        dac_fade_api();
         jiffies ++;
         ir_timeout();
         key_scan();

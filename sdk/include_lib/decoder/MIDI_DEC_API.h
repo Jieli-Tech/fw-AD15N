@@ -38,10 +38,15 @@ typedef  struct _EX_BeatTrig_STRUCT_ {				//节拍回调/*val1 一节多少拍, 
     u32(*beat_trigger)(void *priv, u8 val1, u8 val2);
 } EX_BeatTrig_STRUCT;
 
-typedef  struct _EX_MELODY_STRUCT_ {				//音符回调 vel 为按键力度
+typedef  struct _EX_MELODY_STRUCT_ {				//主旋律音符回调 vel 为按键力度
     void *priv;
     u32(*melody_trigger)(void *priv, u8 key, u8 vel);
 } EX_MELODY_STRUCT;
+
+typedef struct _EX_MELODY_STOP_STRUCT_ {			//主旋律音符停止回调
+    void *priv;
+    u32(*melody_stop_trigger)(void *priv, u8 key);
+} EX_MELODY_STOP_STRUCT;
 
 #define  CMD_MODE4_PLAY_END          0x09
 
@@ -87,7 +92,7 @@ typedef struct _MIDI_OKON_MODE_ {
 
 typedef  struct _MIDI_PLAY_CTRL_TEMPO_ {
     u16 tempo_val;
-    u16 decay_val;             //1024 低11bit有效
+    u16 decay_val[CTRL_CHANNEL_NUM];             //1024 低11bit有效
     u32 mute_threshold;
 } MIDI_PLAY_CTRL_TEMPO;				//用于配置节奏及衰减
 
@@ -120,14 +125,15 @@ typedef struct _MIDI_W2S_STRUCT_ {
 
 enum {
     MARK_ENABLE = 0x0001,                //mark回调的使能
-    MELODY_ENABLE = 0x0002,              //melody回调的使能
+    MELODY_ENABLE = 0x0002,              //主旋律音符回调的使能
     TIM_DIV_ENABLE = 0x0004,             //小节回调的使能
     MUTE_ENABLE = 0x0008,                //mute住解码的使能
     SAVE_DIV_ENBALE = 0x0010,             //小节保存的使能
     EX_VOL_ENABLE = 0x0020,               //外部音量控制使能
     SET_PROG_ENABLE = 0x0040,             //主轨道设置成固定乐器使能
     MELODY_PLAY_ENABLE = 0x0080,           //主轨道播放使能
-    BEAT_TRIG_ENABLE = 0x0100              //每拍回调的使能
+    BEAT_TRIG_ENABLE = 0x0100,              //每拍回调的使能
+    MELODY_STOP_ENABLE = 0x200				//主旋律音符停止回调使能
 
 };
 
@@ -144,6 +150,7 @@ typedef struct _MIDI_INIT_STRUCT_ {
     EX_TmDIV_STRUCT  tmDiv_info;              //小节回调参数
     EX_BeatTrig_STRUCT beat_info;             //每拍回调参数
     MIDI_OKON_MODE okon_info;				  //OKON参数
+    EX_MELODY_STOP_STRUCT moledy_stop_info;	 //melody_stop回调函数
 #if 1
     MIDI_W2S_STRUCT    w2s_info;
 #endif
@@ -165,8 +172,10 @@ void init_midi_info_val(MIDI_INIT_STRUCT  *midi_init_info_v)  //midi 配置
 
     //midi节奏初始化
     midi_init_info_v->tempo_info.tempo_val = 1024;
+    for (int i = 0; i < 16; i++) {
+        midi_init_info_v->tempo_info.decay_val[i] = ((u16)31 << 11) | 1024;
+    }
 
-    midi_init_info_v->tempo_info.decay_val = ((u16)31 << 11) | 1024;
     midi_init_info_v->tempo_info.mute_threshold = (u16)1L << 29;
 
     //midi主轨道初始化
@@ -196,6 +205,10 @@ void init_midi_info_val(MIDI_INIT_STRUCT  *midi_init_info_v)  //midi 配置
     //midi的melody控制初始化
     midi_init_info_v->moledy_info.priv = &file_melody;
     midi_init_info_v->moledy_info.melody_trigger = melody_trigger;
+
+    //midi的melody stop控制初始化
+    midi_init_info_v->moledy_stop_info.priv = &file_melody_stop;
+    midi_init_info_v->moledy_stop_info.melody_stop_trigger = melody_stop_trigger;
 
     //midi的小节回调控制初始化
     midi_init_info_v->tmDiv_info.priv = NULL;

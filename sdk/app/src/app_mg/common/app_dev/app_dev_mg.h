@@ -19,4 +19,5 @@ enum {
 };
 
 u32 app_device_ioctl(u32 cmd, int arg);
+void device_upgrate_try(void);
 #endif

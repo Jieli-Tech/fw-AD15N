@@ -57,8 +57,8 @@ static const u8 IRTabFF00[] = {
 
 #else
 
-#define IRTMR       JL_TMR1
-#define IRQ_IRTMR   IRQ_TIME1_IDX
+#define IRTMR       JL_TMR2
+#define IRQ_IRTMR   IRQ_TIME2_IDX
 #define IOMC_CAP    (2<<4)
 
 #endif
@@ -184,6 +184,8 @@ static void ir_input_io_sel(u8 port)
     INPUT_CHANNLE1_SRC_SEL(port);
 
     gpio_set_direction(port, 1);
+    gpio_set_die(port, 1);
+    gpio_set_pull_up(port, 1);
 }
 
 static inline void ir_output_timer_sel(u8 timer)

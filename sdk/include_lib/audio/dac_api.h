@@ -18,7 +18,7 @@ typedef enum {
 
 
 bool dac_mute(bool mute);
-void dac_mode_init(void);
+void dac_mode_init(u16 vol);
 void dac_init_api(u32 sr);
 void dac_sr_api(u32 sr);
 void dac_off_api(void);
@@ -28,6 +28,29 @@ u8 dac_vol(char set, u8 vol);
 void dac_usb_vol(u8 vol_r, u8 vol_l);
 bool regist_dac_channel(void *sound, void *kick);
 bool unregist_dac_channel(void *dec_hld);
+
+/*---------DAC FADE IN & OUT Configuration---------------*/
+#ifdef D_MBOX_SDK
+#define 	DAC_FADE_ENABLE		1
+#else
+#define 	DAC_FADE_ENABLE		0
+#endif
+#if DAC_FADE_ENABLE
+void dac_fade(void);
+void dac_fade_in(void);
+void dac_fade_out(u32 delay);
+#define dac_fade_api        dac_fade
+#define dac_fade_in_api     dac_fade_in
+#define dac_fade_out_api    dac_fade_out
+
+#else
+#define dac_fade_api()
+#define dac_fade_in_api()
+#define dac_fade_out_api(...)
+
+#endif
+
+
 
 #endif
 

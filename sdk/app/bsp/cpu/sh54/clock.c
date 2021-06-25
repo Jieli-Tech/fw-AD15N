@@ -230,6 +230,9 @@ int clk_get(const char *name)
     if (!strcmp(name, "mcpwm")) {
         return lsb_clk_get();
     }
+    if (!strcmp(name, "lrc")) {
+        return lrc_clk_get();
+    }
     return 0;
 }
 
@@ -425,6 +428,15 @@ void lrc_trace_trim(void)
     u32 new_pll_ds = (old_pll_ds + 2) * 256 * lrc_pll_ds / (num >> 3);
     log_info("new_pll_ds = %d\n", new_pll_ds - 2);
     pll_config(new_pll_ds);
+}
+
+u32 lrc_clk_get(void)
+{
+    if (LRC_TRIM_DISABLE) {
+        return 32000;
+    }
+
+    return 480000000 / lrc_pll_ds / 8;
 }
 
 #if 0

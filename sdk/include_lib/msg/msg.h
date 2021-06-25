@@ -120,6 +120,7 @@ enum {
     MSG_USB_DISK_IN,          //以下顺序不可随意调整
     MSG_SDMMCA_IN,
     MSG_SDMMCB_IN,
+    MSG_EXTFLSH_IN,
     MSG_USB_DISK_OUT,
     MSG_SDMMCA_OUT,
     MSG_SDMMCB_OUT,
@@ -179,6 +180,9 @@ enum {
 //DEV_ONLINE
 
 #define MSG_HEADER_BYTE_LEN     2
+#define MSG_HEADER_BIT_LEN     (MSG_HEADER_BYTE_LEN*8)
+#define MSG_HEADER_ALL_BIT     ((1L<<MSG_HEADER_BIT_LEN) - 1)
+
 #define MSG_TYPE_BIT_LEN        12
 #define MSG_PARAM_BIT_LEN       (MSG_HEADER_BYTE_LEN*8-MSG_TYPE_BIT_LEN)
 
@@ -223,6 +227,7 @@ enum {
 #define 		EVENT_SD0_OUT   29
 #define			EVENT_AUX_IN   30
 #define         EVENT_AUX_OUT  31
+#define 		EVENT_EXTFLSH_IN	32
 
 #define EVENT_HALF_SECOND	31
 

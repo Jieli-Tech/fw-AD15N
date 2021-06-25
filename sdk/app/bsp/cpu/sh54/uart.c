@@ -29,6 +29,8 @@ void uart_init(u32 fre)
 
     JL_PORTA->DIR &= ~BIT(4);
     JL_PORTA->DIR |= BIT(5);
+    JL_PORTA->DIE |= BIT(4) | BIT(5);
+
 
     UART->BAUD = clk_get("uart") / fre / 4 - 1;
     UART->CON = BIT(13) | BIT(12) | BIT(0);

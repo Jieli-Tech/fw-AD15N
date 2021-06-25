@@ -94,6 +94,10 @@ u32 midi_melody_trigger(void *priv, u8 key, u8 vel)
 {
     return 0;
 }
+u32 midi_melody_stop_trigger(void *priv, u8 key)
+{
+    return 0;
+}
 u32 midi_beat_trigger(void *priv, u8 val1, u8 val2)
 {
     return 0;
@@ -119,7 +123,9 @@ void midi_init_info(MIDI_INIT_STRUCT *init_info)
 
                          //midi节奏初始化
                          init_info->tempo_info.tempo_val = 1042;
-    init_info->tempo_info.decay_val = ((u16)31 << 11) | 1024;
+    for (int i = 0; i < CTRL_CHANNEL_NUM; i++) {
+        init_info->tempo_info.decay_val[i] = ((u16)31 << 11) | 1024;
+    }
     init_info->tempo_info.mute_threshold = (u16)1L << 29;
 
     ///midi主轨道初始化
@@ -146,6 +152,9 @@ void midi_init_info(MIDI_INIT_STRUCT *init_info)
     init_info->moledy_info.priv = NULL;
     init_info->moledy_info.melody_trigger = midi_melody_trigger;
 
+    init_info->moledy_stop_info.priv = NULL;
+    init_info->moledy_stop_info.melody_stop_trigger = midi_melody_stop_trigger;
+
     init_info->beat_info.priv = NULL;
     init_info->beat_info.beat_trigger = midi_beat_trigger;
 
@@ -153,7 +162,7 @@ void midi_init_info(MIDI_INIT_STRUCT *init_info)
     init_info->tmDiv_info.timeDiv_trigger = midi_timeDiv_trigger;
 
     ///使能控制
-    init_info->switch_info = MARK_ENABLE | MELODY_ENABLE | TIM_DIV_ENABLE | BEAT_TRIG_ENABLE | MELODY_PLAY_ENABLE | EX_VOL_ENABLE;
+    init_info->switch_info = MELODY_STOP_ENABLE | MARK_ENABLE | MELODY_ENABLE | TIM_DIV_ENABLE | BEAT_TRIG_ENABLE | MELODY_PLAY_ENABLE | EX_VOL_ENABLE;
 }
 
 #endif

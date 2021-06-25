@@ -26,11 +26,13 @@
 //TOUCH KEY
 #define TOUCH_KEY_SEL				{IO_PORTA_09,IO_PORTA_10,IO_PORTA_11}
 
+
 /*---------FLASH Configuration---------------*/
 // #define 	EXT_FLASH_EN		0
 
 /*---------KEY VOICE Configuration---------------*/
 #define KEY_VOICE_EN   				1
+
 
 /*---------SD Configuration---------------*/
 #define TFG_SD_EN				0//ENABLE

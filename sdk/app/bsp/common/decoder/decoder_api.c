@@ -21,6 +21,7 @@
 #include "decoder_msg_tab.h"
 #include "eq.h"
 #include "mio_api.h"
+#include "app_config.h"
 
 
 #define LOG_TAG_CONST       NORM
@@ -152,14 +153,15 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
         p_curr_sound = &p_dec->sound;
         p_curr_sound->enable = 0;
         sound_out_obj *first_sound = p_curr_sound;
-
+        void *cbuff_o = p_dec->sound.p_obuf;
 #if AUDIO_SPEED_EN
         //变速变调
         if (dec_ctl & BIT_SPEED) {
-            p_curr_sound->effect = speed_api(p_dec->sound.p_obuf, p_dec->sr, (void **) &p_next_sound);
+            p_curr_sound->effect = speed_api(cbuff_o, p_dec->sr, (void **) &p_next_sound);
             if (NULL != p_curr_sound->effect) {
                 p_curr_sound->enable |= B_DEC_EFFECT;
                 p_curr_sound = p_next_sound;
+                p_curr_sound->p_obuf = cbuff_o;
                 p_next_sound = 0;
                 /* log_info("src init succ\n"); */
             }
@@ -169,15 +171,7 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
         //硬件src
         p_curr_sound->enable = 0;
         if (32000 != p_dec->sr) {
-            p_curr_sound->effect = src_api(p_dec->sound.p_obuf, p_dec->sr, (void **)&p_next_sound);
-            if (NULL != p_curr_sound->effect) {
-                p_dec->src_effect = p_curr_sound->effect;
-                p_curr_sound->enable |= B_DEC_EFFECT;
-                p_curr_sound = p_next_sound;
-                /* log_info("src init succ\n"); */
-            } else {
-                log_info("src init fail\n");
-            }
+            p_curr_sound = link_src_sound(p_curr_sound, cbuff_o, (void **) &p_dec->src_effect, p_dec->sr, 32000);
         } else {
             void *src_tmp = src_hld_malloc();
             src_reless((void **)&src_tmp);
@@ -213,6 +207,7 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
     } else {
         log_info("decode err : 0x%x\n", res);
     }
+    dac_fade_in_api();
     //while(1)clear_wdt();
     return p_dec;
 }
@@ -262,13 +257,13 @@ void decoder_stop(dec_obj *obj, DEC_STOP_WAIT wait)
     if (NULL == obj) {
         return;
     }
-
     /* log_info("decode stop --\n"); */
     if (obj->sound.enable & B_DEC_RUN_EN) {
         clear_dp_buff(obj->p_dp_buf);
     }
     /* log_info("decode stop\n"); */
     obj->sound.enable &= ~B_DEC_RUN_EN;
+    dac_fade_out_api(200);
     if (NO_WAIT != wait) {
         log_info("decode stop wait!\n");
         while (obj->sound.enable & B_DEC_OBUF_EN) {

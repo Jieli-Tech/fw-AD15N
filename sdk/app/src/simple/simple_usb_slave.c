@@ -26,6 +26,7 @@ void usb_slave(void)
 {
     dac_init_api(32000);
     /* dac_vol(0, 31); */
+    dac_fade_in_api();
     int msg[2];
     char c;
     while (1) {

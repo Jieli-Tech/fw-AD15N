@@ -49,7 +49,8 @@ const int MAINTRACK_USE_CHN	= 0;//0:用track号来区分  1:用channel号来区�
 const u8 dev_update_use_eeprom = 0;
 //ufw升级文件的vid要求： 0：vid要相同  1：vid要不一样
 const u8 ufw_vid_need_to_be_different = 0;
-
+//sd空闲后挂起的最大cnt值，单位时间是sd检测函数的时间，即sd空闲后每次检测函数cnt就加1，为0时，则每次读写完都会发挂起命令
+const u8 is_sdx_active_cnt_max = 20;
 //内核异常打印
 const u8 config_asser = 1;
 /**

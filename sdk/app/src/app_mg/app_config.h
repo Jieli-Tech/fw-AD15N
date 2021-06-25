@@ -32,6 +32,10 @@
 /*---------KEY VOICE Configuration---------------*/
 #define KEY_VOICE_EN   				0
 
+/*---------dev upgrade Configuration---------------*/
+#define TFG_DEV_UPGRADE_SUPPORT 1
+#define TFG_UPGRADE_FILE_NAM	"/update.ufw"
+
 /*---------SD Configuration---------------*/
 #define TFG_SD_EN				0//ENABLE
 /*---------USB Configuration---------------*/

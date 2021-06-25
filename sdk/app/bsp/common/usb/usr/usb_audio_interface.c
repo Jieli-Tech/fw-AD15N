@@ -237,8 +237,10 @@ void usb_slave_sound_open(sound_out_obj *p_sound, u32 sr)
     uac_sync_init(sr);
     if (0 != sr) {
         p_curr_sound = p_sound;
-
-        p_curr_sound->effect = src_api(p_sound->p_obuf, sr, (void **)&p_next_sound);
+        void *cbuf_o = p_curr_sound->p_obuf;
+        p_curr_sound = link_src_sound(p_curr_sound, cbuf_o, (void **)&usb_src_obj, sr, 32000);
+#if 0
+        p_curr_sound->effect = src_api(p_sound->p_obuf, sr, 32000, (void **)&p_next_sound);
         if (NULL != p_curr_sound->effect) {
             /* p_dec->src_effect = p_curr_sound->effect; */
             p_curr_sound->enable |= B_DEC_EFFECT;
@@ -248,6 +250,7 @@ void usb_slave_sound_open(sound_out_obj *p_sound, u32 sr)
             log_info("src init fail\n");
         }
         usb_src_obj = p_sound->effect;
+#endif
         regist_dac_channel(p_sound, NULL);//注册到DAC;
         p_sound->enable |=  B_DEC_RUN_EN;
     }

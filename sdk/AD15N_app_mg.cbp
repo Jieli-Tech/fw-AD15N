@@ -13,6 +13,7 @@
 <Compiler>
 <Add option="-DD_TOY_SDK=1" />
 <Add option="-DD_APP_TOY=1" />
+<Add option="-DMAX_F1A_CHANNEL=1" />
 <Add option="-integrated-as" />
 <Add option="-g" />
 <Add option="-Oz" />
@@ -24,7 +25,8 @@
 <Add option="-Wundef" />
 <Add option="-DFPGA=0" />
 <Add option="-DCPU_SH55=1" />
-<Add option="-DMAX_F1A_CHANNEL=1" />
+<Add option="-DSPEAKER_EN=0" />
+<Add option="-DVO_PITCH_EN=0" />
 <Add option="-DAUX_EN=0" />
 <Add option="-DENCODER_EN=0" />
 <Add option="-DDECODER_UMP3_EN=0" />
@@ -34,11 +36,11 @@
 <Add option="-DDECODER_MIDI_EN=1" />
 <Add option="-DDECODER_A_EN=1" />
 <Add option="-DAUDIO_SPEED_EN=0" />
-<Add option="-DEXT_FLASH_EN=1" />
+<Add option="-DEXT_FLASH_EN=0" />
 <Add option="-DFM_EN=0" />
 <Add option="-DEEPROM_EN=0" />
 <Add option="-DHAS_USB_EN=0" />
-<Add option="-DHAS_MIO_EN=1" />
+<Add option="-DHAS_MIO_EN=0" />
 <Add option="-DHAS_UPDATE_EN=0" />
 <Add option="-DECHO_EN=0" />
 <Add option="-DHOWLING_EN=0" />
@@ -79,6 +81,7 @@
 <Add directory="app/bsp/common/key" />
 <Add directory="app/bsp/common/power_manage" />
 <Add directory="app/bsp/common/norflash" />
+<Add directory="app/bsp/common/reserved_area" />
 <Add directory="app/bsp/modules" />
 <Add directory="app/bsp/modules/timer" />
 <Add directory="app/src/app_mg" />
@@ -92,14 +95,14 @@
 <Add option="include_lib/liba/sh55/fs_lib.a" />
 <Add option="include_lib/liba/sh55/audio_lib.a" />
 <Add option="include_lib/liba/sh55/decoder_mge_lib.a" />
-<Add option="include_lib/liba/sh55/effect_lib.a" />
+<Add option="include_lib/liba/sh55/ae_resample_lib.a" />
 <Add option="include_lib/liba/sh55/dev_mg_lib.a" />
 <Add option="include_lib/liba/sh55/malloc_lib.a" />
-<Add option="--end-group" />
 <Add option="include_lib/liba/lib_f1a_decode.a" />
 <Add option="include_lib/liba/lib_midi_decode.a" />
 <Add option="include_lib/liba/lib_a_decode.a" />
 <Add option="include_lib/liba/sh55/sdmmc_lib.a" />
+<Add option="--end-group" />
 <Add option="-Tapp/post_build/sh55/app.ld" />
 <Add option="-M=app/post_build/sh55/app.map" />
 <Add library="C:\JL\pi32\lib\libm.a" />
@@ -121,10 +124,7 @@
 <Unit filename="app/bsp/common/decoder/list/f1a_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/midi_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/midi_ctrl_api.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/common/decoder/list/mio_phy.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/common/decoder/mio_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/sine_play.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/common/decoder/speed_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/fs/nor_fs/nor_fs_resource.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/fs/sydf/sydf_resource.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/fs/vfs.c"><Option compilerVer="CC"/></Unit>
@@ -146,7 +146,10 @@
 <Unit filename="app/bsp/common/norflash/norflash.h" />
 <Unit filename="app/bsp/common/power_manage/app_power_mg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/power_manage/app_power_mg.h" />
+<Unit filename="app/bsp/common/reserved_area/reserved_area.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/reserved_area/reserved_area.h" />
 <Unit filename="app/bsp/common/sdk_cfg.h" />
+<Unit filename="app/bsp/common/sound_effect_list/speed_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/vm/vm_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/clock.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/dac_cpu.c"><Option compilerVer="CC"/></Unit>

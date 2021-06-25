@@ -10,6 +10,7 @@
 #include "errno-base.h"
 #include "msg.h"
 #include "decoder_msg_tab.h"
+#include "app_config.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -19,7 +20,7 @@
 #define A_OBUF_SIZE DAC_DECODER_BUF_SIZE
 
 cbuffer_t cbuf_a AT(.a_data);
-u8 obuf_a[A_OBUF_SIZE] AT(.a_data) ;
+u16 obuf_a[A_OBUF_SIZE / 2] AT(.a_data) ;
 dec_obj dec_a_hld ;
 u32 a_decode_buff[228 / 4] AT(.a_data) ;
 #define A_CAL_BUF ((void *)&a_decode_buff[0])

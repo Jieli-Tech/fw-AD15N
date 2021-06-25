@@ -16,6 +16,10 @@
 #include "errno-base.h"
 #include "sine_play.h"
 
+#if SPEAKER_EN
+#include "speak_api.h"
+#endif
+
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
 #include "debug.h"
@@ -137,6 +141,13 @@ void decoder_demo(void)
             } else if ('t' == c) {
                 /* aux_test_audio(); */
             }
+#if SPEAKER_EN
+            else if ('o' == c) {
+                audio_adc_speaker_start();
+            } else if ('c' == c) {
+                audio_adc_speaker_reless();
+            }
+#endif
         } else {
             /* log_info(" msg :0x%x\n",msg[0]); */
         }

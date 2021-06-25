@@ -21,7 +21,7 @@ const char LRC_TRIM_DISABLE = FALSE;  //LRC trim 主时钟
 //内存管理
 const char MM_ASSERT     = TRUE;  //malloc内部断言
 //
-const char MIC_CAPLESS_EN   = TRUE; // MIC省电容的使能
+const char MIC_CAPLESS_EN   = FALSE; // MIC省电容的使能
 const char MIC_RES_BUILT_IN = TRUE;  // MIC使用内置偏置电阻的使能
 //00000:NA;     00001:2;   00010:5;   00011:1.425; 00100:7;   00101:1.555; 00110:2.916; 00111:1.186;
 //01000:NA;     01001:3;   01010:6;   01011:2.428; 01100:8;   01101:2.555; 01110:3.916; 01111:2.186;
@@ -48,6 +48,8 @@ const int MAINTRACK_USE_CHN	= 0;//0:用track号来区分  1:用channel号来区�
 const u8 dev_update_use_eeprom = 0;
 //ufw升级文件的vid要求： 0：vid要相同  1：vid要不一样
 const u8 ufw_vid_need_to_be_different = 0;
+//sd空闲后挂起的最大cnt值，单位时间是sd检测函数的时间，即sd空闲后每次检测函数cnt就加1，为0时，则每次读写完都会发挂起命令
+const u8 is_sdx_active_cnt_max = 20;
 
 //内核异常打印
 const u8 config_asser = 1;

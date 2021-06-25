@@ -14,6 +14,7 @@
 #include "msg.h"
 #include "errno-base.h"
 #include "decoder_msg_tab.h"
+#include "app_config.h"
 //#include "avio.h"
 //#include "bitstream.h"
 //#include "wmadata.h"
@@ -32,8 +33,8 @@ dec_obj dec_f1a_hld[MAX_F1A_CHANNEL];
 
 typedef struct _f1x_data {
     cbuffer_t cbuf;
-    u8 o_buf[F1A_OBUF_SIZE];
-    u8 d_buff[F1A_DBUF_SIZE];
+    u16 o_buf[F1A_OBUF_SIZE / 2];
+    u16 d_buff[F1A_DBUF_SIZE / 2];
 } f1x_data;
 
 f1x_data g_f1x1_data AT(.f1a_1_buf);
@@ -91,6 +92,7 @@ u32 f1a_decode_index(void *p_file, u32 index, dec_obj **p_dec, void *p_dp_buf, f
     local_irq_disable();
     memset(p_dec_hld, 0, sizeof(dec_obj));
     local_irq_enable();
+
 
     dec_f1a_hld[0].type = D_TYPE_F1A_1;
 #if (MAX_F1A_CHANNEL > 1)

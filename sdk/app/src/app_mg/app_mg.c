@@ -6,6 +6,7 @@
 #include "usb/device/usb_stack.h"
 #include "usb/device/msd.h"
 #include "audio.h"
+#include "efuse.h"
 #if APP_MODE_MIDI_EN
 #include "app_mg/midi/app_midi.h"
 #endif
@@ -121,6 +122,12 @@ void app_usb_loop(void *parm)
 }
 #endif
 
+__attribute__((weak))
+u32 get_up_suc_flag(void)
+{
+    return 0;
+}
+
 /* __attribute__((weak)) */
 void app(void)
 {
@@ -130,6 +137,14 @@ void app(void)
         ladc_capless_init(30);
     }
 #endif
+    if (get_up_suc_flag()) {
+        log_info("----- device update end ---- \n");
+        wdt_close();
+#if KEY_VOICE_EN
+        d_key_voice_kick();
+#endif
+        while (1);
+    }
 
     ///init
     app_mg_init(APP_MUSIC, NULL);

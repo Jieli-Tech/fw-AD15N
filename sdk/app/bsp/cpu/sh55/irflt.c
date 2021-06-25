@@ -50,7 +50,7 @@ static const u8 IRTabFF00[] = {
 #define IRFLT_OUTPUT_TIMER_SEL(x)		SFR(JL_IOMC->IOMC1, 3, 1, x)
 #define CAP_TIMER_SEL(x)	        	SFR(JL_IOMC->IOMC1, 4, 2, x)
 
-#if 0
+#if 1
 
 #define IRTMR       JL_TMR2
 #define IRQ_IRTMR   IRQ_TIME2_IDX

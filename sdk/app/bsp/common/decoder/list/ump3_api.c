@@ -9,6 +9,7 @@
 #include "errno-base.h"
 #include "msg.h"
 #include "decoder_msg_tab.h"
+#include "app_config.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -17,7 +18,7 @@
 
 #define ump3_OBUF_SIZE DAC_DECODER_BUF_SIZE
 cbuffer_t cbuf_ump3 AT(.ump3_data);
-u8 obuf_ump3[ump3_OBUF_SIZE] AT(.ump3_data) ;
+u16 obuf_ump3[ump3_OBUF_SIZE / 2] AT(.ump3_data) ;
 dec_obj dec_ump3_hld;
 /* u32 ump3_decode_buff[1601] AT(.ump3_data) ; */
 u32 ump3_decode_buff[0x1a18 / 4] AT(.ump3_data) ;

@@ -83,6 +83,7 @@ void pll_config(u32 pll_ds);
 void usb_sof_trim();
 void lrc_trace_init(void);
 void lrc_trace_trim(void);
+u32 lrc_clk_get(void);
 
 
 #endif

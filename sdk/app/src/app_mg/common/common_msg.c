@@ -12,6 +12,7 @@
 #include "app_mg/app_mg.h"
 #include "audio.h"
 #include "sdmmc/sd_host_api.h"
+#include "app_dev_mg.h"
 
 
 #define LOG_TAG_CONST       NORM
@@ -31,6 +32,14 @@ void music_vol_update(void)
 int common_msg_deal(int *msg)
 {
     switch (*msg) {
+    case MSG_SDMMCA_IN:
+#if (TFG_DEV_UPGRADE_SUPPORT && !CPU_SH55)
+        device_upgrate_try();
+#endif
+        break;
+    case MSG_SDMMCA_OUT:
+        break;
+
     case MSG_500MS:
         wdt_clear();
         music_vol_update();

@@ -63,6 +63,7 @@ typedef enum _mm_type {
     MM_FAT_TMP,
     MM_SRC,
     MM_MIO,
+    MM_SWIN_BUF,
 } mm_type;
 
 

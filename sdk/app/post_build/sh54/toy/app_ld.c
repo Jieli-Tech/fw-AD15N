@@ -80,26 +80,42 @@ SECTIONS
     .effect_buf ALIGN(4):
     {
         PROVIDE(effect_buf_start = .);
-        . = ALIGN(4);
-        *(.sp_data)
+        /* . = ALIGN(4); */
+        /* *(.sp_data) */
         . = ALIGN(4);
         *(.rs_data)
         /* .d_sp {  *(.sp_data) } */
         /* .d_rs { *(.rs_data) } */
     } > ram0
     /* _ram0_end = .; */
-    .dec_buf ALIGN(32):
-    {
-        PROVIDE(a_buf_start = .);
-        *(.a_data);
-        PROVIDE(a_buf_end = .);
-    } > ram0
+    /* .dec_buf ALIGN(32): */
+    /* { */
+        /* PROVIDE(a_buf_start = .); */
+        /* *(.a_data); */
+        /* PROVIDE(a_buf_end = .); */
+    /* } > ram0 */
 
     /* . = ORIGIN(ram1); */
     OVERLAY : AT(0x200000)
     {
+        d_speed
+        {
+            PROVIDE(speed_buf_start = .);
+            . = ALIGN(4);
+            *(.sp_data)
+            PROVIDE(speed_buf_end = .);
+        }
+        .d_a
+        {
+            . = speed_buf_end;
+            PROVIDE(a_buf_start = .);
+            *(.a_data);
+            PROVIDE(a_buf_end = .);
+        }
+
         .d_midi
         {
+            . = a_buf_end;
             PROVIDE(midi_buf_start = .);
             *(.midi_buf);
             PROVIDE(midi_buf_end = .);
@@ -109,24 +125,28 @@ SECTIONS
         }
         .d_ump3
         {
+            . = a_buf_end;
             PROVIDE(ump3_buf_start = .);
             *(.ump3_data);
             PROVIDE(ump3_buf_end = .);
         }
         .d_mp3_st
         {
+            . = a_buf_end;
             PROVIDE(mp3_st_buf_start = .);
             *(.mp3_st_data);
             PROVIDE(mp3_st_buf_end = .);
         }
         .d_wav
         {
+            . = a_buf_end;
             PROVIDE(wav_buf_start = .);
             *(.wav_data);
             PROVIDE(wav_buf_end = .);
         }
         .d_f1a
         {
+            . = a_buf_end;
             PROVIDE(f1a_1_buf_start = .);
             *(.f1a_1_buf);
             PROVIDE(f1a_1_buf_end = .);
@@ -153,6 +173,20 @@ SECTIONS
         {
             /* . = aux_data_end; */
             *(.aux_data)
+            aux_data_end = .;
+        }
+        .d_vp_data
+        {
+            /* . = aux_data_end; */
+            *(.speaker_data)
+            *(.vp_data);
+			*(.howling_data)
+		   . = ALIGN(4);
+			*(.notch_howling_data)
+		   . = ALIGN(4);
+			*(.echo_data)
+		   . = ALIGN(4);
+		   *(.notch_howling_lib)
         }
 
         .pc_buffer
@@ -173,6 +207,12 @@ SECTIONS
         }
         /* .d_ima {  *(.a_data) } */
     } > ram0
+
+    d_dec_0 = MAX(midi_ctrl_buf_end,ump3_buf_end);
+    d_dec_1 = MAX(d_dec_0 ,mp3_st_buf_end);
+    d_dec_2 = MAX(d_dec_1 ,wav_buf_end);
+    d_dec_max = MAX(d_dec_2 ,f1a_2_buf_end);
+
 
     .heap_buf ALIGN(4):
     {

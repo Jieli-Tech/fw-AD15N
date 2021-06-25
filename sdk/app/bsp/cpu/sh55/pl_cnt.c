@@ -22,8 +22,8 @@ void pl_cnt_iomc(u8 port)
     }
     PL_CNT_IO_xx = port % 16;
     //放电计数引脚选择intputchannel0
-    JL_IOMC->IOMC2 &= ~(0b111111 << 12);
-    JL_IOMC->IOMC2 |= ((input_start + PL_CNT_IO_xx) << 12);
+    JL_IOMC->IOMC2 &= ~(0b111111 << 0);
+    JL_IOMC->IOMC2 |= ((input_start + PL_CNT_IO_xx) << 0);
 }
 
 /*
