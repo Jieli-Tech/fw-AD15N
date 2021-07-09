@@ -124,6 +124,7 @@ void decoder_channel_set(u8 dc);
 
 void decoder_pause(dec_obj *obj);
 void decoder_stop(dec_obj *obj, DEC_STOP_WAIT wait);
+void decoder_stop_now(dec_obj *obj);
 int decoder_fun(void *pfile, u32 dec_ctl, s32 *dec_index);
 // dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff * dbuff);
 dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop);

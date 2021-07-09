@@ -24,10 +24,17 @@
 volatile u32 jiffies = 0;
 volatile u8 isr_tick_timer_close = 0;
 
+
+/*
+ * 警告！！！！！！！！！！！！
+ * 以下两个函数一定要内联
+ * */
+__attribute__((always_inline))
 void tick_timer_set(bool on_off)
 {
     isr_tick_timer_close = on_off;
 }
+__attribute__((always_inline))
 bool tick_timer_close(void)
 {
     return isr_tick_timer_close;

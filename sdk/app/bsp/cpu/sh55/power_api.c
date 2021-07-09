@@ -35,6 +35,7 @@ const struct low_power_param power_param = {
     .vddiow_lev     = TCFG_LOWPOWER_VDDIOW_LEVEL,          //弱VDDIO等级,可选：2.1V  2.4V  2.8V  3.2V
     .osc_type       = OSC_TYPE_LRC,
     .flash_pg       = TCFG_KEEP_FLASH_POWER_GATE,
+    .vdc13_cap_en   = 1,									//根据vdc13引脚是否有外部电容来配置, 1.外挂电容 0.无外挂电容
 };
 
 /************************** PWR config ****************************/
@@ -80,6 +81,16 @@ void tick_timer_sleep_init(void)
 {
 }
 
+static void mask_io_cfg()
+{
+    struct boot_soft_flag_t boot_soft_flag = {0};
+
+    boot_soft_flag.flag0.boot_ctrl.wdt_dis = 0;
+    boot_soft_flag.flag0.boot_ctrl.lvd_en = GET_P33_VLVD_EN();
+
+    mask_softflag_config(&boot_soft_flag);
+}
+
 /*进软关机之前默认将IO口都设置成高阻状态，需要保留原来状态的请修改该函数*/
 extern void dac_power_off(void);
 extern void dac_sniff_power_off(void);
@@ -88,6 +99,8 @@ void board_set_soft_poweroff(void)
 {
     u32 porta_value = 0xffff & ~(BIT(0));
     u32 portb_value = 0xffff & ~(BIT(10));
+
+    mask_io_cfg();
 
     /*gpio_write(MIC_HW_IO, 0);*/
 

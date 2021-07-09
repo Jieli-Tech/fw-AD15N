@@ -375,7 +375,7 @@ static void P33_CON_DEBUG(void)
 
 #define WLDO06_EN(en)           P33_TX_NBIT(P3_ANA_CON1, BIT(3), en)
 
-#define VDC13_LOAD_EN(en)       P33_TX_NBIT(P3_ANA_CON1, BIT(4), en)
+#define VDC13_ILIMIT_BYPASS_EN(en) P33_TX_NBIT(P3_ANA_CON1, BIT(5), en)
 
 #define SYSVDD_RES_SHORT_EN(en) P33_TX_NBIT(P3_ANA_CON1, BIT(6), en)
 
@@ -388,6 +388,8 @@ static void P33_CON_DEBUG(void)
 #define VCM_DET_EN(en)          P33_TX_NBIT(P3_ANA_CON2, BIT(3), en)
 
 #define D2SH_EN_SW(en)          P33_TX_NBIT(P3_ANA_CON2, BIT(4), en)
+
+#define FAST_UP_EN(en)          P33_TX_NBIT(P3_ANA_CON2, BIT(5), en)
 
 #define VDDOK_DIS(dis)          P33_TX_NBIT(P3_ANA_CON2, BIT(6), dis)
 
@@ -453,10 +455,15 @@ enum {
     VDC13_VOL_SEL_140V,
 };
 
-#define GET_VD13_VOL_SEL()      (P33_CON_GET(P3_ANA_CON6) & 0x7)
-#define GET_VD13_HD_SEL()       (P33_CON_GET(P3_ANA_CON6) & 0x7)
+#define VDC13_LOAD_EN(en)       P33_CON_SET(P3_ANA_CON6, 7, 1, en)
 
-#define VD13_HD_SEL(sel)        P33_CON_SET(P3_ANA_CON6, 0, 2, sel)
+#define VDC13_OSHOT_EN(en)      P33_CON_SET(P3_ANA_CON6, 6, 1, en)
+
+#define VD13_CAP_EN(en)         P33_CON_SET(P3_ANA_CON6, 5, 1, en)
+
+#define GET_VD13_VOL_SEL()      (P33_CON_GET(P3_ANA_CON6) & 0x7)
+
+#define VD13_HD_SEL(sel)        P33_CON_SET(P3_ANA_CON6, 3, 2, sel)
 
 /*******************************************************************/
 
@@ -522,6 +529,8 @@ enum {
  *-------------------P3_VLVD_CON
  */
 #define P33_VLVD_EN(en)         P33_TX_NBIT(P3_VLVD_CON, BIT(0), en)
+
+#define GET_P33_VLVD_EN()		(P33_CON_GET(P3_VLVD_CON) & BIT(0))
 
 #define P33_VLVD_PS(en)         P33_TX_NBIT(P3_VLVD_CON, BIT(1), en)
 

@@ -104,7 +104,7 @@ void decoder_mutex(u32 index)
         /* log_info("start 0x%x; end  0x%x", cw.start, cw.end); */
         /*  */
         /* log_info("decoder mutex : %d %d\n", index, i); */
-        decoder_stop((void *)dec_hld_tab[i], NO_WAIT);
+        decoder_stop_now((void *)dec_hld_tab[i]);
     }
 }
 dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
@@ -252,7 +252,7 @@ void decoder_pause(dec_obj *obj)
     }
 }
 
-void decoder_stop(dec_obj *obj, DEC_STOP_WAIT wait)
+void decoder_stop_phy(dec_obj *obj, DEC_STOP_WAIT wait, bool fade)
 {
     if (NULL == obj) {
         return;
@@ -281,6 +281,15 @@ void decoder_stop(dec_obj *obj, DEC_STOP_WAIT wait)
     if (NULL != obj->src_effect) {
         src_reless(&obj->src_effect);
     }
+}
+void decoder_stop(dec_obj *obj, DEC_STOP_WAIT wait)
+{
+    decoder_stop_phy(obj, wait, 1);
+}
+
+void decoder_stop_now(dec_obj *obj)
+{
+    decoder_stop_phy(obj, NO_WAIT, 1);
 }
 
 void decoder_ff(dec_obj *obj, u8 step)

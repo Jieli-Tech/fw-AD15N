@@ -127,6 +127,24 @@ struct low_power_param {
 
     u8 flash_pg;
 
+    u8 vdc13_cap_en;
+};
+
+struct soft_flag0_t {
+    u8 wdt_dis: 1;
+    u8 lvd_en: 1;
+    u8 usbdp: 2;
+    u8 usbdm: 2;
+    u8 fast_boot: 1;
+    u8 res: 1;
+};
+
+struct boot_soft_flag_t {
+    union {
+        struct soft_flag0_t boot_ctrl;
+        u8 value;
+    } flag0;
+    u32 poweron;
 };
 
 #define BLUETOOTH_RESUME    BIT(1)
@@ -308,6 +326,9 @@ void reset_vddiom_lev(u8 lev);
 
 /*-----------------------------------------------------------*/
 void lrc_scan();
+
+/*-----------------------------------------------------------*/
+void mask_softflag_config(const struct boot_soft_flag_t *softflag);
 
 typedef u8(*idle_handler_t)(void);
 
