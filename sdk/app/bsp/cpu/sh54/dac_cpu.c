@@ -13,6 +13,11 @@
 void dac_cpu_mode(void)
 {
     if (DAC_MODE_5_A == (JL_ADDA->DAC_CON0 & (7 << 5))) {
+        JL_PORTB->DIR |= BIT(0);
+        JL_PORTB->DIE &= ~BIT(0);
+        JL_PORTB->DIEH &= ~BIT(0);
+        JL_PORTB->PU &= ~BIT(0);
+        JL_PORTB->PD &= ~BIT(0);
         rdac_analog_open();
     } else {
         apa_analog_open();

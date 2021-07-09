@@ -100,11 +100,6 @@ void dac_mode_init(u16 vol)
 #endif
 
     memset(&double_dac_buf[0], 0, sizeof(double_dac_buf));
-    JL_PORTB->DIR |= BIT(0);
-    JL_PORTB->DIE &= ~BIT(0);
-    JL_PORTB->DIEH &= ~BIT(0);
-    JL_PORTB->PU &= ~BIT(0);
-    JL_PORTB->PD &= ~BIT(0);
 
     dac_resource_init((u8 *)&double_dac_buf[0], sizeof(double_dac_buf),  DAC_DEFAULT, 0);
 }

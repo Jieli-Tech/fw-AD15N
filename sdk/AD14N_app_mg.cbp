@@ -42,8 +42,8 @@
 <Add option="-DHAS_USB_EN=1" />
 <Add option="-DHAS_MIO_EN=1" />
 <Add option="-DHAS_UPDATE_EN=1" />
-<Add option="-DECHO_EN=0" />
-<Add option="-DHOWLING_EN=0" />
+<Add option="-DECHO_EN=1" />
+<Add option="-DHOWLING_EN=1" />
 <Add option="-DNOFLOAT" />
 <Add directory="app/src/app_mg/simple" />
 <Add directory="app/src/app_mg/common/music_api" />
@@ -103,6 +103,12 @@
 <Add option="include_lib/liba/sh54/ae_resample_lib.a" />
 <Add option="include_lib/liba/sh54/dev_mg_lib.a" />
 <Add option="include_lib/liba/sh54/malloc_lib.a" />
+<Add option="include_lib/liba/lib_echo_cal.a" />
+<Add option="include_lib/liba/sh54/ae_echo_lib.a" />
+<Add option="include_lib/liba/lib_howling_fs.a" />
+<Add option="include_lib/liba/notchHowling.a" />
+<Add option="include_lib/liba/sh54/ae_howling_lib.a" />
+<Add option="include_lib/liba/sh54/ae_notch_howling_lib.a" />
 <Add option="include_lib/liba/lib_speed_pitch.a" />
 <Add option="include_lib/liba/sh54/ae_speed_lib.a" />
 <Add option="include_lib/liba/sh54/update_lib.a" />
@@ -169,6 +175,8 @@
 <Unit filename="app/bsp/common/reserved_area/reserved_area.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/reserved_area/reserved_area.h" />
 <Unit filename="app/bsp/common/sdk_cfg.h" />
+<Unit filename="app/bsp/common/sound_effect_list/echo_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/sound_effect_list/notch_howling_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sound_effect_list/speed_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/speaker/speak_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/usb/device/descriptor.c"><Option compilerVer="CC"/></Unit>
@@ -261,6 +269,8 @@
 <Unit filename="include_lib/audio/dac.h" />
 <Unit filename="include_lib/audio/dac_api.h" />
 <Unit filename="include_lib/audio/echo_api.h" />
+<Unit filename="include_lib/audio/howling_api.h" />
+<Unit filename="include_lib/audio/howling_pitchshifter_api.h" />
 <Unit filename="include_lib/audio/notch_howling_api.h" />
 <Unit filename="include_lib/audio/reverb_api.h" />
 <Unit filename="include_lib/audio/src.h" />

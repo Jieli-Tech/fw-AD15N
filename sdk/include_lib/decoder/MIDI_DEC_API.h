@@ -18,7 +18,7 @@ extern audio_decoder_ops *get_midi_ops();
 #define  CTRL_CHANNEL_NUM             16
 
 typedef struct _EX_CH_VOL_PARM_ {
-    unsigned short  cc_vol[CTRL_CHANNEL_NUM];                 //16个通道的音量      <=>8192等于原音量
+    unsigned short  cc_vol[CTRL_CHANNEL_NUM];                 //16个通道的音量      <=>4096等于原音量
 } EX_CH_VOL_PARM;
 
 
@@ -133,7 +133,8 @@ enum {
     SET_PROG_ENABLE = 0x0040,             //主轨道设置成固定乐器使能
     MELODY_PLAY_ENABLE = 0x0080,           //主轨道播放使能
     BEAT_TRIG_ENABLE = 0x0100,              //每拍回调的使能
-    MELODY_STOP_ENABLE = 0x200				//主旋律音符停止回调使能
+    MELODY_STOP_ENABLE = 0x200,				//主旋律音符停止回调使能
+    MARK_LOOP_ENABLE = 0x400				//使用mark做循环播放使能
 
 };
 
@@ -208,6 +209,10 @@ void init_midi_info_val(MIDI_INIT_STRUCT  *midi_init_info_v)  //midi 配置
 
     //midi的melody stop控制初始化
     midi_init_info_v->moledy_stop_info.priv = &file_melody_stop;
+    midi_init_info_v->moledy_stop_info.melody_stop_trigger = melody_stop_trigger;
+
+    //midi的melody stop控制初始化
+    midi_init_info_v->moledy_stop_info.priv = NULL;
     midi_init_info_v->moledy_stop_info.melody_stop_trigger = melody_stop_trigger;
 
     //midi的小节回调控制初始化

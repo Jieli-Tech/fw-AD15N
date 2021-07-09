@@ -3,7 +3,7 @@
 #include "asm/power/p33.h"
 #include "gpio.h"
 #include "tick_timer_driver.h"
-#include "audio.h"
+/* #include "audio.h" */
 
 #define ENABLE								1
 #define DISABLE								0
@@ -17,7 +17,7 @@
 //*********************************************************************************//
 #define TCFG_LOWPOWER_POWER_SEL				PWR_LDO15                    //电源模式设置，可选DCDC和LDO
 #define TCFG_LOWPOWER_BTOSC_DISABLE			0                            //低功耗模式下BTOSC是否保持
-#define TCFG_LOWPOWER_LOWPOWER_SEL			0//SLEEP_EN                  //SNIFF状态下芯片是否进入powerdown
+#define TCFG_LOWPOWER_LOWPOWER_SEL			SLEEP_EN                  //SNIFF状态下芯片是否进入powerdown
 /*mvddiom: 2.0~3.4*/
 #define TCFG_LOWPOWER_VDDIOM_LEVEL			VDDIOM_VOL_32V
 /*wvddiom: 2.0~3.4*/
@@ -70,10 +70,6 @@ const struct reset_param rs_param = {
     .hold_time = LONG_4S_RESET,
 };
 
-void dac_power_off()
-{
-    audio_off();
-}
 
 /*进软关机之前默认将IO口都设置成高阻状态，需要保留原来状态的请修改该函数*/
 extern void dac_power_off(void);
@@ -117,6 +113,16 @@ void board_set_soft_poweroff(void)
     dac_power_off();
 }
 
+__attribute__((weak))
+void dac_power_off()
+{
+
+}
+
+__attribute__((weak))
+void tick_timer_sleep_init(void)
+{
+}
 
 #define     APP_IO_DEBUG_0(i,x)       //{JL_PORT##i->DIR &= ~BIT(x), JL_PORT##i->OUT &= ~BIT(x);}
 #define     APP_IO_DEBUG_1(i,x)       //{JL_PORT##i->DIR &= ~BIT(x), JL_PORT##i->OUT |= BIT(x);}
@@ -136,6 +142,23 @@ void sleep_enter_callback(u8  step)
         /*dac_sniff_power_off();*/
         dac_power_off();
     } else {
+        u32 porta_value = 0xffff & ~(BIT(0));
+        u32 portb_value = 0xffff;
+
+        /*gpio_write(MIC_HW_IO, 0);*/
+
+        JL_PORTA->DIR |= porta_value;
+        JL_PORTA->PU &= ~(porta_value);
+        JL_PORTA->PD &= ~(porta_value);
+        JL_PORTA->DIE &= ~(porta_value);
+        JL_PORTA->DIEH &= ~(porta_value);
+
+        //PB1:长按复位
+        JL_PORTB->DIR |= portb_value;
+        JL_PORTB->PU &= ~(portb_value);
+        JL_PORTB->PD &= ~(portb_value);
+        JL_PORTB->DIE &= ~(portb_value);
+        JL_PORTB->DIEH &= ~(portb_value);
 
         usb_iomode(1);
 
@@ -173,6 +196,23 @@ int power_wakeup_reason(void)
         }
     }
     return wkup_port;
+}
+
+extern u8 sys_low_power_request;
+extern u32 lowpower_usec;
+
+void sys_power_down(u32 usec)
+{
+    if (!sys_low_power_request) {
+        lowpower_usec = usec;
+        low_power_sys_request(NULL);
+        wdt_clear();
+    }
+}
+
+void sys_softoff()
+{
+    power_set_soft_poweroff();
 }
 
 void sys_power_init()

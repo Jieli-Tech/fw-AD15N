@@ -100,10 +100,10 @@ void decoder_mutex(u32 index)
         if ((cl.start >= cw.end) || (cw.start >= cl.end)) {
             continue;
         }
-        log_info("start 0x%x; end  0x%x", cl.start, cl.end);
-        log_info("start 0x%x; end  0x%x", cw.start, cw.end);
-
-        log_info("decoder mutex : %d %d\n", index, i);
+        /* log_info("start 0x%x; end  0x%x", cl.start, cl.end); */
+        /* log_info("start 0x%x; end  0x%x", cw.start, cw.end); */
+        /*  */
+        /* log_info("decoder mutex : %d %d\n", index, i); */
         decoder_stop((void *)dec_hld_tab[i], NO_WAIT);
     }
 }
@@ -273,7 +273,7 @@ void decoder_stop(dec_obj *obj, DEC_STOP_WAIT wait)
         }
         /* log_info("decode stop wait ok!\n"); */
     } else {
-        log_info("decode stop no wait!\n");
+        /* log_info("decode stop no wait!\n"); */
     }
 
     d_mio_close(&obj->sound.mio);

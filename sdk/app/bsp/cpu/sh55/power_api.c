@@ -3,7 +3,7 @@
 #include "asm/power/p33.h"
 #include "gpio.h"
 #include "tick_timer_driver.h"
-#include "audio.h"
+/* #include "audio.h" */
 
 #define ENABLE								1
 #define DISABLE								0
@@ -69,9 +69,15 @@ const struct reset_param rs_param = {
     .hold_time = LONG_4S_RESET,
 };
 
+__attribute__((weak))
 void dac_power_off()
 {
-    audio_off();
+
+}
+
+__attribute__((weak))
+void tick_timer_sleep_init(void)
+{
 }
 
 /*进软关机之前默认将IO口都设置成高阻状态，需要保留原来状态的请修改该函数*/
@@ -175,6 +181,23 @@ int power_wakeup_reason(void)
         }
     }
     return wkup_port;
+}
+
+extern u8 sys_low_power_request;
+extern u32 lowpower_usec;
+
+void sys_power_down(u32 usec)
+{
+    if (sys_low_power_request) {
+        lowpower_usec = usec;
+        low_power_sys_request(NULL);
+        wdt_clear();
+    }
+}
+
+void sys_softoff()
+{
+    power_set_soft_poweroff();
 }
 
 void sys_power_init()

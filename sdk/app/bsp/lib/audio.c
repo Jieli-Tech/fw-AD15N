@@ -51,6 +51,11 @@ void audio_lookup(void)
     audio_analog_lookup(audio_analog, 1);
 }
 
+void dac_power_off()
+{
+    audio_off();
+}
+
 
 
 

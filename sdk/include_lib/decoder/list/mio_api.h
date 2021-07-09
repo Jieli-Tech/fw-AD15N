@@ -52,33 +52,41 @@ typedef struct _sound_mio_obj {
 
 void mio_a_hook_init(sound_mio_obj *obj);
 
-void mio_module_init(void);
-void mio_start(void *mio_obj);
-void mio_kick(void *mio_obj, u32 dac_packt);
-void mio_run(void);
-bool mio_open(void **pp_obj, void *pfile, void *);
-void mio_close(void **pp_obj);
+__attribute__((weak)) void mio_module_init(void);
+__attribute__((weak)) void mio_start(void *mio_obj);
+__attribute__((weak)) void mio_kick(void *mio_obj, u32 dac_packt);
+__attribute__((weak)) void mio_run(void);
+__attribute__((weak)) bool mio_open(void **pp_obj, void *pfile, void *);
+__attribute__((weak)) void mio_close(void **pp_obj);
 
-#if HAS_MIO_EN
 
-#define d_mio_module_init   mio_module_init
-#define d_mio_a_hook_init   mio_a_hook_init
-#define d_mio_start         mio_start
-#define d_mio_kick          mio_kick
-#define d_mio_run           mio_run
-#define d_mio_open          mio_open
-#define d_mio_close         mio_close
+#define d_mio_module_init() if(mio_module_init) { mio_module_init();}
+#define d_mio_start(n)      if(mio_start) { mio_start(n);}
+#define d_mio_kick(n,m)     if(mio_kick)  { mio_kick(n,m);}
+#define d_mio_run()         if(mio_run)   { mio_run();}
+#define d_mio_open(n,m,k)   if(mio_open)  { mio_open(n,m,k);}
+#define d_mio_close(n)      if(mio_close) { mio_close(n);}
 
-#else
-#define d_mio_module_init(...)
-#define d_mio_a_hook_init(...)
-#define d_mio_start(...)
-#define d_mio_kick(...)
-#define d_mio_run(...)
-#define d_mio_open(...)
-#define d_mio_close(...)
+// #if HAS_MIO_EN
 
-#endif
+// #define d_mio_module_init   mio_module_init
+// #define d_mio_a_hook_init   mio_a_hook_init
+// #define d_mio_start         mio_start
+// #define d_mio_kick          mio_kick
+// #define d_mio_run           mio_run
+// #define d_mio_open          mio_open
+// #define d_mio_close         mio_close
+
+// #else
+// #define d_mio_module_init(...)
+// #define d_mio_a_hook_init(...)
+// #define d_mio_start(...)
+// #define d_mio_kick(...)
+// #define d_mio_run(...)
+// #define d_mio_open(...)
+// #define d_mio_close(...)
+
+// #endif
 
 
 

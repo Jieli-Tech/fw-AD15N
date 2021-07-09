@@ -1,6 +1,7 @@
 #ifndef __IRQ_API_H__
 #define __IRQ_API_H__
 #include "hwi.h"
+#include "typedef.h"
 
 
 
@@ -23,7 +24,8 @@ void HWI_Uninstall(unsigned char index);
 #define     OS_ENTER_CRITICAL   CPU_INT_DIS
 #define     OS_EXIT_CRITICAL    CPU_INT_EN
 
-extern volatile u8 isr_tick_timer_close;
+extern __attribute__((weak)) void tick_timer_set(bool);
+extern __attribute__((weak)) bool tick_timer_close(void);
 void _OS_EXIT_CRITICAL(void);
 void _OS_ENTER_CRITICAL(u8 no_close_isr_index);
 void irq_index_tab_reg(void *tab, u32 max_cnt);

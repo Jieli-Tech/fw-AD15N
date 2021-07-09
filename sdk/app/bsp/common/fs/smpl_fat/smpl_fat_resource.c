@@ -19,6 +19,10 @@ extern FIL pfi;
 /****************api*****************/
 u32 smpl_fat_monut_api(void **ppfs, void *p_device)
 {
+    if ((u8 *)p_device  == NULL) {
+        return -1;
+    }
+
     return fat_init((u8 *)p_device);
 }
 
