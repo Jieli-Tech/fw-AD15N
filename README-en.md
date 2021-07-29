@@ -74,7 +74,7 @@ Hardware
 Packing tool & audio file conversion tool
 -------------
 
-* [download link](https://pan.baidu.com/s/1ajzBF4BFeiRFpDF558ER9w) code: `3jey`
+* [download link](https://pan.baidu.com/s/1ajzBF4BFeiRFpDF558ER9w#list/path=%2F) code: `3jey`
   
 SDK function
 -------------
