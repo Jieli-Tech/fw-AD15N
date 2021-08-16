@@ -7,15 +7,15 @@
 
 #define SPI1_GROUPA_IO /*CLK*/ IO_PORT_DP,\
                        /*DO*/  IO_PORT_DM,\
-                       /*DO*/  IO_PORTA_03,
+                       /*DI*/  IO_PORTA_03,
 
 #define SPI1_GROUPB_IO /*CLK*/ IO_PORTA_11,\
                        /*DO*/  IO_PORTA_12,\
-                       /*DO*/  IO_PORTA_10,
+                       /*DI*/  IO_PORTA_10,
 
 #define SPI1_GROUPC_IO /*CLK*/ IO_PORTA_04,\
                        /*DO*/  IO_PORTA_05,\
-                       /*DO*/  IO_PORTA_06,
+                       /*DI*/  IO_PORTA_06,
 
 
 /*enum spi_mode {
@@ -26,12 +26,13 @@
 };*/
 enum spi_mode {
     SPI_MODE_BIDIR_1BIT,    //支持SPIx(x=1)，全双工，di接收，do发送
-    SPI_MODE_UNIDIR_1BIT,   //支持SPIx(x=1,1)，半双工，do分时发送/接收
+    SPI_MODE_UNIDIR_1BIT,   //支持SPIx(x=1)，半双工，do分时发送/接收
     SPI_MODE_UNIDIR_2BIT,   //支持SPIx(x=1)，半双工，di & do共2bit分时发送/接收
+    SPI_MODE_UNIDIR_4BIT,   //支持SPIx(x=0)，半双工，di & do & wp & hoid共4bit分时发送/接收
 };
 
 enum {
-    SPI0,
+    SPI0,//系统占用
     SPI1,
     SPI_MAX_HW_NUM,
 };

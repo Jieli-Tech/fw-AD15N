@@ -26,8 +26,11 @@ void HWI_Uninstall(unsigned char index);
 
 extern __attribute__((weak)) void tick_timer_set(bool on_off);
 extern __attribute__((weak)) bool tick_timer_close(void);
-void _OS_EXIT_CRITICAL(void);
-void _OS_ENTER_CRITICAL(u8 no_close_isr_index);
+
+#define tick_timer_set_api(n)        if(tick_timer_set)   { tick_timer_set(n);  }
+#define tick_timer_close_api()       if(tick_timer_close) { tick_timer_close(); }
+
+
 void irq_index_tab_reg(void *tab, u32 max_cnt);
 u8 irq_index_to_prio(u8 idx);
 

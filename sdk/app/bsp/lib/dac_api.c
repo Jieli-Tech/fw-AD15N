@@ -100,8 +100,8 @@ void dac_mode_init(u16 vol)
 #endif
 
     memset(&double_dac_buf[0], 0, sizeof(double_dac_buf));
-
-    dac_resource_init((u8 *)&double_dac_buf[0], sizeof(double_dac_buf),  DAC_DEFAULT, 0);
+    u32 con = dac_mode_check(DAC_DEFAULT);
+    dac_resource_init((u8 *)&double_dac_buf[0], sizeof(double_dac_buf), con, 0);
 }
 
 void dac_init_api(u32 sr)

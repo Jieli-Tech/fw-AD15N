@@ -21,6 +21,8 @@
 void wdt_init(u8 time);
 void wdt_close(void);
 void wdt_clear(void);
+u8 wdt_rx_con(void);
+void wdt_tx_con(u8 data);
 
 void wdt_enable(void);
 void wdt_disable(void);

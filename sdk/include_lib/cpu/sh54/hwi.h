@@ -63,6 +63,7 @@ void interrupt_init();
 void irq_save(void);
 void irq_resume(void);
 void irq_enable(u8 index);
+void irq_list_enable(u32 b_index);
 void HWI_Install(unsigned char index, unsigned int isr, unsigned char priority);
 
 #define     request_irq(idx,ip,hdl,arg) HWI_Install(idx,(int)hdl,ip)

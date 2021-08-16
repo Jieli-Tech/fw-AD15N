@@ -56,6 +56,13 @@ void dac_power_off()
     audio_off();
 }
 
+void dac_power_on()
+{
+    audio_init();
+    dac_init_api(32000);
+}
+
+
 
 
 

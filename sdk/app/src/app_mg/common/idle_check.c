@@ -28,14 +28,14 @@ void idle_check_deal(u8 is_busy)
     }
 
     idle_cnt ++;
-#if 1
+#if 0
     if (IDLE_SLEEP_TIME == idle_cnt) {
         log_info("idle \n");
         post_msg(1, MSG_ENTER_IDLE);
     }
 #else
 
-    sys_power_down(100000);
+    sys_power_down(-2);
 
 #endif
 

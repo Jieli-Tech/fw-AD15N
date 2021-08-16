@@ -10,19 +10,30 @@
 
 
 #define LOG_TAG_CONST       NORM
-#define LOG_TAG             "[normal]"
+#define LOG_TAG             "[vo_pitch]"
 #include "debug.h"
 
 #if VO_PITCH_EN
 
 const int  VC_ENABLE_FLAG = 1;
-const  int  EXTRA_DATA_SIZE = 500;  //影响rap的音频最大允许长度
+const  int  EXTRA_DATA_SIZE = 1800;  //影响rap的音频最大允许长度
 const  int  VP_DECAY_VAL = 70;      //ECHO模式的decay速度
 const  int  VP_HIS_LEN = 2000;       //ECHO模式的delay:复用其他模式的Buf的
 
 VOICE_PITCH_PARA_STRUCT vp_parm AT(.vp_data);
+
+
 void rap_callback(void *priv, int pos);
 bool vp_cmd_case(VP_CMD cmd, VOICE_PITCH_PARA_STRUCT *p_vc_parm);
+
+
+EFFECT_OBJ vp_obj AT(.vp_data);
+/* u32  VP_BUFLEN[(5 * 1024 + 512) / 4] AT(.vp_data);         //处理32k音频变速变调需要的空间 */
+
+static sound_in_obj vp_si AT(.vp_data);
+
+
+
 
 void *voice_pitch_api(void *obuf, u32 cmd, void **ppsound)
 {
@@ -188,5 +199,53 @@ bool vp_cmd_case(VP_CMD cmd, VOICE_PITCH_PARA_STRUCT *p_vc_parm)
 
 
 #endif
+
+
+
+/********************************VP_PHY************************/
+u32  VP_BUFLEN[(8 * 1024) / 4] AT(.vp_data);       //处理32k音频变速变调需要的空间
+
+const struct _VP_IO_CONTEXT_ vp_pitch_io = {
+    &vp_obj.sound,      //input跟output函数的第一个参数，解码器不做处理，直接回传，可以为NULL
+    sound_output,
+};
+
+static int vp_run(void *hld, short *inbuf, int len)
+{
+    VOICEPITCH_STUCT_API *ops;
+    int res = 0;
+    sound_in_obj *p_si = hld;
+    ops = p_si->ops;
+    res = ops->run(p_si->p_dbuf, inbuf, len);
+    return res;
+}
+void *vp_phy(void *obuf, VOICE_PITCH_PARA_STRUCT *pvp_parm, void **ppsound)
+{
+    u32 buff_len, i;
+    VOICEPITCH_STUCT_API *ops;
+    log_info("voice pitch api\n");
+
+    ops = get_vopitch_context();           //获取变采样函数接口
+    buff_len = ops->need_buf();                          //运算空间获取
+    if (buff_len > sizeof(VP_BUFLEN)) {
+        log_info("vo pitch buff need : 0x%x\n", buff_len);
+        return 0;
+    }
+    /******************************************/
+    //初始化：rs_buf：运算Buf; rs_parm：参数指针，传完可以释放的，里面不会记录这个指针的。vp_pitch_io:output接口，说明如下
+    ops->open(&VP_BUFLEN[0], pvp_parm, (void *)&vp_pitch_io);
+    /*************************************************/
+    memset(&vp_obj, 0, sizeof(vp_obj));
+    vp_si.ops = ops;
+    vp_si.p_dbuf = &VP_BUFLEN[0];
+    /*************************************************/
+    vp_obj.p_si = &vp_si;
+    vp_obj.run = vp_run;
+    vp_obj.sound.p_obuf = obuf;
+    *ppsound = &vp_obj.sound;
+    log_info("vp_succ\n");
+    return &vp_obj;
+}
+
 
 

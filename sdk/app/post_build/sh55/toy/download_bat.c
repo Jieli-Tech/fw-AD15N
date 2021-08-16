@@ -46,7 +46,8 @@ isd_download.exe -tonorflash -dev sh55 -boot 0x0 -div8 -wait 300 -uboot uboot.bo
 @rem //                        例:NULL/PA00：power_io:无/pa0;  spi1: 双向模式  (注：power_io不能选USBDP/USBDM)
 @rem //                           NUL0/B010：power_io:无/pb1;  spi1: 单线模式
 @rem //                           NUL1/A081：power_io:无/pa8;  spi1: 双向模式
-@rem //注意：spi端口只能选B/C（B:PA11,PA12,PA10[CLK,DO,DI]; C:PA4,PA5,PA6[CLK,DO,DI]）
+@rem //注意：spi端口:A:PB00,PB01,PB02[CLK,DO,DI]; B:PA14,PA15,PA13[CLK,DO,DI]
+@rem //              C:PA06,PA07,PA08[CLK,DO,DI]; D:PB08,PB09,PB07[CLK,DO,DI]
 
 
 

@@ -20,9 +20,9 @@ extern int clk_get(const char *name);
 
 // void clk_out(enum CLK_OUT_SOURCE clk);
 
-#define PLL_192M    0b0100
+#define PLL_192M    0b1100
 #define PLL_137M    0b1000
-#define PLL_107M    0b1100
+#define PLL_107M    0b0100
 #define PLL_96M     0b0001
 #define PLL_320M    0b0010
 #define PLL_480M    0b0011
@@ -77,10 +77,11 @@ typedef enum {
 
 void pll_sel(u32 pll_clock, _PLL_DIV pll_div, _PLL_B_DIV pll_b_div);
 u32 sys_clock_get(void);
+u32 sys_clock_peration(void);
 void uart_clk_sel();
 void clk_output_sel(u8 clk);
 void pll_config(u32 pll_ds);
-void usb_sof_trim();
+void usb_sof_trim(void (*trim_enter)(void), void (*trim_exit)(void));
 void lrc_trace_init(void);
 void lrc_trace_trim(void);
 u32 lrc_clk_get(void);

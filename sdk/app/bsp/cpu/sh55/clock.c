@@ -47,7 +47,7 @@ enum {
 #define OSC_CLOCK_IN(x)        SFR(JL_CLK->CON0,  19,  2,  x)
 #define OSC_SRC_CLK    OSC_CLK_IN_PLL12M//OSC_CLK_IN_LRC
 
-u32 sys_clock_get(void)
+u32 sys_clock_peration(void)
 {
     u32 t_sel;
     u32 clock = 0;
@@ -74,25 +74,56 @@ u32 sys_clock_get(void)
     return clock;
 }
 void sfc_resume(u32 disable_spi);
-void sfc_suspend(u32 enable_spi);
+
+AT(.ram_code)
+void sfc_suspend(u32 enable_spi)
+{
+    //wait cache idle
+    while (!(JL_CACHE->CON & BIT(5)));
+    //wait sfc idle
+    while (JL_SFC->CON & BIT(31));
+
+    //disable sfc
+    JL_PORTD->PU |= BIT(2);
+    JL_PORTD->DIR |= BIT(2);
+
+    JL_SFC->CON &= ~BIT(0);
+
+    JL_PORTD->DIR &= ~BIT(2);
+
+    if (enable_spi) {
+        JL_SPI0->CON |= BIT(0);
+    }
+}
+
+
+
+static u32 sfc_clk;
+#define     SPI_TSHSL   40
 AT(.ram_code)
 void sfc_baud_set(u32 baud)
 {
-    sfc_suspend(1);
+    local_irq_disable();
+    sfc_suspend(0);
+    const u32 tshsl = SPI_TSHSL * (sfc_clk / 1000000) / 1000 + 1;
+    // see https://gitee.com/Jieli-Tech/fw-AD15N/issues/I41WDD
+    /* const u32 tshsl = 0x7; */
+    SFR(JL_SFC->CON, 20, 4, tshsl);
     JL_SFC->BAUD = baud;
-    sfc_resume(1);
+    sfc_resume(0);
+    local_irq_enable();
 }
-
+AT(.ram_code)
 static u32 sfc_max_baud(u32 pll_clock, _PLL_DIV pll_div)
 {
     u32 t_pll_clk = 0;
-    log_info("pll set, pll_clock %d, pll_div %d \n", pll_clock, pll_div);
+    /* log_info("pll set, pll_clock %d, pll_div %d \n", pll_clock, pll_div); */
     if (0 == (3 & pll_clock)) {
-        if (1 == (0x0c & pll_clock)) {
+        if (0b0100 == (0x0c & pll_clock)) {
             t_pll_clk = 192;
-        } else if (2 == (0x0c & pll_clock)) {
+        } else if (0b1000 == (0x0c & pll_clock)) {
             t_pll_clk = 137;
-        } else if (3 == (0x0c & pll_clock)) {
+        } else if (0b1100 == (0x0c & pll_clock)) {
             t_pll_clk = 107;
         }
     } else if (1 == (0x03 & pll_clock)) {
@@ -115,44 +146,61 @@ static u32 sfc_max_baud(u32 pll_clock, _PLL_DIV pll_div)
         b_div = 8;
     }
     u32 div = a_div * b_div;
-    u32 pll_sys_clk = t_pll_clk / div;
+    sfc_clk = t_pll_clk / div;
     u32 baud = 0;
-    while ((pll_sys_clk / (baud + 1)) > 50) {
+    while ((sfc_clk / (baud + 1)) > 50) {
         baud++;
     }
-    log_info(" PLL_SYS_CLK %dMhz;  SFC BAUD %d\n", pll_sys_clk, baud);
+    sfc_clk *= 1000000;
+    /* log_info(" PLL_SYS_CLK %dMhz;  SFC BAUD %d\n", pll_sys_clk, baud); */
     return baud;
 
 }
 
-/* void pll_sel(u32 pll_clock, _PLL_DIV pll_div) */
+static u32 sys_clock = 24000000;
+__attribute__((always_inline))
+u32 sys_clock_get(void)
+{
+    return sys_clock;
+}
+
+AT(.ram_code)
 void pll_sel(u32 pll_clock, _PLL_DIV pll_div, _PLL_B_DIV pll_b_div)
 {
+
     u32 clock;
-    u32 baud = 0;
-    baud = sfc_max_baud(pll_clock, pll_div);
+    local_irq_disable();
+
     JL_CLK->CON0 &= ~BIT(5);          // select rc
     delay(1);
-    sfc_baud_set(baud);
 
     SFR(JL_CLK->CON1, 20, 4, pll_clock);      //pll sys clk sel 96m  3
     SFR(JL_CLK->CON1, 16, 4, pll_div);      //pll sys clk div 1   4
-
     SFR(JL_CLK->CON1, 5, 3, pll_b_div);       //hsb div 2
 
-    clock = sys_clock_get();
-
+    sys_clock = sys_clock_peration();
+    clock = sys_clock;
     for (u32 i = 0; i < 8; i++) {
-        clock /= (i + 1);
-        if (clock < 80000000L) {
+        clock = sys_clock / (i + 1);
+        if (clock <= 80000000L) {
             JL_CLK->CON1 &= ~(7 << 2);
             JL_CLK->CON1 |= (i & 7) << 2;
-            log_info(" lsb clock: %d\n", clock);
             break;
         }
     }
+
     SFR(JL_CLK->CON0, 3, 2, 3);       // select pll
     JL_CLK->CON0 |=  BIT(5);          // select mux
+    delay(10);
+
+    u32 baud = sfc_max_baud(pll_clock, pll_div);
+    sfc_baud_set(baud);
+
+    local_irq_enable();
+    log_info("---SFC CLK : %d", sfc_clk);
+    log_info("---SPI CLK : %d", sfc_clk / (baud + 1));
+    log_info("---HSB CLK : %d", sys_clock);
+    log_info("---LSB CLK : %d", clk_get("lsb"));
 }
 
 u32 lsb_clk_get(void)

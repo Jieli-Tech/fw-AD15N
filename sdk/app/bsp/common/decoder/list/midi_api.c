@@ -24,7 +24,7 @@ static u32 midi_tone_tab = 0;
 cbuffer_t cbuf_midi AT(.midi_buf);
 dec_obj dec_midi_hld;
 u16 obuf_midi[DAC_DECODER_BUF_SIZE / 2] AT(.midi_buf) ;
-u32 midi_decode_buff[(4952 + 3) / 4] AT(.midi_buf) ;
+u32 midi_decode_buff[(4984 + 3) / 4] AT(.midi_buf) ;
 #define MIDI_CAL_BUF ((void *)&midi_decode_buff[0])
 static MIDI_CONFIG_PARM midi_t_parm AT(.midi_buf);
 static MIDI_INIT_STRUCT init_info AT(.midi_buf);
@@ -85,6 +85,7 @@ u32 midi_decode_api(void *p_file, void **ppdec, void *p_dp_buf)
 
     ops = get_midi_ops();
     buff_len = ops->need_dcbuf_size();
+    log_info("buff_len:%d \n", buff_len);
     if (buff_len > sizeof(midi_decode_buff)) {
         return E_MIDI_DBUF;
     }

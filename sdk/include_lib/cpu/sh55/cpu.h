@@ -168,6 +168,7 @@ void local_irq_disable();
 #endif
 
 
+char chip_versions(void);
 
 #endif
 

@@ -106,6 +106,13 @@ u32 midi_mark_trigger(void *priv, u8 *val, u8 len)
 {
     return 0;
 }
+u32 wdt_clear_trigger(void *priv)
+{
+    /* wdt_clear(); */
+    /* log_char('w'); */
+    /* log_info("wdt_clear_trigger \n"); */
+    return 64;
+}
 
 /*----------------------------------------------------------------------------*/
 /**@brief  midi 初始化接口，会给midi解码器主动调用
@@ -144,6 +151,11 @@ void midi_init_info(MIDI_INIT_STRUCT *init_info)
     init_info->prog_info.prog = 0;
     init_info->prog_info.ex_vol = 1024;
     init_info->prog_info.replace_mode = 0;
+
+    //OKON 解码副旋空转回调注册
+    init_info->wdt_clear.priv = NULL;
+    init_info->wdt_clear.count = 68;
+    init_info->wdt_clear.wdt_clear_trigger = wdt_clear_trigger;
 
     ///midi 控制初始化
     init_info->mark_info.priv = NULL;

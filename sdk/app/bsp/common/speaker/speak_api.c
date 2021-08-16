@@ -19,6 +19,9 @@
 #if VO_PITCH_EN
 #include "vo_pitch_api.h"
 #endif
+#if PCM_EQ_EN
+#include "pcm_eq_api.h"
+#endif
 #include "echo_api.h"
 #include "notch_howling_api.h"
 
@@ -119,7 +122,11 @@ void audio_adc_speaker_start(void)
     /* p_curr_sound = link_echo_sound(p_curr_sound, &cbuf_ads_o, 0, adc_sr); */
 #endif
 #if VO_PITCH_EN     //多种音效集合库：机器人、rap、两种变速变调；
-    p_curr_sound = link_voice_pitch_sound(p_curr_sound, &cbuf_ads_o, (void **)&aa_speaker.p_vp, VP_CMD_ROBOT);
+    /* p_curr_sound = link_voice_pitch_sound(p_curr_sound, &cbuf_ads_o, (void **)&aa_speaker.p_vp, VP_CMD_ROBOT); */
+#endif
+
+#if PCM_EQ_EN
+    p_curr_sound = link_pcm_eq_sound(p_curr_sound, &cbuf_ads_o, 0, adc_sr, 1);
 #endif
 
 

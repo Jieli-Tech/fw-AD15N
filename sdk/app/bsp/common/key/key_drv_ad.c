@@ -115,12 +115,13 @@ u8 get_adkey_value(void)
     if (key_value > AD_NOKEY) {
         return key_filter(NO_KEY);
     }
+
     for (key_number = 0; key_number < sizeof(ad_key_table) / sizeof(ad_key_table[0]); key_number++) {
         if (key_value > ad_key_table[key_number]) {
             break;
         }
     }
-    /* log_printf("key_value:%d, vdd_ad_val:%d, key_num:0x%x\n", key_value, key_value * 33 / 0x3ff, key_number); */
+    /* log_info("key_value:%d, vdd_ad_val:%d, key_num:0x%x\n", key_value, key_value * 333 / 0x3ff, key_number); */
     return key_filter(key_number);
 }
 

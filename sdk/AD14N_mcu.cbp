@@ -26,6 +26,7 @@
 <Add option="-DCPU_SH55=0" />
 <Add option="-DSPEAKER_EN=0" />
 <Add option="-DVO_PITCH_EN=0" />
+<Add option="-DPCM_EQ_EN=0" />
 <Add option="-DAUX_EN=0" />
 <Add option="-DENCODER_EN=0" />
 <Add option="-DDECODER_UMP3_EN=0" />
@@ -69,7 +70,6 @@
 <Linker>
 <Add option="--plugin-opt=save-temps" />
 <Add option="--gc-sections" />
-<Add option="tools/libc/libc.a" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/sh54/cpu_lib.a" />
 <Add option="--end-group" />
@@ -80,6 +80,7 @@
 <ExtraCommands>
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\toy\app_ld.c -o app\post_build\sh54\app.ld" />
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\toy\download_bat.c -o app\post_build\sh54\download.bat" />
+<Add before="tools\utils\fixbat.exe app\post_build\sh54\download.bat" />
 <Mode before="always" />
 <Add after="app\post_build\sh54\download.bat sdk" />
 <Mode after="always" />
@@ -87,6 +88,7 @@
 </Target>
 </Build>
 <Unit filename="app/bsp/cpu/sh54/clock.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh54/port_init.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/power_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/power_api.h" />
 <Unit filename="app/bsp/cpu/sh54/uart.c"><Option compilerVer="CC"/></Unit>
@@ -110,6 +112,7 @@
 <Unit filename="include_lib/common/printf.h" />
 <Unit filename="include_lib/cpu/sh54/asm/power/p33.h" />
 <Unit filename="include_lib/cpu/sh54/asm/power_interface.h" />
+<Unit filename="include_lib/cpu/sh54/asm/usb.h" />
 <Unit filename="include_lib/cpu/sh54/clock.h" />
 <Unit filename="include_lib/cpu/sh54/cpu.h" />
 <Unit filename="include_lib/cpu/sh54/csfr.h" />
@@ -123,6 +126,14 @@
 <Unit filename="include_lib/cpu/sh54/uart.h" />
 <Unit filename="include_lib/cpu/sh54/wdt.h" />
 <Unit filename="include_lib/cpu/tick_timer_driver.h" />
+<Unit filename="include_lib/dev_mg/atomic.h" />
+<Unit filename="include_lib/dev_mg/dev_manage.h" />
+<Unit filename="include_lib/dev_mg/device.h" />
+<Unit filename="include_lib/dev_mg/ioctl_cmds.h" />
+<Unit filename="include_lib/device/usb/ch9.h" />
+<Unit filename="include_lib/device/usb/host/usb_host.h" />
+<Unit filename="include_lib/device/usb/otg.h" />
+<Unit filename="include_lib/device/usb/usb_phy.h" />
 <Unit filename="include_lib/msg/msg.h" />
 </Project>
 </CodeBlocks_project_file>

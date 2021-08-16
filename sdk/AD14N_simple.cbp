@@ -27,6 +27,7 @@
 <Add option="-DCPU_SH55=0" />
 <Add option="-DSPEAKER_EN=1" />
 <Add option="-DVO_PITCH_EN=1" />
+<Add option="-DPCM_EQ_EN=1" />
 <Add option="-DAUX_EN=1" />
 <Add option="-DENCODER_EN=1" />
 <Add option="-DDECODER_UMP3_EN=1" />
@@ -69,15 +70,18 @@
 <Add directory="include_lib/encoder" />
 <Add directory="include_lib/encoder/list" />
 <Add directory="include_lib/device" />
+<Add directory="include_lib/ex_mcu" />
 <Add directory="app/bsp/common" />
 <Add directory="app/bsp/common/fs" />
 <Add directory="app/bsp/common/iic_soft" />
+<Add directory="app/bsp/common/eeprom" />
 <Add directory="app/bsp/common/msg" />
 <Add directory="app/bsp/common/file_operate" />
 <Add directory="app/bsp/common/api_mg" />
 <Add directory="app/bsp/common/key" />
 <Add directory="app/bsp/common/power_manage" />
 <Add directory="app/bsp/common/norflash" />
+<Add directory="app/bsp/common/spi_soft" />
 <Add directory="app/bsp/common/reserved_area" />
 <Add directory="app/bsp/modules" />
 <Add directory="app/bsp/modules/timer" />
@@ -93,7 +97,6 @@
 <Linker>
 <Add option="--plugin-opt=save-temps" />
 <Add option="--gc-sections" />
-<Add option="tools/libc/libc.a" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/sh54/cpu_lib.a" />
 <Add option="include_lib/liba/sh54/fs_lib.a" />
@@ -103,13 +106,10 @@
 <Add option="include_lib/liba/sh54/dev_mg_lib.a" />
 <Add option="include_lib/liba/sh54/malloc_lib.a" />
 <Add option="include_lib/liba/lib_echo_cal.a" />
-<Add option="include_lib/liba/sh54/ae_echo_lib.a" />
 <Add option="include_lib/liba/lib_howling_fs.a" />
 <Add option="include_lib/liba/notchHowling.a" />
 <Add option="include_lib/liba/sh54/ae_howling_lib.a" />
-<Add option="include_lib/liba/sh54/ae_notch_howling_lib.a" />
 <Add option="include_lib/liba/lib_speed_pitch.a" />
-<Add option="include_lib/liba/sh54/ae_speed_lib.a" />
 <Add option="include_lib/liba/sh54/encoder_mge_lib.a" />
 <Add option="include_lib/liba/lib_a_code.a" />
 <Add option="include_lib/liba/lib_mp3_decode.a" />
@@ -121,7 +121,8 @@
 <Add option="include_lib/liba/sh54/file_manage_lib.a" />
 <Add option="include_lib/liba/sh54/sdmmc_lib.a" />
 <Add option="include_lib/liba/lib_vopitch_cal.a" />
-<Add option="include_lib/liba/sh54/ae_vo_pitch_lib.a" />
+<Add option="include_lib/liba/lib_pcm_eq.a" />
+<Add option="include_lib/liba/sh54/ae_pcm_eq_lib.a" />
 <Add option="--end-group" />
 <Add option="-Tapp/post_build/sh54/app.ld" />
 <Add option="-M=app/post_build/sh54/app.map" />
@@ -130,6 +131,7 @@
 <ExtraCommands>
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\toy\app_ld.c -o app\post_build\sh54\app.ld" />
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\toy\download_bat.c -o app\post_build\sh54\download.bat" />
+<Add before="tools\utils\fixbat.exe app\post_build\sh54\download.bat" />
 <Mode before="always" />
 <Add after="app\post_build\sh54\download.bat sdk" />
 <Mode after="always" />
@@ -175,9 +177,12 @@
 <Unit filename="app/bsp/common/sdk_cfg.h" />
 <Unit filename="app/bsp/common/sound_effect_list/echo_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sound_effect_list/notch_howling_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/sound_effect_list/pcm_eq_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sound_effect_list/speed_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sound_effect_list/vo_pitch_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/speaker/speak_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/spi_soft/spi_soft.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/spi_soft/spi_soft.h" />
 <Unit filename="app/bsp/common/usb/device/descriptor.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/usb/device/hid.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/usb/device/msd.c"><Option compilerVer="CC"/></Unit>
@@ -204,13 +209,17 @@
 <Unit filename="app/bsp/common/usb/usr/usb_audio_interface.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/usb/usr/usb_audio_interface.h" />
 <Unit filename="app/bsp/common/vm/vm_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh54/adc_drv.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/clock.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh54/cpu.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/dac_cpu.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/irflt.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/irflt.h" />
 <Unit filename="app/bsp/cpu/sh54/pl_cnt.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/pl_cnt.h" />
+<Unit filename="app/bsp/cpu/sh54/port_init.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/port_wkup.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh54/port_wkup.h" />
 <Unit filename="app/bsp/cpu/sh54/power_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/power_api.h" />
 <Unit filename="app/bsp/cpu/sh54/spi1.c"><Option compilerVer="CC"/></Unit>
@@ -253,6 +262,8 @@
 <Unit filename="include_lib/audio/howling_api.h" />
 <Unit filename="include_lib/audio/howling_pitchshifter_api.h" />
 <Unit filename="include_lib/audio/notch_howling_api.h" />
+<Unit filename="include_lib/audio/pcm_eq.h" />
+<Unit filename="include_lib/audio/pcm_eq_api.h" />
 <Unit filename="include_lib/audio/reverb_api.h" />
 <Unit filename="include_lib/audio/src.h" />
 <Unit filename="include_lib/common/boot.h" />

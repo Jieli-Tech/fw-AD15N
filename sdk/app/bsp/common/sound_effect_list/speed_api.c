@@ -33,6 +33,53 @@ void *speed_api(void *obuf, u32 insample, void **ppsound)
 }
 #endif
 
+/***************************phy***************************************************************/
+EFFECT_OBJ speed_obj AT(.sp_data);
+u32  SP_BUFLEN[752] AT(.sp_data);            //处理32k音频变速变调需要的空间
 
+static sound_in_obj speed_si AT(.sp_data);
+
+const struct _RS_IO_CONTEXT_ sppitch_io = {
+    &speed_obj.sound,      //input跟output函数的第一个参数，解码器不做处理，直接回传，可以为NULL
+    sound_output,
+};
+
+static int speed_run(void *hld, short *inbuf, int len)
+{
+    SPEEDPITCH_STUCT_API *ops;
+    int res = 0;
+    sound_in_obj *p_si = hld;
+    ops = p_si->ops;
+    res = ops->run(p_si->p_dbuf, inbuf, len);
+    return res;
+}
+
+void *speed_phy(void *obuf, SPEED_PITCH_PARA_STRUCT *psp_parm, void **ppsound)
+{
+    u32 buff_len, i;
+    SPEEDPITCH_STUCT_API *ops;
+    log_info("speed_api\n");
+
+    ops = get_sppitch_context();           //获取变采样函数接口
+    buff_len = ops->need_buf(psp_parm->insample);                          //运算空间获取
+    if (buff_len > sizeof(SP_BUFLEN)) {
+        log_info("speed buff need : 0x%x\n", buff_len);
+        return 0;
+    }
+    /******************************************/
+    //初始化：rs_buf：运算Buf; rs_parm：参数指针，传完可以释放的，里面不会记录这个指针的。sppitch_io:output接口，说明如下
+    ops->open(&SP_BUFLEN[0], psp_parm, (void *)&sppitch_io);
+    /*************************************************/
+    memset(&speed_obj, 0, sizeof(speed_obj));
+    speed_si.ops = ops;
+    speed_si.p_dbuf = &SP_BUFLEN[0];
+    /*************************************************/
+    speed_obj.p_si = &speed_si;
+    speed_obj.run = speed_run;
+    speed_obj.sound.p_obuf = obuf;
+    *ppsound = &speed_obj.sound;
+    log_info("speed_succ\n");
+    return &speed_obj;
+}
 
 

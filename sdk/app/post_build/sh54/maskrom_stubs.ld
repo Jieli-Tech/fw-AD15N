@@ -32,7 +32,7 @@
   cbuf_rewrite = ABSOLUTE(0xc2f9c);
   sys_clock_init = ABSOLUTE(0xc2fa0);
   clk_out_pa3 = ABSOLUTE(0xc2fa4);
-  sfc_suspend = ABSOLUTE(0xc2fa8);
+  _sfc_suspend = ABSOLUTE(0xc2fa8);
   sfc_resume = ABSOLUTE(0xc2fac);
   sfc_drop_cache = ABSOLUTE(0xc2fb0);
   chip_crc16 = ABSOLUTE(0xc2fb4);

@@ -26,6 +26,7 @@
 <Add option="-DCPU_SH55=1" />
 <Add option="-DSPEAKER_EN=0" />
 <Add option="-DVO_PITCH_EN=0" />
+<Add option="-DPCM_EQ_EN=0" />
 <Add option="-DAUX_EN=0" />
 <Add option="-DENCODER_EN=0" />
 <Add option="-DDECODER_UMP3_EN=0" />
@@ -69,7 +70,6 @@
 <Linker>
 <Add option="--plugin-opt=save-temps" />
 <Add option="--gc-sections" />
-<Add option="tools/libc/libc.a" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/sh55/cpu_lib.a" />
 <Add option="--end-group" />
@@ -80,6 +80,7 @@
 <ExtraCommands>
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh55\toy\app_ld.c -o app\post_build\sh55\app.ld" />
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh55\toy\download_bat.c -o app\post_build\sh55\download.bat" />
+<Add before="tools\utils\fixbat.exe app\post_build\sh55\download.bat" />
 <Mode before="always" />
 <Add after="app\post_build\sh55\download.bat sdk" />
 <Mode after="always" />
@@ -87,6 +88,7 @@
 </Target>
 </Build>
 <Unit filename="app/bsp/cpu/sh55/clock.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh55/port_init.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/power_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/power_api.h" />
 <Unit filename="app/bsp/cpu/sh55/uart.c"><Option compilerVer="CC"/></Unit>

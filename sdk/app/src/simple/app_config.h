@@ -36,6 +36,12 @@
 
 /*---------SD Configuration---------------*/
 #define TFG_SD_EN				0//ENABLE
+/*
+ ******************注意事项******************
+ *功能描述：实现spi_flash和sd卡的引脚复用
+ *注意：尚未完全调试完成，不能使用
+ */
+#define SPI_SD_IO_REUSE			0//SPI_FLASH与SD卡模块IO复用使能
 ///<SD卡接口选择
 #if TFG_SD_EN
 #define SDMMCA_EN

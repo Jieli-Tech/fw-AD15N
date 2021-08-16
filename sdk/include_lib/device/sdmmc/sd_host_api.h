@@ -32,6 +32,7 @@ extern void sd0_dev_detect(void *p);
 extern void sd_set_power(u8 enable);
 extern u8 sd_io_suspend(u8 sdx, u8 sd_io);
 extern u8 sd_io_resume(u8 sdx, u8 sd_io);
+extern u32 sdx_dev_send_suspend_event(u8 event_idx);
 
 extern void sdmmc_0_port_init(const struct sdmmc_platform_data *, int mode);
 

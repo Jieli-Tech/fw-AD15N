@@ -17,6 +17,7 @@
 #include "usb_config.h"
 #include "app_config.h"
 #include "msg/msg.h"
+#include "asm/power_interface.h"
 
 #define LOG_TAG_CONST       USB
 #define LOG_TAG             "[USB]"
@@ -2027,8 +2028,8 @@ ___usb_test_exit:
     return;
 }
 #endif
-/* REGISTER_LP_TARGET(usb_stor_lp_target) = { */
-/*     .name = "udisk",                       */
-/*     .is_idle = usb_stor_idle_query,        */
-/* };                                         */
+REGISTER_LP_TARGET(usb_a) = {
+    .name = "udisk",
+    .is_idle = usb_stor_idle_query,
+};
 #endif

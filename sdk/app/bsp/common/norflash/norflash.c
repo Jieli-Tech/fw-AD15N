@@ -20,6 +20,10 @@
 #define LOG_INFO_ENABLE
 #include "debug.h"
 
+#if(SPI_SD_IO_REUSE)		//SD SPI IO复用
+static u8 spi_busy = 0;
+#include "sdmmc/sd_host_api.h"
+#endif
 
 #define MALLOC_EN 0
 
@@ -401,6 +405,7 @@ int _norflash_close(void)
             _norflash_write_pages(flash_cache_addr, flash_cache_buf, 4096);
         }
         flash_cache_addr = 2;
+        flash_read_use_cache = 0;//不论是否调用ioctl用命令关闭，默认都关闭读buf
 #if MALLOC_EN
         free(flash_cache_buf);
         flash_cache_buf = NULL;
@@ -516,22 +521,33 @@ u8 get_flash_cache_timer(void)
     return 0;
 #endif
 }
-void _norflash_cache_sync_timer()
+#if NORFLASH_NO_SYS
+static u32 idle_cnt = 0;
+#endif
+void _norflash_cache_sync_timer(u32 sync_step)//sync_step:调节同步写入时间间隔(5即5*100ms写入)
 {
 #if FLASH_CACHE_ENABLE
     int reg = 0;
     flash_mutex_pend(&_norflash.mutex, 5);//若flash忙，等待5*10ms；形参为0：死等
     if (flash_cache_is_dirty) {
-        /* putchar('x'); */
-        flash_cache_is_dirty = 0;
-        if (flash_cache_timer) {
-            flash_cache_timer = 0;
+#if NORFLASH_NO_SYS
+        idle_cnt++;
+        if (idle_cnt >= sync_step)
+#endif
+        {
+            OS_ENTER_CRITICAL();
+            /* putchar('x'); */
+            flash_cache_is_dirty = 0;
+            if (flash_cache_timer) {
+                flash_cache_timer = 0;
+            }
+            reg = _norflash_eraser(FLASH_SECTOR_ERASER, flash_cache_addr);
+            if (reg) {
+                goto __exit;
+            }
+            reg = _norflash_write_pages(flash_cache_addr, flash_cache_buf, 4096);
+            OS_EXIT_CRITICAL();
         }
-        reg = _norflash_eraser(FLASH_SECTOR_ERASER, flash_cache_addr);
-        if (reg) {
-            goto __exit;
-        }
-        reg = _norflash_write_pages(flash_cache_addr, flash_cache_buf, 4096);
     }
 __exit:
     flash_mutex_post(&_norflash.mutex);
@@ -711,13 +727,14 @@ int _norflash_ioctl(u32 cmd, u32 arg, u32 unit, void *_part)
         break;
 #if FLASH_CACHE_ENABLE
     case IOCTL_SET_READ_USE_CACHE:
+        OS_ENTER_CRITICAL();
         if (arg == 1) {
-            if (flash_read_use_cache != 1) {
-                flash_read_use_cache = 2;
-            }
+            flash_read_use_cache = 2;
         } else {
             flash_read_use_cache = 0;
         }
+        OS_EXIT_CRITICAL();
+        _norflash_cache_sync_timer(0);
         break;
 #endif
     case IOCTL_GET_PART_INFO:
@@ -736,6 +753,99 @@ __exit:
     return reg;
 }
 
+/**	@brief	SPI_FLASH_IO挂起
+ *
+ *
+ *
+ */
+void spi_flash_io_suspend()
+{
+    spi_close(_norflash.spi_num);
+    spi_cs_init();				//挂起时cs脚仍需处于高电平态
+    switch (_norflash.spi_num) {
+    case 0:
+        JL_SPI0->CON &= ~BIT(0);
+        break;
+    case 1:
+        JL_SPI1->CON &= ~BIT(0);
+        break;
+    default:
+        break;
+    }
+}
+
+/**	@brief	SPI_FLASH_IO释放
+ *
+ *
+ *
+ */
+void spi_flash_io_resume()
+{
+    spi_cs_init();
+    spi_open(_norflash.spi_num);
+    switch (_norflash.spi_num) {
+    case 0:
+        JL_SPI0->CON |= BIT(0);
+        break;
+    case 1:
+        JL_SPI1->CON |= BIT(0);
+        break;
+    default:
+        break;
+    }
+}
+
+/**	@brief	SD复用IO挂起
+ *
+ *
+ *
+ */
+u8 sd_io_suspend(u8 sdx, u8 sdx_io);
+u8 sd_io_resume(u8 sdx, u8 sdx_io);
+int sd_io_reuse_suspend()
+{
+    u8 sd_io_suspend_status = 0;
+    OS_ENTER_CRITICAL();
+    if (0 != sd_io_suspend(0, 0)) {
+        log_error("sd io suspend 0 fail!\n");	//cmd_sem suspend失败
+        goto _exit;
+    }
+    sd_io_suspend_status |= BIT(0);
+    if (0 != sd_io_suspend(0, 1)) {
+        log_error("sd io suspend 1 fail!\n");	//clk_sem suspend失败
+        goto _exit;
+    }
+    sd_io_suspend_status |= BIT(1);
+    if (0 != sd_io_suspend(0, 2)) {
+        log_error("sd io suspend 2 fail!\n");	//dat_sem suspend失败
+        goto _exit;
+    }
+    OS_EXIT_CRITICAL();
+    return 0;
+
+_exit:
+    if (sd_io_suspend_status & BIT(0)) {
+        sd_io_resume(0, 0);						//若suspend中途失败，需将已经suspend的脚释放
+    }
+    if (sd_io_suspend_status & BIT(1)) {
+        sd_io_resume(0, 1);
+    }
+    OS_EXIT_CRITICAL();
+    return -1;
+}
+/**	@brief	SD复用IO释放
+ *
+ *
+ *
+ */
+void sd_io_reuse_resume()
+{
+    OS_ENTER_CRITICAL();
+    sd_io_resume(0, 0);
+    sd_io_resume(0, 1);
+    sd_io_resume(0, 2);
+    OS_EXIT_CRITICAL();
+}
 
 /*************************************************************************************
  *                                  挂钩 device_api
@@ -743,81 +853,179 @@ __exit:
 
 static int norflash_dev_init(const struct dev_node *node, void *arg)
 {
-    struct norflash_dev_platform_data *pdata = arg;
-    return _norflash_init(node->name, pdata);
+    int err = 0;
+#if(SPI_SD_IO_REUSE)
+    spi_busy = 1;
+    if (sd_io_reuse_suspend() == 0) {
+#endif
+        struct norflash_dev_platform_data *pdata = arg;
+        err = _norflash_init(node->name, pdata);
+#if(SPI_SD_IO_REUSE)
+        spi_flash_io_suspend();
+        sd_io_reuse_resume();
+    } else {
+        log_error("sd io suspend fail!");
+    }
+    spi_busy = 0;
+#endif
+    return err;
 }
 
 static int norflash_dev_open(const char *name, struct device **device, void *arg)
 {
-    struct norflash_partition *part;
-    part = norflash_find_part(name);
-    if (!part) {
-        log_error("no norflash partition is found\n");
-        return -ENODEV;
+    int err = 0;
+#if(SPI_SD_IO_REUSE)
+    spi_busy = 1;
+    if (sd_io_reuse_suspend() == 0) {
+        spi_flash_io_resume();
+#endif
+        struct norflash_partition *part;
+        part = norflash_find_part(name);
+        if (!part) {
+#if(SPI_SD_IO_REUSE)
+            spi_flash_io_suspend();
+            sd_io_reuse_resume();
+            spi_busy = 0;
+#endif
+            log_error("no norflash partition is found\n");
+            return -ENODEV;
+        }
+        *device = &part->device;
+        (*device)->private_data = part;
+        if (atomic_read(&part->device.ref)) {
+#if(SPI_SD_IO_REUSE)
+            spi_flash_io_suspend();
+            sd_io_reuse_resume();
+            spi_busy = 0;
+#endif
+            return 0;
+        }
+        err = _norflash_open(arg);
+#if(SPI_SD_IO_REUSE)
+        spi_flash_io_suspend();
+        sd_io_reuse_resume();
+    } else {
+        log_error("sd io suspend fail!");
     }
-    *device = &part->device;
-    (*device)->private_data = part;
-    if (atomic_read(&part->device.ref)) {
-        return 0;
-    }
-    return _norflash_open(arg);
+    spi_busy = 0;
+#endif
+    return err;
 }
 static int norflash_dev_close(struct device *device)
 {
-    return _norflash_close();
+    int err = 0;
+#if(SPI_SD_IO_REUSE)
+    spi_busy = 1;
+    if (sd_io_reuse_suspend() == 0) {
+        spi_flash_io_resume();
+#endif
+        err =  _norflash_close();
+#if(SPI_SD_IO_REUSE)
+        spi_flash_io_suspend();
+        sd_io_reuse_resume();
+    } else {
+        log_error("sd io suspend fail!");
+    }
+    spi_busy = 0;
+#endif
+    return err;
 }
 static int norflash_bulk_read(struct device *device, void *buf, u32 len, u32 offset)
 {
-    int reg;
-    /* log_info("flash read sector = %d, num = %d\n", offset, len); */
-    struct norflash_partition *part;
-    part = (struct norflash_partition *)device->private_data;
-    if (!part) {
-        log_error("norflash partition invalid\n");
-        return -EFAULT;
-    }
-    offset = offset * 512;
-    len = len * 512;
-    offset += part->start_addr;
-#if FLASH_CACHE_ENABLE
-    if (flash_read_use_cache == 1) {
-        flash_mutex_pend(&_norflash.mutex, 2);
-        reg = _norflash_read(offset, buf, len, 1);
-        flash_mutex_post(&_norflash.mutex);
-    } else
+#if NORFLASH_NO_SYS
+    idle_cnt = 0;
 #endif
-    {
-        flash_mutex_pend(&_norflash.mutex, 2);
-        reg = _norflash_read(offset, buf, len, 0);
-        flash_mutex_post(&_norflash.mutex);
-    }
-    if (reg) {
-        r_printf(">>>[r error]:\n");
+#if(SPI_SD_IO_REUSE)
+    spi_busy = 1;
+    if (sd_io_reuse_suspend() == 0) {
+        spi_flash_io_resume();
+#endif
+        int reg;
+        /* log_info("flash read sector = %d, num = %d\n", offset, len); */
+        struct norflash_partition *part;
+        part = (struct norflash_partition *)device->private_data;
+        if (!part) {
+#if(SPI_SD_IO_REUSE)
+            spi_flash_io_suspend();
+            sd_io_reuse_resume();
+            spi_busy = 0;
+#endif
+            log_error("norflash partition invalid\n");
+            return -EFAULT;
+        }
+        offset = offset * 512;
+        len = len * 512;
+        offset += part->start_addr;
+#if FLASH_CACHE_ENABLE
+        if (flash_read_use_cache == 1) {
+            flash_mutex_pend(&_norflash.mutex, 2);
+            reg = _norflash_read(offset, buf, len, 1);
+            flash_mutex_post(&_norflash.mutex);
+        } else
+#endif
+        {
+            flash_mutex_pend(&_norflash.mutex, 2);
+            reg = _norflash_read(offset, buf, len, 0);
+            flash_mutex_post(&_norflash.mutex);
+        }
+        if (reg) {
+            r_printf(">>>[r error]:\n");
+            len = 0;
+        }
+
+        len = len / 512;
+#if(SPI_SD_IO_REUSE)
+        spi_flash_io_suspend();
+        sd_io_reuse_resume();
+    } else {
+        log_error("sd io suspend fail!");
         len = 0;
     }
-
-    len = len / 512;
+    spi_busy = 0;
+#endif
     return len;
 }
 //写入前进行检查，非空会执行擦除（支持4k）
 static int norflash_bulk_write(struct device *device, void *buf, u32 len, u32 offset)
 {
-    /* log_info("flash write sector = %d, num = %d\n", offset, len); */
-    int reg = 0;
-    struct norflash_partition *part = device->private_data;
-    if (!part) {
-        log_error("norflash partition invalid\n");
-        return -EFAULT;
-    }
-    offset = offset * 512;
-    len = len * 512;
-    offset += part->start_addr;
-    reg = _norflash_write(offset, buf, len, 1);
-    if (reg) {
-        r_printf(">>>[w error]:\n");
+#if NORFLASH_NO_SYS
+    idle_cnt = 0;
+#endif
+#if(SPI_SD_IO_REUSE)
+    spi_busy = 1;
+    if (sd_io_reuse_suspend() == 0) {
+        spi_flash_io_resume();
+#endif
+        /* log_info("flash write sector = %d, num = %d\n", offset, len); */
+        int reg = 0;
+        struct norflash_partition *part = device->private_data;
+        if (!part) {
+#if(SPI_SD_IO_REUSE)
+            spi_flash_io_suspend();
+            sd_io_reuse_resume();
+            spi_busy = 0;
+#endif
+            log_error("norflash partition invalid\n");
+            return -EFAULT;
+        }
+        offset = offset * 512;
+        len = len * 512;
+        offset += part->start_addr;
+        reg = _norflash_write(offset, buf, len, 1);
+        if (reg) {
+            r_printf(">>>[w error]:\n");
+            len = 0;
+        }
+        len = len / 512;
+#if(SPI_SD_IO_REUSE)
+        spi_flash_io_suspend();
+        sd_io_reuse_resume();
+    } else {
+        log_error("sd io suspend fail!");
         len = 0;
     }
-    len = len / 512;
+    spi_busy = 0;
+#endif
     return len;
 }
 static bool norflash_dev_online(const struct dev_node *node)
@@ -827,12 +1035,32 @@ static bool norflash_dev_online(const struct dev_node *node)
 
 static int norflash_bulk_ioctl(struct device *device, u32 cmd, u32 arg)
 {
-    struct norflash_partition *part = device->private_data;
-    if (!part) {
-        log_error("norflash partition invalid\n");
-        return -EFAULT;
+    int err = 0;
+#if(SPI_SD_IO_REUSE)
+    spi_busy = 1;
+    if (sd_io_reuse_suspend() == 0) {
+        spi_flash_io_resume();
+#endif
+        struct norflash_partition *part = device->private_data;
+        if (!part) {
+            log_error("norflash partition invalid\n");
+#if(SPI_SD_IO_REUSE)
+            spi_flash_io_suspend();
+            sd_io_reuse_resume();
+            spi_busy = 0;
+#endif
+            return -EFAULT;
+        }
+        err = _norflash_ioctl(cmd, arg, 512, part);
+#if(SPI_SD_IO_REUSE)
+        spi_flash_io_suspend();
+        sd_io_reuse_resume();
+    } else {
+        log_error("sd io suspend fail!");
     }
-    return _norflash_ioctl(cmd, arg, 512, part);
+    spi_busy = 0;
+#endif
+    return err;
 }
 
 
@@ -871,51 +1099,115 @@ const struct device_operations norflash_dev_ops = {
 /****************************************************************************************/
 static int norflash_byte_read(struct device *device, void *buf, u32 len, u32 offset)
 {
-    int reg;
-    /* log_info("flash read sector = %d, num = %d\n", offset, len); */
-    struct norflash_partition *part;
-    part = (struct norflash_partition *)device->private_data;
-    if (!part) {
-        log_error("norflash partition invalid\n");
-        return -EFAULT;
-    }
-    offset += part->start_addr;
-    flash_mutex_pend(&_norflash.mutex, 2);
-    reg = _norflash_read(offset, buf, len, 0);
-    flash_mutex_post(&_norflash.mutex);
-    if (reg) {
-        r_printf(">>>[r error]:\n");
+#if NORFLASH_NO_SYS
+    idle_cnt = 0;
+#endif
+#if(SPI_SD_IO_REUSE)
+    spi_busy = 1;
+    if (sd_io_reuse_suspend() == 0) {
+        spi_flash_io_resume();
+#endif
+        int reg;
+        /* log_info("flash read sector = %d, num = %d\n", offset, len); */
+        struct norflash_partition *part;
+        part = (struct norflash_partition *)device->private_data;
+        if (!part) {
+#if(SPI_SD_IO_REUSE)
+            spi_flash_io_suspend();
+            sd_io_reuse_resume();
+            spi_busy = 0;
+#endif
+            log_error("norflash partition invalid\n");
+            return -EFAULT;
+        }
+        offset += part->start_addr;
+        flash_mutex_pend(&_norflash.mutex, 2);
+        reg = _norflash_read(offset, buf, len, 0);
+        flash_mutex_post(&_norflash.mutex);
+        if (reg) {
+            r_printf(">>>[r error]:\n");
+            len = 0;
+        }
+#if(SPI_SD_IO_REUSE)
+        spi_flash_io_suspend();
+        sd_io_reuse_resume();
+    } else {
+        log_error("sd io suspend fail!");
         len = 0;
     }
+    spi_busy = 0;
+#endif
 
     return len;
 }
 //写入前不进行检查不擦除
 static int norflash_byte_write(struct device *device, void *buf, u32 len, u32 offset)
 {
-    /* log_info("flash write sector = %d, num = %d\n", offset, len); */
-    int reg = 0;
-    struct norflash_partition *part = device->private_data;
-    if (!part) {
-        log_error("norflash partition invalid\n");
-        return -EFAULT;
-    }
-    offset += part->start_addr;
-    reg = _norflash_write(offset, buf, len, 0);
-    if (reg) {
-        r_printf(">>>[w error]:\n");
+#if NORFLASH_NO_SYS
+    idle_cnt = 0;
+#endif
+#if(SPI_SD_IO_REUSE)
+    spi_busy = 1;
+    if (sd_io_reuse_suspend() == 0) {
+        spi_flash_io_resume();
+#endif
+        /* log_info("flash write sector = %d, num = %d\n", offset, len); */
+        int reg = 0;
+        struct norflash_partition *part = device->private_data;
+        if (!part) {
+#if(SPI_SD_IO_REUSE)
+            spi_flash_io_suspend();
+            sd_io_reuse_resume();
+            spi_busy = 0;
+#endif
+            log_error("norflash partition invalid\n");
+            return -EFAULT;
+        }
+        offset += part->start_addr;
+        reg = _norflash_write(offset, buf, len, 0);
+        if (reg) {
+            r_printf(">>>[w error]:\n");
+            len = 0;
+        }
+#if(SPI_SD_IO_REUSE)
+        spi_flash_io_suspend();
+        sd_io_reuse_resume();
+    } else {
+        log_error("sd io suspend fail!");
         len = 0;
     }
+    spi_busy = 0;
+#endif
     return len;
 }
 static int norflash_byte_ioctl(struct device *device, u32 cmd, u32 arg)
 {
-    struct norflash_partition *part = device->private_data;
-    if (!part) {
-        log_error("norflash partition invalid\n");
-        return -EFAULT;
+    int err = 0;
+#if(SPI_SD_IO_REUSE)
+    spi_busy = 1;
+    if (sd_io_reuse_suspend() == 0) {
+        spi_flash_io_resume();
+#endif
+        struct norflash_partition *part = device->private_data;
+        if (!part) {
+#if(SPI_SD_IO_REUSE)
+            spi_flash_io_suspend();
+            sd_io_reuse_resume();
+            spi_busy = 0;
+#endif
+            log_error("norflash partition invalid\n");
+            return -EFAULT;
+        }
+        err = _norflash_ioctl(cmd, arg, 1, part);
+#if(SPI_SD_IO_REUSE)
+        spi_flash_io_suspend();
+        sd_io_reuse_resume();
+    } else {
+        log_error("sd io suspend fail!");
     }
-    return _norflash_ioctl(cmd, arg, 1, part);
+    spi_busy = 0;
+#endif
+    return err;
 }
 
 /*

@@ -18,7 +18,8 @@ extern audio_decoder_ops *get_midi_ops();
 #define  CTRL_CHANNEL_NUM             16
 
 typedef struct _EX_CH_VOL_PARM_ {
-    unsigned short  cc_vol[CTRL_CHANNEL_NUM];                 //16个通道的音量      <=>4096等于原音量
+    unsigned short  cc_vol[CTRL_CHANNEL_NUM];                 //16个通道或轨道的音量      <=>4096等于原音量
+    unsigned char	ex_vol_use_chn;							  //ex_vol_use_chn = 0 轨道音量；ex_vol_use_chn = 1 通道音量
 } EX_CH_VOL_PARM;
 
 
@@ -48,20 +49,13 @@ typedef struct _EX_MELODY_STOP_STRUCT_ {			//主旋律音符停止回调
     u32(*melody_stop_trigger)(void *priv, u8 key);
 } EX_MELODY_STOP_STRUCT;
 
-#define  CMD_MODE4_PLAY_END          0x09
+typedef struct _WDT_CLEAR_ {					//清狗回调，okon 只播主旋时需要清狗
+    void *priv;
+    u32 count;									//run count次回调一次
+    u32(*wdt_clear_trigger)(void *priv);
+} WDT_CLEAR;
 
-enum {
-    CMD_MIDI_SEEK_BACK_N = 0xa0,		//回调								  MIDI_SEEK_BACK_STRUCT 变量
-    CMD_MIDI_SET_CHN_PROG,			//配置主通道乐器或者所有的通道乐器	  MIDI_PROG_CTRL_STRUCT 变量
-    CMD_MIDI_CTRL_TEMPO,			//配置节奏及衰减					  MIDI_PLAY_CTRL_TEMPO 变量
-    CMD_MIDI_GOON,					//okon 发声
-    CMD_MIDI_CTRL_MODE,				//配置midi模式						  MIDI_PLAY_CTRL_MODE 变量
-    CMD_MIDI_SET_SWITCH,			//配置使能		                      使能参数
-    CMD_MIDI_SET_EX_VOL,			//配置外部音量						  EX_CH_VOL_PARM 变量
-    CMD_INIT_CONFIG,				//初始化配置						  MIDI_INIT_STRUCT 变量
-    CMD_INIT_CONFIGS,				//音色文件配置						  MIDI_CONFIG_PARM  变量
-    CMD_MIDI_OKON_MODE				//配置OKON模式						  MIDI_OKON_MODE 变量
-};
+#define  CMD_MODE4_PLAY_END          0x09
 
 enum {
     CMD_MIDI_CTRL_MODE_0        = 0X00,		 // 正常解码
@@ -71,8 +65,9 @@ enum {
 };
 
 enum {
-    CMD_MIDI_OKON_MODE_0 = 0x00,	//主旋 okon
-    CMD_MIDI_OKON_MODE_1			//主副旋一起 okon
+    CMD_MIDI_OKON_MODE_0 = 0x00,	//主旋 okon 副旋正常播放
+    CMD_MIDI_OKON_MODE_1,			//主副旋一起 okon
+    CMD_MIDI_OKON_MODE_2			//只播放主旋 okon
 };
 
 enum {
@@ -91,7 +86,7 @@ typedef struct _MIDI_OKON_MODE_ {
 } MIDI_OKON_MODE;					//用于配置OKON模式
 
 typedef  struct _MIDI_PLAY_CTRL_TEMPO_ {
-    u16 tempo_val;
+    u16 tempo_val;								 //配置节奏
     u16 decay_val[CTRL_CHANNEL_NUM];             //1024 低11bit有效
     u32 mute_threshold;
 } MIDI_PLAY_CTRL_TEMPO;				//用于配置节奏及衰减
@@ -112,6 +107,9 @@ typedef struct _MIDI_SEEK_BACK_STRUCT_ {
     s8 seek_back_n;
 } MIDI_SEEK_BACK_STRUCT;    //回调多少小节
 
+typedef struct _MIDI_SEMITONE_CTRL_STRUCT_ {
+    char  key_diff[CTRL_CHANNEL_NUM];	// 配置每个通道移多少半音
+} MIDI_SEMITONE_CTRL_STRUCT;
 
 #define MAX_WORD   10
 
@@ -122,6 +120,21 @@ typedef struct _MIDI_W2S_STRUCT_ {
     unsigned short *rec_data;						//pcm 数据
     char key_diff;									//与音高成反比 建议范围[-12,12]
 } MIDI_W2S_STRUCT;
+
+
+enum {
+    CMD_MIDI_SEEK_BACK_N = 0xa0,		//回调								  MIDI_SEEK_BACK_STRUCT 变量
+    CMD_MIDI_SET_CHN_PROG,			//配置主通道乐器或者所有的通道乐器	  MIDI_PROG_CTRL_STRUCT 变量
+    CMD_MIDI_CTRL_TEMPO,			//配置节奏及衰减					  MIDI_PLAY_CTRL_TEMPO 变量
+    CMD_MIDI_GOON,					//okon 发声
+    CMD_MIDI_CTRL_MODE,				//配置midi模式						  MIDI_PLAY_CTRL_MODE 变量
+    CMD_MIDI_SET_SWITCH,			//配置使能		                      使能参数
+    CMD_MIDI_SET_EX_VOL,			//配置外部音量						  EX_CH_VOL_PARM 变量
+    CMD_INIT_CONFIG,				//初始化配置						  MIDI_INIT_STRUCT 变量
+    CMD_INIT_CONFIGS,				//音色文件配置						  MIDI_CONFIG_PARM  变量
+    CMD_MIDI_OKON_MODE,				//配置OKON模式						  MIDI_OKON_MODE 变量
+    CMD_MIDI_SET_SEMITONE				//配置移半音					  MIDI_SEMITONE_CTRL_STRUCT 变量
+};
 
 enum {
     MARK_ENABLE = 0x0001,                //mark回调的使能
@@ -134,7 +147,8 @@ enum {
     MELODY_PLAY_ENABLE = 0x0080,           //主轨道播放使能
     BEAT_TRIG_ENABLE = 0x0100,              //每拍回调的使能
     MELODY_STOP_ENABLE = 0x200,				//主旋律音符停止回调使能
-    MARK_LOOP_ENABLE = 0x400				//使用mark做循环播放使能
+    MARK_LOOP_ENABLE = 0x400,				//使用mark做循环播放使能
+    SEMITONE_ENABLE = 0x800					//移半音使能
 
 };
 
@@ -150,8 +164,10 @@ typedef struct _MIDI_INIT_STRUCT_ {
     EX_MELODY_STRUCT moledy_info;             //melody回调函数
     EX_TmDIV_STRUCT  tmDiv_info;              //小节回调参数
     EX_BeatTrig_STRUCT beat_info;             //每拍回调参数
+    WDT_CLEAR wdt_clear;
     MIDI_OKON_MODE okon_info;				  //OKON参数
     EX_MELODY_STOP_STRUCT moledy_stop_info;	 //melody_stop回调函数
+    MIDI_SEMITONE_CTRL_STRUCT semitone_info;
 #if 1
     MIDI_W2S_STRUCT    w2s_info;
 #endif

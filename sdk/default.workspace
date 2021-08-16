@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Workspace">
+		<Project filename="AD15N_app_mg.cbp" />
+		<Project filename="AD14N_simple.cbp" />
+		<Project filename="AD14N_mcu.cbp" />
+		<Project filename="AD14N_app_mg.cbp" />
+		<Project filename="AD15N_mcu.cbp" />
+		<Project filename="AD15N_simple.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

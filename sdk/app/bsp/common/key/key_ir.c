@@ -47,6 +47,19 @@ static u8 key_filter(u8 key)
 }
 
 /*----------------------------------------------------------------------------*/
+/**@brief   ir初始化回调
+   @param   用于ir资源被占用后恢复ir配置
+   @param   void
+   @return  void
+   @note    void irflt_restore(void)
+*/
+/*----------------------------------------------------------------------------*/
+void irflt_restore(void)
+{
+    irflt_init(0, (void *)&irflt_data);
+}
+
+/*----------------------------------------------------------------------------*/
 /**@brief   ir按键初始化
    @param   void
    @param   void

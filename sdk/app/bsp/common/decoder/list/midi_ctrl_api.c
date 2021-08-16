@@ -23,7 +23,7 @@ static u32 midi_ctrl_tone_tab = 0;
 cbuffer_t cbuf_midi_ctrl AT(.midi_ctrl_buf);
 dec_obj dec_midi_ctrl_hld;
 u16 obuf_midi_ctrl[DAC_DECODER_BUF_SIZE / 2] AT(.midi_ctrl_buf) ;
-u32 midi_ctrl_decode_buff[4952 / 4] AT(.midi_ctrl_buf) ;
+u32 midi_ctrl_decode_buff[4984 / 4] AT(.midi_ctrl_buf) ;
 #define MIDI_CTRL_CAL_BUF ((void *)&midi_ctrl_decode_buff[0])
 MIDI_CONFIG_PARM midi_ctrl_t_parm AT(.midi_ctrl_buf);
 MIDI_CTRL_PARM midi_ctrl_parmt AT(.midi_ctrl_buf);

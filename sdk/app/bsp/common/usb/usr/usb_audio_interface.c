@@ -155,8 +155,8 @@ void uac_inc_sync(void)
         if (sync_cnt > 60) {
             sync_cnt = 0;
             if (x_step > 2) {
-                u32 tmp  = x_step / 6;
-                x_step -= tmp ;
+                /* u32 tmp  = x_step / 6; */
+                /* x_step -= tmp ; */
             }
             /* c = '='; */
         }

@@ -27,6 +27,7 @@
 <Add option="-DCPU_SH55=1" />
 <Add option="-DSPEAKER_EN=0" />
 <Add option="-DVO_PITCH_EN=0" />
+<Add option="-DPCM_EQ_EN=0" />
 <Add option="-DAUX_EN=0" />
 <Add option="-DENCODER_EN=0" />
 <Add option="-DDECODER_UMP3_EN=0" />
@@ -72,15 +73,18 @@
 <Add directory="include_lib/encoder" />
 <Add directory="include_lib/encoder/list" />
 <Add directory="include_lib/device" />
+<Add directory="include_lib/ex_mcu" />
 <Add directory="app/bsp/common" />
 <Add directory="app/bsp/common/fs" />
 <Add directory="app/bsp/common/iic_soft" />
+<Add directory="app/bsp/common/eeprom" />
 <Add directory="app/bsp/common/msg" />
 <Add directory="app/bsp/common/file_operate" />
 <Add directory="app/bsp/common/api_mg" />
 <Add directory="app/bsp/common/key" />
 <Add directory="app/bsp/common/power_manage" />
 <Add directory="app/bsp/common/norflash" />
+<Add directory="app/bsp/common/spi_soft" />
 <Add directory="app/bsp/common/reserved_area" />
 <Add directory="app/bsp/modules" />
 <Add directory="app/bsp/modules/timer" />
@@ -89,7 +93,6 @@
 <Linker>
 <Add option="--plugin-opt=save-temps" />
 <Add option="--gc-sections" />
-<Add option="tools/libc/libc.a" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/sh55/cpu_lib.a" />
 <Add option="include_lib/liba/sh55/fs_lib.a" />
@@ -110,6 +113,7 @@
 <ExtraCommands>
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh55\toy\app_ld.c -o app\post_build\sh55\app.ld" />
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh55\toy\download_bat.c -o app\post_build\sh55\download.bat" />
+<Add before="tools\utils\fixbat.exe app\post_build\sh55\download.bat" />
 <Mode before="always" />
 <Add after="app\post_build\sh55\download.bat sdk" />
 <Mode after="always" />
@@ -150,14 +154,20 @@
 <Unit filename="app/bsp/common/reserved_area/reserved_area.h" />
 <Unit filename="app/bsp/common/sdk_cfg.h" />
 <Unit filename="app/bsp/common/sound_effect_list/speed_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/spi_soft/spi_soft.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/spi_soft/spi_soft.h" />
 <Unit filename="app/bsp/common/vm/vm_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh55/adc_drv.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/clock.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh55/cpu.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/dac_cpu.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/irflt.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/irflt.h" />
 <Unit filename="app/bsp/cpu/sh55/pl_cnt.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/pl_cnt.h" />
+<Unit filename="app/bsp/cpu/sh55/port_init.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/port_wkup.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh55/port_wkup.h" />
 <Unit filename="app/bsp/cpu/sh55/power_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/power_api.h" />
 <Unit filename="app/bsp/cpu/sh55/spi1.c"><Option compilerVer="CC"/></Unit>

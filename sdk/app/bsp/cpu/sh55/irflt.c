@@ -187,6 +187,7 @@ static void ir_input_io_sel(u8 port)
     INPUT_CHANNLE0_SRC_SEL(port);
 
     gpio_set_direction(port, 1);
+    gpio_set_die(port, 1);
     /* JL_PORTA->DIR |= BIT(8); */
 }
 

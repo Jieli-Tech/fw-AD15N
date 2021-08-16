@@ -27,6 +27,7 @@ u32 enc_output(void *priv, u8 *data, u16 len);
 
 void stop_encode(void *pfile, u32 dlen);
 void encoder_io(u32(*fun)(void *), void *pfile);
+void wfil_soft2_isr_hook(enc_obj *hdl);
 
 void kick_encode_api(void *obj);
 void enc_phy_init(void);

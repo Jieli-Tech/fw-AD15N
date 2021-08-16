@@ -63,6 +63,7 @@ typedef enum {
     VM_INDEX_FM_CHANNL_END = VM_INDEX_FM_CHANNL + 28,
     /*mbox*/
     VM_INDEX_FLASH_UPDATE,
+    VM_INDEX_AUTO_BP,
     VM_INDEX_MAX = 128,
 } VM_INDEX;
 
@@ -92,6 +93,7 @@ VM_ERR vm_eraser(void);
 VM_ERR vm_init(void *dev_hdl, u32 vm_addr, u32 vm_len, u8 vm_mode);
 void vm_check_all(u8 level);    //level : default 0
 void vm_defrag_line_set(u8 defrag_line);//设置vm空间整理的阀值,按照百分比计算，取值范围0~100
+int vm_get_area_using_info(u32 *vm_area_len, u32 *vm_used_len);
 // io api
 s32 vm_write(vm_hdl hdl, u8 *data_buf, u16 len);
 s32 vm_read(vm_hdl hdl, u8 *data_buf, u16 len);

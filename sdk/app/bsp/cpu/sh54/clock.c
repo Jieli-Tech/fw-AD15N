@@ -19,9 +19,9 @@ const u32 pll_clock_tab0[]  = {
 };
 const u32 pll_clock_tab1[]  = {
     0,
-    192000000L,
-    137000000L,
     107000000L,
+    137000000L,
+    192000000L,
 };
 const u8 div_taba[] = {
     1, 3, 5, 7
@@ -48,7 +48,7 @@ enum {
 #define OSC_CLOCK_IN(x)        SFR(JL_CLK->CON0,  19,  2,  x)
 #define OSC_SRC_CLK    OSC_CLK_IN_PLL12M//OSC_CLK_IN_LRC
 
-u32 sys_clock_get(void)
+u32 sys_clock_peration(void)
 {
     u32 t_sel;
     u32 clock = 0;
@@ -75,29 +75,55 @@ u32 sys_clock_get(void)
     return clock;
 }
 void sfc_resume(u32 disable_spi);
-void sfc_suspend(u32 enable_spi);
 
+AT(.ram_code)
+void sfc_suspend(u32 enable_spi)
+{
+    //wait cache idle
+    while (!(JL_CACHE->CON & BIT(5)));
+    //wait sfc idle
+    while (JL_SFC->CON & BIT(31));
+
+    //disable sfc
+    JL_PORTD->PU |= BIT(2);
+    JL_PORTD->DIR |= BIT(2);
+
+    JL_SFC->CON &= ~BIT(0);
+
+    JL_PORTD->DIR &= ~BIT(2);
+
+    if (enable_spi) {
+        JL_SPI0->CON |= BIT(0);
+    }
+}
+static u32 sfc_clk;
+#define     SPI_TSHSL   40
 AT(.ram_code)
 void sfc_baud_set(u32 baud)
 {
     local_irq_disable();
-    sfc_suspend(1);
+    sfc_suspend(0);
+    const u32 tshsl = SPI_TSHSL * (sfc_clk / 1000000) / 1000 + 1;
+    // see https://gitee.com/Jieli-Tech/fw-AD15N/issues/I41WDD
+    /* const u32 tshsl = 0x7; */
+    SFR(JL_SFC->CON, 20, 4, tshsl);
     JL_SFC->BAUD = baud;
-    sfc_resume(1);
+    sfc_resume(0);
     local_irq_enable();
 }
 
+AT(.ram_code)
 static u32 sfc_max_baud(u32 pll_clock, _PLL_DIV pll_div)
 {
     u32 t_pll_clk = 0;
-    log_info("pll set, pll_clock %d, pll_div %d \n", pll_clock, pll_div);
+    /* log_info("pll set, pll_clock %d, pll_div %d \n", pll_clock, pll_div); */
     if (0 == (3 & pll_clock)) {
-        if (1 == (0x0c & pll_clock)) {
-            t_pll_clk = 192;
-        } else if (2 == (0x0c & pll_clock)) {
-            t_pll_clk = 137;
-        } else if (3 == (0x0c & pll_clock)) {
+        if (0b0100 == (0x0c & pll_clock)) {
             t_pll_clk = 107;
+        } else if (0b1000 == (0x0c & pll_clock)) {
+            t_pll_clk = 137;
+        } else if (0b1100 == (0x0c & pll_clock)) {
+            t_pll_clk = 192;
         }
     } else if (1 == (0x03 & pll_clock)) {
         t_pll_clk = 96;
@@ -119,50 +145,63 @@ static u32 sfc_max_baud(u32 pll_clock, _PLL_DIV pll_div)
         b_div = 8;
     }
     u32 div = a_div * b_div;
-    u32 pll_sys_clk = t_pll_clk / div;
+    sfc_clk = t_pll_clk / div;
     u32 baud = 0;
-    while ((pll_sys_clk / (baud + 1)) > 80) {
+    while ((sfc_clk / (baud + 1)) > 60) {
         baud++;
     }
-    log_info(" PLL_SYS_CLK %dMhz;  SFC BAUD %d\n", pll_sys_clk, baud);
+    sfc_clk *= 1000000;
+    /* log_info(" PLL_SYS_CLK %d;  SFC BAUD %d\n",sfc_clk, baud); */
     return baud;
 
 }
 
 /* void pll_sel(u32 pll_clock, _PLL_DIV pll_div) */
+static u32 sys_clock;
+__attribute__((always_inline))
+u32 sys_clock_get(void)
+{
+    return sys_clock;
+}
 void pll_sel(u32 pll_clock, _PLL_DIV pll_div, _PLL_B_DIV pll_b_div)
 {
     u32 clock;
-    u32 baud = 0;
-    baud = sfc_max_baud(pll_clock, pll_div);
+    local_irq_disable();
     JL_CLK->CON0 &= ~BIT(5);          // select rc
     delay(1);
-    sfc_baud_set(baud);
 
     SFR(JL_CLK->CON1, 20, 4, pll_clock);      //pll sys clk sel 96m  3
     SFR(JL_CLK->CON1, 16, 4, pll_div);      //pll sys clk div 1   4
 
     SFR(JL_CLK->CON1, 5, 3, pll_b_div);       //hsb div 2
 
-    clock = sys_clock_get();
+    sys_clock = sys_clock_peration();
+    clock = sys_clock;
 
     for (u32 i = 0; i < 8; i++) {
-        clock /= (i + 1);
-        if (clock < 80000000L) {
-            JL_CLK->CON1 &= ~(7 << 2);
-            JL_CLK->CON1 |= (i & 7) << 2;
-            log_info(" lsb clock: %d\n", clock);
+        clock = sys_clock / (i + 1);
+        if (clock <= 80000000L) {
+            SFR(JL_CLK->CON1, 2, 3, i);       //lsb div
             break;
         }
     }
     SFR(JL_CLK->CON0, 3, 2, 3);       // select pll
     JL_CLK->CON0 |=  BIT(5);          // select mux
+    delay(10);
+
+    u32 baud = sfc_max_baud(pll_clock, pll_div);
+    sfc_baud_set(baud);
+
+    local_irq_enable();
 
     lrc_trace_init();
     lrc_trace_trim();
+
+    log_info("---SFC CLK : %d", sfc_clk);
+    log_info("---SPI CLK : %d", sfc_clk / (baud + 1));
+    log_info("---HSB CLK : %d", sys_clock);
+    log_info("---LSB CLK : %d", clk_get("lsb"));
 }
-
-
 
 u32 lsb_clk_get(void)
 {
@@ -273,12 +312,19 @@ struct usb_trim_t {
     u32 pll_ds;
     volatile u8 g_pll_trimok;
 };
-
+static u32 timer_div()
+{
+    u32 timer_src_clk = clk_get("lsb");
+    if (timer_src_clk > 64 * 1000000) {
+        return 4;
+    }
+    return 1;
+}
 static struct usb_trim_t usb_trim ;//SEC(.usb_config_var);
 SET_INTERRUPT
 void sof_trim_isr()
 {
-    delay(100);
+    udelay(140);
     JL_TMR2->CON |= BIT(6);      //clear tmr pnd
 
     u16 cur_prd = (u16)JL_TMR2->PRD - usb_trim.last_cnt;
@@ -292,7 +338,8 @@ void sof_trim_isr()
         if (usb_trim.sof_cnt == (4)) {
             JL_TMR2->CON = BIT(6);
             u32 timer_src_clk = clk_get("lsb") / 1000;
-            usb_trim.trim_osc_freq = usb_trim.trim_osc_freq / 4;
+
+            usb_trim.trim_osc_freq = usb_trim.trim_osc_freq * timer_div() / 4 ;
 
             usb_trim.pll_ds = (((u32)(timer_src_clk) << 1) * usb_trim.pll_ds) / usb_trim.trim_osc_freq;
             usb_trim.pll_ds = (usb_trim.pll_ds >> 1) + (usb_trim.pll_ds & BIT(0));
@@ -331,9 +378,8 @@ void pll_config(u32 pll_ds)
 
     log_info("JL_PLL->CON1 %x", JL_PLL->CON1);
 }
-void usb_sof_trim()
+void usb_sof_trim(void (*trim_enter)(void), void (*trim_exit)(void))
 {
-
     memset(&usb_trim, 0, sizeof(usb_trim));
 
     usb_trim.pll_ds = (JL_PLL->CON1 & 0xfff) + 2;
@@ -341,12 +387,19 @@ void usb_sof_trim()
 
     log_info("old pll_ds %d", usb_trim.pll_ds);
 
+    if (trim_enter) {
+        trim_enter();
+    }
     request_irq(IRQ_TIME2_IDX, 7, sof_trim_isr, cpu_id);
     set_timer_captrue_dp(1);
 
     JL_TMR2->CNT = 0;
     JL_TMR2->PRD = 0;//100000;
-    JL_TMR2->CON = BIT(1) | (0b00 << 2) | (0b00 << 4); //选择lsb时钟,div1
+    if (timer_div() == 1) {
+        JL_TMR2->CON = BIT(1) | (0b00 << 2) | (0b00 << 4); //选择lsb时钟,div1
+    } else {
+        JL_TMR2->CON = BIT(1) | (0b00 << 2) | (0b01 << 4); //选择lsb时钟,div4
+    }
 
     u32 timeout = 100;
     timeout = jiffies + timeout;
@@ -371,6 +424,10 @@ void usb_sof_trim()
 
         pll_config(usb_trim.pll_ds);
     }
+    if (trim_exit) {
+        trim_exit();
+    }
+
 }
 
 extern const char LRC_TRIM_DISABLE;  //LRC trim 主时钟

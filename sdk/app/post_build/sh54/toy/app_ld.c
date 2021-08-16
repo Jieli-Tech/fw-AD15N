@@ -175,18 +175,39 @@ SECTIONS
             *(.aux_data)
             aux_data_end = .;
         }
-        .d_vp_data
+        .d_vp_data0
         {
             /* . = aux_data_end; */
             *(.speaker_data)
-            *(.vp_data);
+            speaker_data_end = .;
 			*(.howling_data)
 		   . = ALIGN(4);
 			*(.notch_howling_data)
 		   . = ALIGN(4);
-			*(.echo_data)
-		   . = ALIGN(4);
 		   *(.notch_howling_lib)
+            howling_data_end = .;
+        }
+
+        .d_vp_data1
+        {
+            . = howling_data_end;
+		   . = ALIGN(4);
+            *(.vp_data);
+        }
+
+        .d_echo_data
+        {
+
+            . = howling_data_end;
+		   . = ALIGN(4);
+            *(.echo_data);
+        }
+
+        .d_pcm_eq_data
+        {
+            . = howling_data_end;
+		   . = ALIGN(4);
+            *(.pcm_eq_data);
         }
 
         .pc_buffer

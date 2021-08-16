@@ -12,6 +12,19 @@
 #define LOG_TAG             "[iic]"
 #include "debug.h"
 
+//硬件IIC设备数据初始化
+const struct hw_iic_config hw_iic_cfg[] = {
+    {
+        .port = 'A',
+        .baudrate = 200000,
+        .hdrive = 0,
+        .io_pu = 1,
+        .role = IIC_MASTER,
+        .slave_addr = 0x54,
+        .isr_en = 0
+    },
+};
+
 #define EINVAL 22
 struct iic_iomapping {
     u8 scl;
@@ -120,14 +133,16 @@ static int iic_port_init(hw_iic_dev iic)
             gpio_set_hd(sda, 0);
         }
         if (iic_info_io_pu(iic)) {
-            gpio_set_pull_up(scl, 1);
             gpio_set_pull_up(sda, 1);
+            gpio_set_pull_up(scl, 1);
             gpio_set_pull_down(scl, 0);
             gpio_set_pull_down(sda, 0);
             /*log_info("pullup\n");*/
         } else {
             gpio_set_pull_up(scl, 0);
             gpio_set_pull_up(sda, 0);
+            gpio_set_pull_down(scl, 0);
+            gpio_set_pull_down(sda, 0);
         }
 #endif
         //} else if (fh->id == 1) {
@@ -217,7 +232,8 @@ int hw_iic_init(hw_iic_dev iic)
         }
     } else {
         iic_role_slave(iic_regs[id]);
-        hw_iic_slave_set_addr(iic, iic_info_slave_addr(iic), 1);
+        hw_iic_slave_set_addr(iic, iic_info_slave_addr(iic), 1);//0:不自动响应起始位,1:响应
+        log_info("hw_iic slave\n");
 //        iic_si_mode_en(iic_regs[id]);
     }
 
@@ -226,7 +242,7 @@ int hw_iic_init(hw_iic_dev iic)
         iic_set_end_ie(iic_regs[id]);
         iic_set_ie(iic_regs[id]);
         iic_buf_reg(iic_regs[id]) = 0xff;
-        HWI_Install(IRQ_IIC_IDX, (u32)iic_isr, 0) ;
+        HWI_Install(IRQ_IIC_IDX, (u32)iic_isr, 0);//0: 中断优先级
     } else {
         iic_clr_ie(iic_regs[id]);
     }
@@ -294,6 +310,7 @@ u8 hw_iic_tx_byte(hw_iic_dev iic, u8 byte)
 {
     u8 id = iic_get_id(iic);
     iic_buf_reg(iic_regs[id]) = byte;
+    iic_recv_nack(iic_regs[id]);
     /*log_info("iic-pnd=%x\n",iic_pnd(iic_regs[id]));*/
     while (!iic_pnd(iic_regs[id]));
     /*log_info("iic-pnd=%x\n",iic_pnd(iic_regs[id]));*/
@@ -408,7 +425,7 @@ void hw_iic_clr_end_pnd(hw_iic_dev iic)
     iic_end_pnd_clr(iic_regs[id]);
 }
 
-void hw_iic_slave_set_addr(hw_iic_dev iic, u8 addr, u8 addr_ack)//addr_ack=1:应答
+void hw_iic_slave_set_addr(hw_iic_dev iic, u8 addr, u8 addr_ack)//addr_ack=1:自动应答起始位
 {
     u8 id = iic_get_id(iic);
 
@@ -454,29 +471,76 @@ u8 hw_iic_slave_tx_check_ack(hw_iic_dev iic)
     return iic_send_is_ack(iic_regs[id]);
 }
 
-u8 iic_slave_rxdata;
+u8 iic_slave_rxdata[9];
 SET(interrupt(""))
 void iic_isr()
 {
+    static u8 cnt = 0;
     if (iic_pnd(iic_regs[0])) {
         if (iic_start_pnd(iic_regs[0])) {
             /*log_info(" start!\n");*/
-            iic_slave_rxdata = iic_buf_reg(iic_regs[0]);
+            iic_recv_ack(iic_regs[0]);
             iic_buf_reg(iic_regs[0]) = 0xff;
             iic_start_pnd_clr(iic_regs[0]);
         } else {
             /*log_info("no start!\n");*/
-            iic_slave_rxdata = iic_buf_reg(iic_regs[0]);
+            iic_recv_ack(iic_regs[0]);
             iic_buf_reg(iic_regs[0]) = 0xff;
-            iic_pnd_clr(iic_regs[0]);
         }
+        iic_slave_rxdata[cnt] = iic_buf_reg(iic_regs[0]);
         iic_pnd_clr(iic_regs[0]);
     }
+    cnt++;
     if (iic_end_pnd(iic_regs[0])) {
-        /*log_info("end!\n");*/
+        log_info_hexdump(iic_slave_rxdata, 9);
+        log_info("iic end!\n");
+        for (cnt = 0; cnt < 9; cnt++) {
+            iic_slave_rxdata[cnt] = 0;
+        }
+        cnt = 0;
         iic_start_pnd_clr(iic_regs[0]);
         iic_pnd_clr(iic_regs[0]);
         iic_end_pnd_clr(iic_regs[0]);
+    }
+}
+
+
+/***************************iic slave test***************************/
+//从机接收有出错概率，需添加校验
+//中断法: hw_iic_cfg结构体配置从机模式地址使能中断即可
+//轮询法：hw_iic_cfg结构体配置从机模式地址关闭中断
+void hw_iic_slave_rx_test(hw_iic_dev iic)
+{
+    hw_iic_init(iic);
+    u8 id = iic_get_id(iic);
+    u8 temp1 = 0, rx_data[12], i = 0;
+    temp1 = hw_iic_cfg[iic].slave_addr;
+    while (1) {
+        log_info("------------iic slave test------------");
+        /* log_info("------------iic CON:%x------------",JL_IIC->IIC_CON); */
+        for (i = 0; i < 12; i++) {
+            rx_data[i] = 0;
+        }
+        i = 0;
+        hw_iic_slave_rx_prepare(id, 1);
+        while (!iic_pnd(iic_regs[id]));
+        rx_data[i++] = hw_iic_slave_rx_byte(iic, NULL);
+        hw_iic_slave_rx_prepare(id, 1);
+        iic_pnd_clr(iic_regs[id]);
+        while (!iic_end_pnd(iic_regs[id])) {
+            while (iic_pnd(iic_regs[id])) {
+                rx_data[i++] = hw_iic_slave_rx_byte(iic, NULL);//iic_buf_reg(iic_regs[id]);
+                hw_iic_slave_rx_prepare(id, 1);
+                iic_pnd_clr(iic_regs[id]);
+                /* putchar(0x30); */
+            }
+        }
+        iic_end_pnd_clr(iic_regs[id]);
+        iic_start_pnd_clr(iic_regs[id]);
+        log_info("rx addr:%x, slave addr:%x", rx_data[0], temp1);
+        log_info_hexdump(rx_data, i);
+        log_info("~~~~~iic rx end~~~~~\n\n");
+        wdt_clear();
     }
 }
 

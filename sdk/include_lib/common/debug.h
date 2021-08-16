@@ -36,7 +36,8 @@ LOG_TAG_CONST_DECLARE(LOG_DEBUG,    LOG_TAG_CONST);
 LOG_TAG_CONST_DECLARE(LOG_WARN,     LOG_TAG_CONST);
 LOG_TAG_CONST_DECLARE(LOG_ERROR,    LOG_TAG_CONST);
 LOG_TAG_CONST_DECLARE(LOG_CHAR,     LOG_TAG_CONST);
-#define _LOG_TAG                        STR(LOG_TAG_CONST)
+// #define _LOG_TAG                        STR(LOG_TAG_CONST)
+#define _LOG_TAG            LOG_TAG
 #define LOG_IS_ENABLE(level)            _LOG_IS_ENABLE(level)
 
 #else

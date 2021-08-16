@@ -54,7 +54,7 @@ void aux_init(void)
     cbuf_init(&cbuf_aux_o, &obuf_aux_o[0], sizeof(obuf_aux_o));
     aux_sound.p_obuf = &cbuf_aux_o;
 
-    err = audio_adc_init_api(24000, ADC_LINE_IN, BIT(1));
+    err = audio_adc_init_api(24000, ADC_MIC, BIT(1));
     /* dac_sr_api(24000); */
     /* dac_init_api(24000); */
     aux_test_audio();
@@ -84,9 +84,9 @@ void aux_demo(void)
     dac_sr_api(24000);
     /* dac_init_api(24000); */
     /* dac_vol(0, 31); */
-    aux_init();
+    /* aux_init(); */
     dac_fade_in_api();
-    /* audio_adc_speaker_start(); */
+    audio_adc_speaker_start();
     int msg[2];
     char c;
     while (1) {

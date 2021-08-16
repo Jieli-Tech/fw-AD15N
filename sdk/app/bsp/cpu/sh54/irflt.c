@@ -185,7 +185,6 @@ static void ir_input_io_sel(u8 port)
 
     gpio_set_direction(port, 1);
     gpio_set_die(port, 1);
-    gpio_set_pull_up(port, 1);
 }
 
 static inline void ir_output_timer_sel(u8 timer)

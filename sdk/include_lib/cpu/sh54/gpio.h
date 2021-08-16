@@ -425,7 +425,8 @@ u32 gpio_clock_in(u32 gpio);
  */
 u32 get_gpio(const char *p);
 
-
+//gpio操作关中断临界保护控制变量
+extern const char GPIO_CRITICAL_OPT;
 
 // u32 gpio_close_uart0();
 // u32 gpio_close_uart1();

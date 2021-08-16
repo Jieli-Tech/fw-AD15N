@@ -47,6 +47,7 @@ isd_download.exe -tonorflash -dev sh55 -boot 0x0 -div8 -wait 300 -uboot uboot.bo
 @rem
 @rem
 @rem
+@rem
 
 
 

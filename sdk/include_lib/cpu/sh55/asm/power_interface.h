@@ -276,7 +276,7 @@ void *low_power_get(void *priv, const struct low_power_operation *ops);
 
 void low_power_put(void *priv);
 
-void low_power_sys_request(void *priv);
+u8 low_power_sys_request(void *priv);
 
 void *low_power_sys_get(void *priv, const struct low_power_operation *ops);
 

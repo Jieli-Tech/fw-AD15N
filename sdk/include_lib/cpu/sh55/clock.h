@@ -77,6 +77,7 @@ typedef enum {
 
 void pll_sel(u32 pll_clock, _PLL_DIV pll_div, _PLL_B_DIV pll_b_div);
 u32 sys_clock_get(void);
+u32 sys_clock_peration(void);
 void uart_clk_sel();
 void clk_output_sel(u8 clk);
 

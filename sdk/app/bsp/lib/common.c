@@ -13,6 +13,17 @@ void delay(volatile u32 t)
     }
 }
 
+__attribute__((always_inline))
+void enter_critical_hook()
+{
+    tick_timer_set_api(1);
+}
+__attribute__((always_inline))
+void exit_critical_hook()
+{
+    tick_timer_set_api(0);
+}
+
 void system_enter_critical(void)
 {
 }

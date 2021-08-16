@@ -169,6 +169,10 @@ void usb_start()
 
 #if TCFG_USB_EXFLASH_UDISK_ENABLE
     msd_register_disk(__EXT_FLASH_NANE, NULL);
+    void *device = dev_open(__EXT_FLASH_NANE, 0);
+    if (device != NULL) {
+        dev_ioctl(device, IOCTL_SET_READ_USE_CACHE, 1);
+    }
 #endif
 
 #if TCFG_USB_MSD_CDROM_ENABLE

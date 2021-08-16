@@ -1,9 +1,23 @@
+/*********************************************************************************************
+    *   Filename        : power_api.c
+
+    *   Description     : 低功耗所用接口及流程
+
+    *   Author          : Sunlicheng
+
+    *   Email           : Sunlicheng@zh-jieli.com
+
+    *   Last modifiled  : 2021-07-13 11:50
+
+    *   Copyright:(c)JIELI  2011-2019  @ , All Rights Reserved.
+*********************************************************************************************/
+
 #include "power_api.h"
 #include "asm/power_interface.h"
 #include "asm/power/p33.h"
 #include "gpio.h"
 #include "tick_timer_driver.h"
-/* #include "audio.h" */
+#include "wdt.h"
 
 #define ENABLE								1
 #define DISABLE								0
@@ -12,9 +26,7 @@
 #define LOG_TAG             "[pwra]"
 #include "debug.h"
 
-//*********************************************************************************//
-//                                  低功耗配置                                     //
-//*********************************************************************************//
+/************************************************ power_param *******************************************************/
 #define TCFG_LOWPOWER_POWER_SEL				PWR_LDO15                    //电源模式设置，可选DCDC和LDO
 #define TCFG_LOWPOWER_BTOSC_DISABLE			0                            //低功耗模式下BTOSC是否保持
 #define TCFG_LOWPOWER_LOWPOWER_SEL			SLEEP_EN                  //SNIFF状态下芯片是否进入powerdown
@@ -22,10 +34,12 @@
 #define TCFG_LOWPOWER_VDDIOM_LEVEL			VDDIOM_VOL_32V
 /*wvddiom: 2.0~3.4*/
 #define TCFG_LOWPOWER_VDDIOW_LEVEL			VDDIOW_VOL_28V               //弱VDDIO等级配置
-#define TCFG_KEEP_FLASH_POWER_GATE          0							 //flash power由软件控制
+#define TCFG_KEEP_FLASH_POWER_GATE          0							 //flash power由用户控制
+#define TCFG_LOWPOWER_DAC_OPEN				1							 //出低功耗是否开dac电源，对于频繁进出低功耗应用建议在dac使用前开dac电源
+#define TCFG_NORFLASH_4BYTE_MODE			0							 //出低功耗是否重新初始化4byte模式flash，大于16M的flash不打开此定义vm会报错
 
 
-/************************** LOW POWER config ****************************/
+
 const struct low_power_param power_param = {
     .config         = TCFG_LOWPOWER_LOWPOWER_SEL,          //0：sniff时芯片不进入低功耗  1：sniff时芯片进入powerdown
     .btosc_hz         = 16000000,                   	   //外接晶振频率
@@ -35,10 +49,10 @@ const struct low_power_param power_param = {
     .vddiow_lev     = TCFG_LOWPOWER_VDDIOW_LEVEL,          //弱VDDIO等级,可选：2.1V  2.4V  2.8V  3.2V
     .osc_type       = OSC_TYPE_LRC,
     .flash_pg       = TCFG_KEEP_FLASH_POWER_GATE,
-    .vdc13_cap_en   = 1,									//根据vdc13引脚是否有外部电容来配置, 1.外挂电容 0.无外挂电容
+    .vdc13_cap_en   = 0,									//根据vdc13引脚是否有外部电容来配置, 1.外挂电容 0.无外挂电容
 };
 
-/************************** PWR config ****************************/
+/**************************************************** wk_param *********************************************************/
 
 const struct port_wakeup port0 = {
     .pullup_down_enable = ENABLE,                          //配置I/O 内部上下拉是否使能
@@ -61,7 +75,7 @@ const struct wakeup_param wk_param = {
     .charge = &charge_wkup,
 };
 
-/************************** PWR long hold reset config ****************************/
+/******************************************************* rs_param ***************************************************/
 const struct reset_param rs_param = {
     .en = 0,
     .mode = 1,										//系统释放方式 0：等复位源翻转再释放 1：立刻释放
@@ -70,108 +84,9 @@ const struct reset_param rs_param = {
     .hold_time = LONG_4S_RESET,
 };
 
-__attribute__((weak))
-void dac_power_off()
-{
-
-}
-
-__attribute__((weak))
-void tick_timer_sleep_init(void)
-{
-}
-
-static void mask_io_cfg()
-{
-    struct boot_soft_flag_t boot_soft_flag = {0};
-
-    boot_soft_flag.flag0.boot_ctrl.wdt_dis = 0;
-    boot_soft_flag.flag0.boot_ctrl.lvd_en = GET_P33_VLVD_EN();
-
-    mask_softflag_config(&boot_soft_flag);
-}
-
-/*进软关机之前默认将IO口都设置成高阻状态，需要保留原来状态的请修改该函数*/
-extern void dac_power_off(void);
-extern void dac_sniff_power_off(void);
-extern u32 spi_get_port(void);
-void board_set_soft_poweroff(void)
-{
-    u32 porta_value = 0xffff & ~(BIT(0));
-    u32 portb_value = 0xffff & ~(BIT(10));
-
-    mask_io_cfg();
-
-    /*gpio_write(MIC_HW_IO, 0);*/
-
-    JL_PORTA->DIR |= porta_value;
-    JL_PORTA->PU &= ~(porta_value);
-    JL_PORTA->PD &= ~(porta_value);
-    JL_PORTA->DIE &= ~(porta_value);
-    JL_PORTA->DIEH &= ~(porta_value);
-
-    //PB1:长按复位
-    JL_PORTB->DIR |= portb_value;
-    JL_PORTB->PU &= ~(portb_value);
-    JL_PORTB->PD &= ~(portb_value);
-    JL_PORTB->DIE &= ~(portb_value);
-    JL_PORTB->DIEH &= ~(portb_value);
-
-    VDDIOW_VOL_SEL(power_param.vddiow_lev);
-
-    dac_power_off();
-}
-
-
-#define     APP_IO_DEBUG_0(i,x)       //{JL_PORT##i->DIR &= ~BIT(x), JL_PORT##i->OUT &= ~BIT(x);}
-#define     APP_IO_DEBUG_1(i,x)       //{JL_PORT##i->DIR &= ~BIT(x), JL_PORT##i->OUT |= BIT(x);}
-
-void sleep_exit_callback(u32 usec)
-{
-    putchar('>');
-    APP_IO_DEBUG_1(A, 6);
-}
-
-void sleep_enter_callback(u8  step)
-{
-    /* 此函数禁止添加打印 */
-    if (step == 1) {
-        putchar('<');
-        APP_IO_DEBUG_0(A, 6);
-        /*dac_sniff_power_off();*/
-        dac_power_off();
-    } else {
-
-        u32 porta_value = 0xffff & ~(BIT(0));
-        u32 portb_value = 0xffff & ~BIT(10);
-        u32 portd_value = 0x1f;
-
-        if (spi_get_port() == 0) {
-            portd_value = 0;
-        }
-
-        /*gpio_write(MIC_HW_IO, 0);*/
-
-        JL_PORTA->DIR |= porta_value;
-        JL_PORTA->PU &= ~(porta_value);
-        JL_PORTA->PD &= ~(porta_value);
-        JL_PORTA->DIE &= ~(porta_value);
-        JL_PORTA->DIEH &= ~(porta_value);
-
-        //PB1:长按复位
-        JL_PORTB->DIR |= portb_value;
-        JL_PORTB->PU &= ~(portb_value);
-        JL_PORTB->PD &= ~(portb_value);
-        JL_PORTB->DIE &= ~(portb_value);
-        JL_PORTB->DIEH &= ~(portb_value);
-
-        JL_PORTD->DIR |= portd_value;
-        JL_PORTD->PU &= ~(portd_value);
-        JL_PORTD->PD &= ~(portd_value);
-        JL_PORTD->DIE &= ~(portd_value);
-        JL_PORTD->DIEH &= ~(portd_value);
-    }
-}
+/*#include "port_init.c"*/
+void mask_io_cfg();
+void close_gpio(u8 soft_off);
 
 /**
  * @brief power_wakeup_reason
@@ -196,21 +111,99 @@ int power_wakeup_reason(void)
     return wkup_port;
 }
 
+static u8 dac_state = 1;
+void dac_power_off();
+void dac_power_on();
+void norflash_check_4byte_mode(void);
+__attribute__((weak))
+void dac_power_off()
+{
+
+}
+
+__attribute__((weak))
+void dac_power_on()
+{
+    //audio_init();
+    //dac_init_api(32000);
+}
+
+void sleep_exit_callback(u32 usec)
+{
+    putchar('>');
+}
+
+void sleep_enter_callback(u8  step)
+{
+    /* 此函数禁止添加打印 */
+    if (step == 1) {
+        putchar('<');
+        dac_power_off();
+        dac_state = 0;
+    } else {
+        close_gpio(0);
+    }
+}
+
+void board_set_soft_poweroff(void)
+{
+    close_gpio(1);
+
+    dac_power_off();
+}
+
 extern u8 sys_low_power_request;
 extern u32 lowpower_usec;
 
+/*----------------------------------------------------------------------------*/
+/**@brief 进入powerdown 模式
+   @param usec: -2:静态睡眠，需要等待按键唤醒  非-2：睡眠时间，单位us，例如1000000为睡眠1S后自动唤醒
+   @return null
+   @note
+*/
 void sys_power_down(u32 usec)
 {
-    if (sys_low_power_request) {
+    u8 temp_wdt_con = 0;
+    u8 ret = 0;
+    OS_ENTER_CRITICAL();
+    if (!sys_low_power_request) {
+        temp_wdt_con = wdt_rx_con();
+        if (usec == (u32) - 2) {
+            wdt_close();
+        }
         lowpower_usec = usec;
-        low_power_sys_request(NULL);
+        ret = low_power_sys_request(NULL);
+        wdt_tx_con(temp_wdt_con);
         wdt_clear();
     }
+
+    if (ret == 0) {
+        OS_EXIT_CRITICAL();
+        return;
+    }
+
+#if TCFG_NORFLASH_4BYTE_MODE
+    norflash_check_4byte_mode();
+#endif
+    OS_EXIT_CRITICAL();
+
+#if TCFG_LOWPOWER_DAC_OPEN
+    if (dac_state == 0) {
+        dac_power_on();
+    }
+#endif
+
 }
 
 void sys_softoff()
 {
     power_set_soft_poweroff();
+}
+
+__attribute__((weak))
+void tick_timer_sleep_init(void)
+{
+
 }
 
 void sys_power_init()

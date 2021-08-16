@@ -37,6 +37,7 @@ extern unsigned char jiffies_unit;
 void delay(volatile u32 t);
 void os_time_dly(u32 tick);
 void delay_10ms(u32 tick);
+void udelay();
 
 
 #endif

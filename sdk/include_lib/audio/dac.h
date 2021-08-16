@@ -36,8 +36,8 @@
 
 #define DAC_MODE_1_A   ( DAC_PWM )
 // 以下DSM模式暂时皆不可用
-// #define DAC_MODE_3_C   ( DAC_DSM | DAC_DSM2 )
-// #define DAC_MODE_3_D   ( DAC_DSM | DAC_DSM3 )
+#define DAC_MODE_3_C   ( DAC_DSM | DAC_DSM2 )
+#define DAC_MODE_3_D   ( DAC_DSM | DAC_DSM3 )
 #define DAC_MODE_1_B   ( DAC_DSM | DAC_DSM11 )
 
 #define DAC_MODE_5_A   ( DAC_DSM | DAC_DSM7)    //AD150不支持
@@ -67,6 +67,8 @@ u32 dac_sr_lookup(u32 sr);
 u32 dac_sr_set(u32 sr);
 u32 dac_sr_read(void);
 void dac_cpu_mode(void);
+int dac_low_power(void);
+u32 dac_mode_check(u32 con);
 
 
 #endif

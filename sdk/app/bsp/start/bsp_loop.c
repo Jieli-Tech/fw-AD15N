@@ -55,8 +55,8 @@ int bsp_loop(void)
     switch (event) {
     case B_EVENT_100MS:
 #if (EXT_FLASH_EN)
-        extern void _norflash_cache_sync_timer();
-        _norflash_cache_sync_timer();
+        extern void _norflash_cache_sync_timer(u32 sync_step);
+        _norflash_cache_sync_timer(5);
 #endif
         break;
     default:

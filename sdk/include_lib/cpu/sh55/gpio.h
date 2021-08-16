@@ -435,6 +435,9 @@ u32 gpio_clock_in(u32 gpio);//输入通道3：tmr2 cin输入
 u32 get_gpio(const char *p);
 
 
+//gpio操作关中断临界保护控制变量
+extern const char GPIO_CRITICAL_OPT;
+
 
 // u32 gpio_close_uart0();
 // u32 gpio_close_uart1();

@@ -42,6 +42,9 @@ const u8   AUDIO_VCMCAP     = FALSE;	 //TRUE:VCM有电容   FALSE:VCM没有电�
 //
 const char ADC_VBG_TRIM_EN	= TRUE; // VBG TRIM
 
+//gpio 临界保护控制使能
+const char GPIO_CRITICAL_OPT = TRUE; //TRUE:有关中断临界保护    FALSE:没有关中断临界保护
+
 //midi主轨选择方式
 const int MAINTRACK_USE_CHN	= 0;//0:用track号来区分  1:用channel号来区分。
 
