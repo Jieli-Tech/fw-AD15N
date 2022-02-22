@@ -41,10 +41,12 @@
 <Add option="-DFM_EN=0" />
 <Add option="-DEEPROM_EN=0" />
 <Add option="-DHAS_USB_EN=0" />
-<Add option="-DHAS_MIO_EN=0" />
+<Add option="-DHAS_MIO_EN=1" />
 <Add option="-DHAS_UPDATE_EN=0" />
+<Add option="-DHAS_UART_UPDATE_EN=0" />
 <Add option="-DECHO_EN=0" />
 <Add option="-DHOWLING_EN=0" />
+<Add option="-DSIMPLE_FATFS_ENABLE=0" />
 <Add option="-DNOFLOAT" />
 <Add directory="app/src/app_mg/simple" />
 <Add directory="app/src/app_mg/common/music_api" />
@@ -95,6 +97,7 @@
 <Add option="--gc-sections" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/sh55/cpu_lib.a" />
+<Add option="include_lib/liba/sh55/efuse_trim_value_lib.a" />
 <Add option="include_lib/liba/sh55/fs_lib.a" />
 <Add option="include_lib/liba/sh55/audio_lib.a" />
 <Add option="include_lib/liba/sh55/decoder_mge_lib.a" />
@@ -126,8 +129,11 @@
 <Unit filename="app/bsp/common/decoder/eq.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/a_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/f1a_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/decoder/list/f1x_parsing.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/midi_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/midi_ctrl_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/decoder/list/mio_phy.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/decoder/mio_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/sine_play.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/fs/nor_fs/nor_fs_resource.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/fs/sydf/sydf_resource.c"><Option compilerVer="CC"/></Unit>
@@ -240,6 +246,7 @@
 <Unit filename="include_lib/cpu/sh55/csfr.h" />
 <Unit filename="include_lib/cpu/sh55/dac_cpu.h" />
 <Unit filename="include_lib/cpu/sh55/efuse.h" />
+<Unit filename="include_lib/cpu/sh55/efuse_trim_value.h" />
 <Unit filename="include_lib/cpu/sh55/gpio.h" />
 <Unit filename="include_lib/cpu/sh55/hwi.h" />
 <Unit filename="include_lib/cpu/sh55/irq.h" />
@@ -280,6 +287,9 @@
 <Unit filename="include_lib/device/usb/device/usb_stack.h" />
 <Unit filename="include_lib/device/usb/otg.h" />
 <Unit filename="include_lib/device/usb/usb_phy.h" />
+<Unit filename="include_lib/fs/fat/fat_resource.h" />
+<Unit filename="include_lib/fs/fat/ff_opr.h" />
+<Unit filename="include_lib/fs/fat/tff.h" />
 <Unit filename="include_lib/fs/nor_fs/nor_fs.h" />
 <Unit filename="include_lib/fs/sydf/sydf_resource.h" />
 <Unit filename="include_lib/fs/sydf/sydfile.h" />

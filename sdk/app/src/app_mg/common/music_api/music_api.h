@@ -103,9 +103,9 @@ int music_play_destroy(music_play_obj **hdl);
 int music_play(music_play_obj **hdl, const char *dir,  u32 index, u32 decoder_type, \
                void *device, PLAY_MODE play_mode, void *fs_type, void *bpbuff);
 int music_midi_ctrl_play(music_play_obj **_hdl);
-int music_play_end_operation(music_play_obj *hdl);
-int music_play_next_file(music_play_obj *hdl);
-int music_play_priv_file(music_play_obj *hdl);
+int music_play_end_operation(music_play_obj **hdl);
+int music_play_next_file(music_play_obj **hdl);
+int music_play_priv_file(music_play_obj **hdl);
 int music_play_pp(music_play_obj *hdl);
 int music_play_get_status(music_play_obj *hdl);
 int music_play_get_decoder_type(music_play_obj *hdl);

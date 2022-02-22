@@ -43,6 +43,7 @@ typedef enum {
     VM_INDEX_ENG,
     VM_INDEX_POETRY,
     VM_INDEX_STORY,
+    VM_INDEX_F1X,
     VM_INDEX_EXT_SONG,
     VM_INDEX_VOL,
 

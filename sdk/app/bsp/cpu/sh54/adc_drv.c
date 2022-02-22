@@ -259,7 +259,7 @@ int adc_scan_once(u8 ch)
 
     u32 adc_con = 0;
     adc_con |= (clk_div/*时钟分频*/\
-                | (0xf << 12)/*启动延时控制，实际启动延时为此数值*8个ADC时钟*/\
+                | (0x0 << 12)/*启动延时控制，实际启动延时为此数值*8个ADC时钟*/\
                 | ((adc_ch & 0xf) << 8)/*ch选择*/\
                 | BIT(3) | BIT(6));
 
@@ -361,10 +361,10 @@ u32 adc_value_to_voltage(u32 adc_vbg, u32 adc_vbat)
     if (ADC_VBG_TRIM_EN) {
         trim = get_vbg_trim();
     }
-    if (trim & BIT(5)) {
-        vbg_center += (trim & 0x0f) * 3;
-    } else {
+    if (trim & BIT(4)) {
         vbg_center -= (trim & 0x0f) * 3;
+    } else {
+        vbg_center += (trim & 0x0f) * 3;
     }
     u32 voltage = (vbg_center) * adc_vbat / adc_vbg;
     return voltage;

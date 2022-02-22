@@ -31,6 +31,8 @@ extern __attribute__((weak)) bool tick_timer_close(void);
 #define tick_timer_close_api()       if(tick_timer_close) { tick_timer_close(); }
 
 
+void _OS_EXIT_CRITICAL(void);
+void _OS_ENTER_CRITICAL(u32 bit_list);
 void irq_index_tab_reg(void *tab, u32 max_cnt);
 u8 irq_index_to_prio(u8 idx);
 

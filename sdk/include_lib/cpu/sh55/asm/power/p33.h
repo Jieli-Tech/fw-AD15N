@@ -557,9 +557,9 @@ enum {
 /*
  *-------------------P3_RST_CON0
  */
-#define VLVD_RST_EN(en)         P33_TX_NBIT(P3_RST_SRC, BIT(2), en)
+#define VLVD_RST_EN(en)         P33_TX_NBIT(P3_RST_CON0, BIT(2), en)
 
-#define VLVD_WKUP_EN(en)        P33_TX_NBIT(P3_RST_SRC, BIT(3), en)
+#define VLVD_WKUP_EN(en)        P33_TX_NBIT(P3_RST_CON0, BIT(3), en)
 /*******************************************************************/
 
 /*

@@ -10,6 +10,10 @@
 #include "audio.h"
 #include "audio_analog.h"
 
+#define LOG_TAG_CONST       NORM
+#define LOG_TAG             "[dac cpu]"
+#include "debug.h"
+
 void dac_cpu_mode(void)
 {
     apa_analog_open();
@@ -28,24 +32,24 @@ int dac_low_power(void)
 }
 u32 dac_mode_check(u32 con)
 {
-    /*
-        char cpu_mode = 'A';
-        cpu_mode = chip_versions();
+    char cpu_mode = 'A';
+    cpu_mode = chip_versions();
 
-        u32 dsm_pwm = con & DAC_MODE_BITS;
-        if (cpu_mode <  'C') {
-            switch (dsm_pwm) {
-            case DAC_MODE_1_A:
-                break;
-            case DAC_MODE_1_B:
-            case DAC_MODE_3_C:
-            case DAC_MODE_3_D:
-                con = (con & DAC_MODE_BITS) | DAC_MODE_1_A;
-                break;
-            default:
-                break;
-            }
+    u32 dsm_pwm = con & DAC_MODE_BITS;
+    if (cpu_mode <  'C') {
+        switch (dsm_pwm) {
+        case DAC_MODE_1_A:
+            break;
+        case DAC_MODE_1_B:
+        case DAC_MODE_3_C:
+        case DAC_MODE_3_D:
+            log_error("err dac Work mode!!!\n");
+            con = (con & ~(DAC_MODE_BITS)) | DAC_MODE_1_A;
+            /* con = (con & ~DAC_MODE_BITS) | DAC_MODE_1_A; */
+            break;
+        default:
+            break;
         }
-    */
+    }
     return con;
 }

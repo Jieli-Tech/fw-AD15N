@@ -6,6 +6,7 @@
 #include "init.h"
 #include "clock.h"
 #include "efuse.h"
+#include "efuse_trim_value.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -26,6 +27,7 @@ void all_init_isr(void)
 void system_init(void)
 {
     pll_sel(PLL_320M, PLL_DIV2, PLL_B_DIV2);
+    efuse_trim_value_init();
     /* sys_clock_get(); */
 
     //------

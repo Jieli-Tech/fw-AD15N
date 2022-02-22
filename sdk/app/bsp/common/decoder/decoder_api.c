@@ -121,6 +121,13 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
     /* log_info("\n************\ndecoder_fun"); */
 
 
+#if HAS_MIO_EN
+    u32 mio_res = -1;
+    void *mio_pfile = NULL;
+    if (pfile) {
+        mio_res = vfs_openbyfile(pfile, &mio_pfile, "mio");
+    }
+#endif
 
     dec_obj *p_dec = 0;
     sound_out_obj *p_curr_sound = 0;
@@ -146,7 +153,7 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
         // 设置解码参数
         u32 flen = 0;
         vfs_get_fsize(pfile, &flen);
-        log_info("flen:%d \n", flen);
+        /* log_info("flen:%d \n", flen); */
         if (flen) {
             decoder_set_file_size(p_dec, flen);
         }
@@ -175,15 +182,11 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
         } else {
             void *src_tmp = src_hld_malloc();
             src_reless((void **)&src_tmp);
-            log_info("do't need src\n");
+            //log_info("do't need src\n");
         }
 #if HAS_MIO_EN
-        if (pfile) {
-            void *mio_pfile = NULL;
-            res = vfs_openbyfile(pfile, &mio_pfile, "mio");
-            if (0 == res) {
-                d_mio_open(&first_sound->mio, mio_pfile, (void *)mio_a_hook_init);
-            }
+        if (0 == mio_res) {
+            d_mio_open(&first_sound->mio, mio_pfile, (void *)mio_a_hook_init);
         }
 #endif
 
@@ -192,9 +195,9 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
         clear_dp(dbuff);
         if (0 != loop) { // (dec_ctl & BIT_LOOP)
             p_dec->loop = loop;
-            log_info("get loop dp\n");
+            //log_info("get loop dp\n");
             if (true == get_dp(p_dec, dbuff)) {
-                log_info(" -loop save succ!\n");
+                //log_info(" -loop save succ!\n");
                 p_dec->p_dp_buf = check_dp(dbuff);
             } else {
                 log_info(" -loop save fail!\n");
@@ -206,6 +209,11 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
         log_info("decode succ \n");
     } else {
         log_info("decode err : 0x%x\n", res);
+#if HAS_MIO_EN
+        if (0 == mio_res) {
+            vfs_file_close(&mio_pfile);
+        }
+#endif
     }
     dac_fade_in_api();
     //while(1)clear_wdt();
@@ -226,11 +234,17 @@ void irq_decoder_ret(dec_obj *obj, u32 ret)
     }
     if (0 != ret) {
         log_info("decoder ret : 0x%x\n", ret);
-        post_event(obj->event_tab[ret & 0x0f]);
+        if (MAD_ERROR_F1X_START_ADDR == ret) {
+            /* ret = MAD_ERROR_PLAY_END;  */
+            post_event(obj->event_tab[MAD_ERROR_PLAY_END & 0x0f]);
+        } else {
+            post_event(obj->event_tab[ret & 0x0f]);
+        }
     }
     switch (ret) {
     case MAD_ERROR_FILE_END:
     case MAD_ERROR_SYNC_LIMIT:
+    case MAD_ERROR_F1X_START_ADDR:
         obj->sound.enable |= B_DEC_ERR;
         log_info("file end\n");
         break;

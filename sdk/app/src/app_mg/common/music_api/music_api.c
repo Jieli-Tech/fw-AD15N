@@ -209,14 +209,15 @@ int music_midi_ctrl_play(music_play_obj **_hdl)
    @note
 */
 /*----------------------------------------------------------------------------*/
-int music_play_end_operation(music_play_obj *hdl)
+int music_play_end_operation(music_play_obj **_hdl)
 {
-    if (hdl == NULL || hdl->en != MUSIC_PLAY_INIT_OK) {
+    music_play_obj *hdl = *_hdl;
+    if (_hdl == NULL || hdl == NULL || hdl->en != MUSIC_PLAY_INIT_OK) {
         return -1;
     }
 
     if (hdl->play_mode == MUSIC_MODE_PLAY_ONE) {
-        music_play_destroy(&hdl);
+        music_play_destroy(_hdl);
         return 0;
     }
 
@@ -232,7 +233,7 @@ int music_play_end_operation(music_play_obj *hdl)
                                    hdl->file.cur_file_index : 1;
 
         if (music_file_reopen_byindex(&hdl->file.pvfs, &hdl->file.pvfile, &hdl->file.cur_file_index, 0) != 0) {
-            music_play_destroy(&hdl);
+            music_play_destroy(_hdl);
             return -1;
         }
         break;
@@ -241,7 +242,7 @@ int music_play_end_operation(music_play_obj *hdl)
                                    hdl->file.cur_file_index : hdl->file.total_file_num;
 
         if (music_file_reopen_byindex(&hdl->file.pvfs, &hdl->file.pvfile, &hdl->file.cur_file_index, 1) != 0) {
-            music_play_destroy(&hdl);
+            music_play_destroy(_hdl);
             return -1;
         }
         break;
@@ -267,6 +268,7 @@ int music_play_end_operation(music_play_obj *hdl)
     if (decode_succ_cb) {
         decode_succ_cb(hdl);
     }
+
     return 0;
 }
 
@@ -277,9 +279,10 @@ int music_play_end_operation(music_play_obj *hdl)
    @note
 */
 /*----------------------------------------------------------------------------*/
-int music_play_next_file(music_play_obj *hdl)
+int music_play_next_file(music_play_obj **_hdl)
 {
-    if (hdl == NULL || hdl->en != MUSIC_PLAY_INIT_OK) {
+    music_play_obj *hdl = *_hdl;
+    if (_hdl == NULL || hdl == NULL || hdl->en != MUSIC_PLAY_INIT_OK) {
         music_printf("hdl uninit !!!! \n");
         return -1;
     }
@@ -311,7 +314,7 @@ int music_play_next_file(music_play_obj *hdl)
 
     if (music_file_reopen_byindex(&hdl->file.pvfs, &hdl->file.pvfile, &hdl->file.cur_file_index, 0) != 0) {
         music_err_printf("open file error !!! \n");
-        music_play_destroy(&hdl);
+        music_play_destroy(_hdl);
         return -1;
     }
 
@@ -342,9 +345,10 @@ int music_play_next_file(music_play_obj *hdl)
    @note
 */
 /*----------------------------------------------------------------------------*/
-int music_play_priv_file(music_play_obj *hdl)
+int music_play_priv_file(music_play_obj **_hdl)
 {
-    if (hdl == NULL || hdl->en != MUSIC_PLAY_INIT_OK) {
+    music_play_obj *hdl = *_hdl;
+    if (_hdl == NULL || hdl == NULL || hdl->en != MUSIC_PLAY_INIT_OK) {
         music_printf("hdl uninit !!!! \n");
         return -1;
     }
@@ -376,7 +380,7 @@ int music_play_priv_file(music_play_obj *hdl)
 
     if (music_file_reopen_byindex(&hdl->file.pvfs, &hdl->file.pvfile, &hdl->file.cur_file_index, 1) != 0) {
         music_err_printf("open file error !!! \n");
-        music_play_destroy(&hdl);
+        music_play_destroy(_hdl);
         return -1;
     }
 

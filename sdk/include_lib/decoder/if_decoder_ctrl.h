@@ -32,15 +32,19 @@ typedef struct _AUDIO_FLEN_PARA {
     u32 flen;
 } AUDIO_FLEN_PARA;
 
-#define PLAY_MOD_NORMAL   0x00
-#define PLAY_MOD_FF   0x01
-#define PLAY_MOD_FB   0x02
+typedef struct _AUDIO_FADE_PARA {
+    u32 mode;//0表示不进行任何处理,1代表要fade到0
+} AUDIO_FADE_PARA;
+
+#define PLAY_MOD_NORMAL   	0x00
+#define PLAY_MOD_FF   		0x01
+#define PLAY_MOD_FB   		0x02
 
 
-#define REAPT_MOD_STARTA   0x01
-#define REAPT_MOD_STARTB   0x02
-#define REAPT_MOD_STARTN   0x03
-#define REAPT_MOD_FREPT    0x04
+#define REAPT_MOD_STARTA   	0x01
+#define REAPT_MOD_STARTB   	0x02
+#define REAPT_MOD_STARTN   	0x03
+#define REAPT_MOD_FREPT    	0x04
 
 #define SET_DECODE_MODE   	0x80
 #define SET_FILE_TOTAL_LEN	0x84
@@ -52,7 +56,9 @@ enum {
     SET_RECOVER_MODE
 };
 
-#define  CMD_SET_CONTINUE_BK             0x90
+#define CMD_SET_CONTINUE_BK	0x90
+#define CMD_SET_PLAY_FILE	0x91
+#define CMD_SET_FADEOUT		0x93
 
 //play control
 #define PLAY_FILE       0x80000000
@@ -60,6 +66,11 @@ enum {
 #define PLAY_NEXT       0x80000002
 
 #define AUDIO_BK_EN
+
+typedef struct _EX_PlayFile_STRUCT_ {
+    void *priv;
+    u32(*set_play_file)(void *priv, u32 *startpos, u32 *endpos);
+} EX_PlayFile_STRUCT;
 
 struct if_decoder_io {
     void *priv;

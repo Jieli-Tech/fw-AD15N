@@ -38,7 +38,7 @@ static inline void flash_mutex_post(flash_mutex *sem)//
 {
     (*sem) = 1;
 }
-static inline u32 flash_mutex_pend(flash_mutex *sem, u32 timeout)// 当为timeout=0时，死等
+static inline s32 flash_mutex_pend(flash_mutex *sem, u32 timeout)// 当为timeout=0时，死等
 {
     u32 _timeout = timeout + jiffies;
     extern void wdt_clear();
@@ -51,6 +51,17 @@ static inline u32 flash_mutex_pend(flash_mutex *sem, u32 timeout)// 当为timeou
             return -1;
         }
         wdt_clear();
+    }
+    return 0;
+}
+static inline s32 query_flash_mutex_pend(flash_mutex *sem, u32 timeout)// 当为timeout=0时，死等
+{
+    while (1) {
+        if (*sem) {
+            (*sem) = 0;
+            break;
+        }
+        return -1;
     }
     return 0;
 }
@@ -79,6 +90,8 @@ static inline void flash_mutex_set(flash_mutex *sem, u32 count)
 #define WINBOND_BLOCK_ERASE		          	0xD8
 #define WINBOND_CHIP_ERASE		          	0xC7
 #define WINBOND_JEDEC_ID                    0x9F
+#define WINBOND_POWER_DOWN                  0xB9
+#define WINBOND_RELEASE_POWER_DOWN          0xAB
 
 enum {
     FLASH_PAGE_ERASER,
@@ -107,6 +120,8 @@ struct norflash_dev_platform_data {
 extern const struct device_operations norflash_dev_ops;
 extern const struct device_operations norfs_dev_ops;
 
+void _norflash_power_down();
+void _norflash_release_power_down();
 #endif
 
 

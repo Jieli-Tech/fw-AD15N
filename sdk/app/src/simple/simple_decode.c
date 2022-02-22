@@ -29,10 +29,11 @@ void *g_pvfs = 0;
 
 dp_buff dp_ctl[4];
 static const char *const dir_tab[] = {
+    "/dir_bin_f1x/",
     "/dir_song/",
     "/dir_story/",
     "/dir_poetry/",
-    "/dir_eng/",
+    /* "/dir_eng/", */
 };
 
 static const char *const dir_tab_a[] = {
@@ -66,7 +67,29 @@ dec_obj *decoder_by_index(void *pvfs, play_control *ppctl)
 play_control pctl[2];
 #define ALL_DECODER_CHANNEL (sizeof(pctl)/sizeof(play_control));
 extern void simple_next(void);
-extern void aux_test_audio(void);
+
+void print_audio_sfr(void);
+
+void print_audio_sfr(void)
+{
+    log_info(" JL_ADDA->DAC_CON0    0x%x;",   JL_ADDA->DAC_CON0);
+    log_info(" JL_ADDA->DAC_CON1    0x%x;",   JL_ADDA->DAC_CON1);
+    log_info(" JL_ADDA->DAC_TRM     0x%x;",   JL_ADDA->DAC_TRM);
+    log_info(" JL_ADDA->DAC_ADR     0x%x;",   JL_ADDA->DAC_ADR);
+    log_info(" JL_ADDA->DAC_LEN     0x%x;",   JL_ADDA->DAC_LEN);
+    log_info(" JL_ADDA->DAC_COP     0x%x;",   JL_ADDA->DAC_COP);
+    log_info(" JL_ADDA->DAC_DTB     0x%x;",   JL_ADDA->DAC_DTB);
+    log_info(" JL_ADDA->ADC_CON     0x%x;",   JL_ADDA->ADC_CON);
+    log_info(" JL_ADDA->ADC_ADR     0x%x;",   JL_ADDA->ADC_ADR);
+    log_info(" JL_ADDA->ADC_LEN     0x%x;",   JL_ADDA->ADC_LEN);
+    log_info(" JL_ADDA->RAM_SPD     0x%x;",   JL_ADDA->RAM_SPD);
+    log_info(" JL_ADDA->DAA_CON0    0x%x;",   JL_ADDA->DAA_CON0);
+    log_info(" JL_ADDA->DAA_CON1    0x%x;",   JL_ADDA->DAA_CON1);
+    log_info(" JL_ADDA->ADA_CON0    0x%x;",   JL_ADDA->ADA_CON0);
+    log_info(" JL_ADDA->ADA_CON1    0x%x;",   JL_ADDA->ADA_CON1);
+    log_info(" JL_ADDA->ADA_CON2    0x%x;\n",   JL_ADDA->ADA_CON2);
+}
+
 void decoder_demo(void)
 {
     dac_sr_api(32000);
@@ -154,6 +177,7 @@ void decoder_demo(void)
         switch (msg[0]) {
         case MSG_500MS:
             wdt_clear();
+            /* print_audio_sfr(); */
             //模拟量的调节,电压不要急升
             audio_lookup();
             /* log_char('5'); */
@@ -185,7 +209,7 @@ void decoder_demo(void)
         //case MSG_F1A2_FILE_END:
         case MSG_MP3_FILE_END:
         case MSG_WAV_FILE_END:
-            log_info("\n file err end!!!\n");
+            /* log_info("file err end!!!\n"); */
             decoder_stop(pctl[0].p_dec_obj, NEED_WAIT);
             goto __1_next_file;
 
@@ -240,7 +264,7 @@ __1_next_file:
             post_msg(1, MSG_PLAY_FILE2);
             break;
         case MSG_PC_IN:
-            log_info("simple_decode pc in\n");
+            /* log_info("simple_decode pc in\n"); */
             break;
         }
     }

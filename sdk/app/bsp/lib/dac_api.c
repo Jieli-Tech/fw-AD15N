@@ -130,7 +130,7 @@ void dac_off_api(void)
 /* } */
 
 AT(.dac_oput_code)
-void fill_dac_fill(u8 *buf, u32 len)
+void fill_dac_fill_phy(u8 *buf, u32 len)
 {
     u32 i, sp_cnt, active_flag;
     s32 t_sp;
@@ -221,16 +221,14 @@ void fill_dac_fill(u8 *buf, u32 len)
         }
         dac_kick_decoder(dac_mge.sound[i], dac_mge.kick[i]);
     }
-    /* log_info("c"); */
-    /* __fill_dac_fill_end: */
-    /* if (sp_cnt < sp_number) { */
-    /* [> debug_u16hex0(sp_number - sp_cnt); <] */
-    /* memset(&sp_buf[sp_cnt], 0, (sp_number - sp_cnt) * 2); */
-    /* } */
-    /* log_info("buf:\n"); */
-    /* log_info_buf(buf, len); */
-
 }
+
+AT(.dac_oput_code)
+void fill_dac_fill(u8 *buf, u32 len, AUDIO_TYPE type)
+{
+    fill_dac_fill_phy(buf, len);
+}
+
 u8 dac_vol(char set, u8 vol)
 {
     if ('+' == set) {
@@ -284,7 +282,7 @@ bool regist_dac_channel(void *psound, void *kick)
         dac_mge.kick[i] = kick;
         dac_mge.sound[i] = psound;
         dac_mge.ch |= BIT(i);
-        log_info("dac_channel :0x%x 0x%x\n", i, dac_mge.ch);
+        /* log_info("dac_channel :0x%x 0x%x\n", i, dac_mge.ch); */
         return true;
     }
     return false;

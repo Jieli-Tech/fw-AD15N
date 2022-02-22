@@ -32,16 +32,18 @@ static uart_bus_t uart0;
 static uart_bus_t uart1;
 /* _WEAK_ */
 /* extern */
-const u32 CONFIG_UART0_ENABLE = 1;
+const u8 CONFIG_UART0_ENABLE = 1;
 /* _WEAK_ */
 /* extern */
-const u32 CONFIG_UART1_ENABLE  = 1;
+const u8 CONFIG_UART1_ENABLE = 1;
 /* _WEAK_ */
 /* extern */
-const u32 CONFIG_UART0_ENABLE_TX_DMA =  0;//串口0无DMA
+const u8 CONFIG_UART0_ENABLE_TX_DMA = 0;//串口0无DMA
 /* _WEAK_ */
 /* extern */
-const u32 CONFIG_UART1_ENABLE_TX_DMA =  1;
+const u8 CONFIG_UART1_ENABLE_TX_DMA = 1;
+u8 rx_pin_eq_tx_pin = 0;
+extern void uart_set_dma_dir(u32 rx_en);
 static u32 kfifo_get(KFIFO *kfifo, u8 *buffer, u32 len)
 {
     unsigned int i;
@@ -248,6 +250,9 @@ static void UT0_close(void)
  */
 static void UT1_putbyte(char a)
 {
+    if (rx_pin_eq_tx_pin) {
+        uart_set_dma_dir(0);
+    }
     if (JL_UT1->CON0 & BIT(0)) {
         JL_UT1->BUF = a;
         __asm__ volatile("csync");
@@ -255,6 +260,9 @@ static void UT1_putbyte(char a)
             while ((JL_UT1->CON0 & BIT(15)) == 0);
             JL_UT1->CON0 |= BIT(13);
         }
+    }
+    if (rx_pin_eq_tx_pin) {
+        uart_set_dma_dir(1);
     }
 }
 /**
@@ -275,6 +283,9 @@ static u8 UT1_getbyte(u8 *buf, u32 timeout)
         UT_OSSemSet(&uart1.sem_rx, 0);
         return kfifo_get(&uart1.kfifo, buf, 1);
     } else {
+        if (rx_pin_eq_tx_pin) {
+            uart_set_dma_dir(1);
+        }
         _timeout = timeout + ut_get_jiffies();
         _t_sleep = ut_msecs_to_jiffies(10) + ut_get_jiffies();
         while (!(JL_UT1->CON0 & BIT(14))) {
@@ -304,6 +315,9 @@ static void UT1_isr_fun(void)
         UT_OSSemPost(&uart1.sem_tx);
         if (uart1.isr_cbfun) {
             uart1.isr_cbfun(&uart1, UT_TX);
+        }
+        if (rx_pin_eq_tx_pin) {
+            uart_set_dma_dir(1);
         }
     }
     if ((JL_UT1->CON0 & BIT(3)) && (JL_UT1->CON0 & BIT(14))) {
@@ -353,6 +367,9 @@ static u32 UT1_read_buf(u8 *buf, u32 len, u32 timeout)
         UT_OSSemSet(&uart1.sem_rx, 0);
         return kfifo_get(&uart1.kfifo, buf, len);
     } else {
+        if (rx_pin_eq_tx_pin) {
+            uart_set_dma_dir(1);
+        }
         _timeout = timeout + ut_get_jiffies();
         _t_sleep = ut_msecs_to_jiffies(10) + ut_get_jiffies();
         for (i = 0; i < len; i++) {
@@ -386,6 +403,9 @@ static void UT1_write_buf(const u8 *buf, u32 len)
         return;
     }
     if (CONFIG_UART1_ENABLE_TX_DMA) {
+        if (rx_pin_eq_tx_pin) {
+            uart_set_dma_dir(0);
+        }
         UT_OSSemSet(&uart1.sem_tx, 0);
         JL_UT1->CON0 |= BIT(13);
         JL_UT1->CON0 |= BIT(2);
@@ -407,6 +427,7 @@ static void UT1_write_buf(const u8 *buf, u32 len)
 static void UT1_set_baud(u32 baud)
 {
     uart_clk_sel();//JL_CLK->CON0 &= ~(0b11 << 8);//pll48M
+    u16 reg_temp = JL_UT1->CON0;
     JL_UT1->CON0 &= ~(BIT(1) | BIT(0));
     JL_UT1->CON0 |= BIT(13) | BIT(12) | BIT(10);
     JL_UT1->BAUD = UART_CLK / baud / 4 - 1;
@@ -417,7 +438,8 @@ static void UT1_set_baud(u32 baud)
             JL_UT1->OTCNT = uart1.rx_timeout * UART_OT_CLK / 1000;
         }
     }
-    JL_UT1->CON0 |= BIT(13) | BIT(12) | BIT(10) | BIT(1) | BIT(0);
+    reg_temp |= BIT(13) | BIT(12) | BIT(10) | BIT(0);
+    JL_UT1->CON0 = reg_temp;
 }
 /**
  * @brief ut1使能
@@ -446,6 +468,7 @@ static void UT1_open(u32 baud, u32 is_9bit, void *cbuf, u32 cbuf_size, u32 rx_cn
         JL_UT1->CON2 &= ~BIT(0);
     }
     UT1_set_baud(baud);
+    JL_UT1->CON1 &= ~BIT(4);
 }
 /**
  * @brief ut1关闭，注销
@@ -474,20 +497,16 @@ static u32 uart_is_idle(u32 ut_num)
 /**ut硬件集成引脚名称字符串，上下对应为一对*/
 /* static char *ut_tx_pin[] = {"PA04", "PA00", "reserved", "reserved", "DM", "A9", "DM", "A9"}; */
 /* static char *ut_rx_pin[] = {"PA05", "PA01", "reserved", "reserved", "DP", "A9",  " ",  " "}; */
-static u8 ut_tx_pin[] = {
-    IO_PORTA_06, IO_PORTA_00, IO_PORTA_06, IO_PORTA_00, //UT0_TX
-    IO_PORTA_04, IO_PORTB_09, IO_PORTA_04, IO_PORTB_09,  //UT1_TX
+static u8 ut_tx_pin[4] = {
+    IO_PORTA_06, IO_PORTA_00, //UT0_TX    IO_PORTA_06, IO_PORTA_00,
+    IO_PORTA_04, IO_PORTB_09  //UT1_TX   IO_PORTA_04, IO_PORTB_09,
 };
-#define ICH0SEL 40//////////////////////////////////////////////////////
-#define ICH2SEL 42//////////////////////////////////////////////////////
-static u8 ut_rx_pin[] = {
-    IO_PORTA_07, IO_PORTA_01, ICH2SEL, ICH2SEL, //UT0_RX
-    IO_PORTA_05, IO_PORTB_09, ICH0SEL, ICH0SEL,  //UT1_RX
+static u8 ut_rx_pin[4] = {
+    IO_PORTA_07, IO_PORTA_01, //UT0_RX    ICH2SEL      ICH2SEL
+    IO_PORTA_05, IO_PORTB_09  //UT1_RX   ICH0SEL      ICH0SEL
 };
 
-u8 gpio_uart_rx_input(u8 rx_pin, u8 ut_num, u8 tx_pin);
-u8 gpio_set_uart1(u32 ut_ch);
-u8 gpio_set_uart0(u32 ut_ch);
+u8 gpio_uart_rx_input(u8 rx_pin, u8 ut_num, u8 ut_ch);
 /**
  * @brief ut模块初始化函数，供外部调用
  *
@@ -499,23 +518,30 @@ const uart_bus_t *uart_dev_open(const struct uart_platform_data_t *arg)
 {
     u8 i;
     u8 ut_num;
-    u8 CHx_UTx_TX;
+    u8 CHx_UTx_TX = 0;
     uart_bus_t *ut = NULL;
-    u32 ut_ch = -1;
-    u8 gpio_input_channle_flag = 0;
-    for (i = 0; i < 8; i++) {
+    u32 ut_ch = 0xff;
+    u8 gpio_channle_flag = 0;
+    if (arg->rx_cbuf) {
+        if ((arg->rx_cbuf_size == 0) || (arg->rx_cbuf_size & (arg->rx_cbuf_size - 1))) {//2^n
+            log_error("rx_cbuf_size set error!");
+            return NULL;
+        }
+    }
+    for (i = 0; i < 4; i++) {
         if ((arg->tx_pin == ut_tx_pin[i]) || ((arg->tx_pin == (u8) - 1) && (arg->rx_pin == ut_rx_pin[i]))) {
-            ut_num = i / 4;
+            ut_num = i / 2;
             if (uart_is_idle(ut_num)) {
-                ut_ch = i % 4;
+                ut_ch = i % 2;
                 if ((arg->rx_pin != ut_rx_pin[i]) && (arg->rx_pin != (u8) - 1)) {
-                    gpio_input_channle_flag = 1;
+                    gpio_channle_flag = 1;
+                    ut_ch += 2;
                 }
                 break;
             }
         }
     }
-    if (ut_ch == -1) {
+    if (ut_ch == 0xff) {
         if (uart_is_idle(0)) {
             ut_num = 0;
             if (arg->tx_pin < IO_PORTB_00) {
@@ -533,14 +559,56 @@ const uart_bus_t *uart_dev_open(const struct uart_platform_data_t *arg)
         } else {
             return NULL;
         }
-    }
-    if (arg->rx_cbuf) {
-        if ((arg->rx_cbuf_size == 0) || (arg->rx_cbuf_size & (arg->rx_cbuf_size - 1))) {//1248...不会
-            return NULL;
+        if (arg->rx_pin == ut_rx_pin[ut_num * 2]) {
+            ut_ch = 0;
+            gpio_channle_flag = 2;
+        } else if (arg->rx_pin == ut_rx_pin[ut_num * 2 + 1]) {
+            ut_ch = 1;
+            gpio_channle_flag = 2;
         }
     }
+
+    if (ut_ch <= 3) {
+        i = 4 + ut_num * 3;
+        SFR(JL_IOMC->IOMC0,  i, 3, (ut_ch << 1) + 1);
+    } else {
+        i = 4 + ut_num * 3;
+        SFR(JL_IOMC->IOMC0,  i, 1, 0);
+    }
+    if (arg->tx_pin < IO_PORT_MAX) {
+        gpio_write(arg->tx_pin, 1);
+        gpio_set_direction(arg->tx_pin, 0);
+        if ((CHx_UTx_TX == CH0_UT1_TX) || (CHx_UTx_TX == CH2_UT1_TX)) { //CH2_UT1_TX
+            gpio_set_die(arg->tx_pin, 0);
+        } else {
+            gpio_set_die(arg->tx_pin, 1);
+        }
+    }
+    if (arg->rx_pin < IO_PORT_MAX) {
+        gpio_set_die(arg->rx_pin, 1);
+        gpio_set_direction(arg->rx_pin, 1);
+        gpio_set_pull_up(arg->rx_pin, 1);
+        gpio_set_pull_down(arg->rx_pin, 0);
+        if ((arg->rx_pin == arg->tx_pin) && (arg->tx_pin == IO_PORTB_09)) {
+            rx_pin_eq_tx_pin = 1;
+        } else {
+            rx_pin_eq_tx_pin = 0;
+        }
+    }
+    if (ut_ch == 0xff) {
+        if (arg->rx_pin != (u8) - 1) {
+            gpio_uart_rx_input(arg->rx_pin, ut_num, ut_ch);//io选择--->设置输入通道
+        }
+        if (arg->tx_pin != (u8) - 1) {
+            gpio_output_channle(arg->tx_pin, CHx_UTx_TX);//io选择--->设置输出通道
+        }
+    }
+    if (gpio_channle_flag == 1) {
+        gpio_uart_rx_input(arg->rx_pin, ut_num, ut_ch);
+    } else if (gpio_channle_flag == 2) {
+        gpio_output_channle(arg->tx_pin, CHx_UTx_TX);
+    }
     if (CONFIG_UART0_ENABLE && ut_num == 0) {
-        gpio_set_uart0(ut_ch);
         uart0.argv = arg->argv;
         uart0.isr_cbfun = arg->isr_cbfun;
         uart0.putbyte = UT0_putbyte;
@@ -553,7 +621,6 @@ const uart_bus_t *uart_dev_open(const struct uart_platform_data_t *arg)
                  arg->frame_length, arg->rx_timeout);
         ut = &uart0;
     } else if (CONFIG_UART1_ENABLE && ut_num == 1) {
-        gpio_set_uart1(ut_ch);
         uart1.argv = arg->argv;
         uart1.isr_cbfun = arg->isr_cbfun;
         uart1.putbyte = UT1_putbyte;
@@ -564,25 +631,26 @@ const uart_bus_t *uart_dev_open(const struct uart_platform_data_t *arg)
         UT1_open(arg->baud, arg->is_9bit,
                  arg->rx_cbuf, arg->rx_cbuf_size,
                  arg->frame_length, arg->rx_timeout);
+        if (arg->rx_pin < IO_PORT_MAX) {
+            JL_UT1->CON0 |= BIT(1);
+        }
         ut = &uart1;
     } else {
         return NULL;
     }
-    if (ut_ch == -1) {
-        if (arg->rx_pin != (u8) - 1) {
-            gpio_uart_rx_input(arg->rx_pin, ut_num, arg->tx_pin);//io选择--->设置输入通道
-        }
-        if (arg->tx_pin != (u8) - 1) {
-            gpio_output_channle(arg->tx_pin, CHx_UTx_TX);//io选择--->设置输出通道
-        }
-    }
-    if (gpio_input_channle_flag) {//io选择--->设置输入通道
-        gpio_uart_rx_input(arg->rx_pin, ut_num, arg->tx_pin);
-    }
     return ut;
 }
-u32 gpio_close_uart0();
-u32 gpio_close_uart1();
+
+u8 gpio_close_uart0()
+{
+    SFR(JL_IOMC->IOMC0, 4, 3, 0);
+    return 1;
+}
+u8 gpio_close_uart1()
+{
+    SFR(JL_IOMC->IOMC0, 7, 3, 0);
+    return 1;
+}
 u32 uart_dev_close(uart_bus_t *ut)
 {
     UT_OSSemClose(&ut->sem_rx);
@@ -596,47 +664,21 @@ u32 uart_dev_close(uart_bus_t *ut)
     }
     return 0;
 }
-u32 gpio_close_uart0()
-{
-    SFR(JL_IOMC->IOMC0,  4,  1, 0);//JL_IOMC->IOMC0 &=  ~BIT(4);
-    SFR(JL_IOMC->IOMC0,  5, 2, 0);
-    return 1;
-}
-u32 gpio_close_uart1()
-{
-    JL_IOMC->IOMC0 &=  ~BIT(7);
-    SFR(JL_IOMC->IOMC0,  8, 2, 0);//USB
-    return 1;
-}
 
-u8 gpio_uart_rx_input(u8 rx_pin, u8 ut_num, u8 tx_pin)
+u8 gpio_uart_rx_input(u8 rx_pin, u8 ut_num, u8 ut_ch)
 {
     u8 sel = rx_pin;
     if (rx_pin > IO_PORT_MAX) {
         return 0;
     }
-    //选择端口uart0
-    if (ut_num == 0) {
-        if (tx_pin == ut_tx_pin[0]) {
-            SFR(JL_IOMC->IOMC0,  5, 2, 2);
-        } else if (tx_pin == ut_tx_pin[1]) {
-            SFR(JL_IOMC->IOMC0,  5, 2, 3);
-        } else {
-            SFR(JL_IOMC->IOMC0,  4,  1, 0);
-            SFR(JL_IOMC->IOMC0,  5, 2, 3);
-        }
+    if (ut_ch == 0xff) {
+        ut_ch = 3;
     }
-    //选择端口uart1
-    else if (ut_num == 1) {
-        if (tx_pin == ut_tx_pin[4]) {
-            SFR(JL_IOMC->IOMC0,  8, 2, 2);
-        } else if (tx_pin == ut_tx_pin[5]) {
-            SFR(JL_IOMC->IOMC0,  8, 2, 3);
-        } else {
-            SFR(JL_IOMC->IOMC0,  7,  1, 0);
-            SFR(JL_IOMC->IOMC0,  8, 2, 3);
-        }
+    u8 temp = 5 + ut_num * 3;
+    if (ut_ch == 2 || ut_ch == 3) {
+        SFR(JL_IOMC->IOMC0,  temp, 2, ut_ch);
     } else {
+        log_error("ut_ch error!");
         return 0;
     }
 //配置输入通道
@@ -652,57 +694,15 @@ u8 gpio_uart_rx_input(u8 rx_pin, u8 ut_num, u8 tx_pin)
     }
 
     gpio_set_die(rx_pin, 1);
-    gpio_set_direction(rx_pin, 1);//in  /*JL_PORTA->DIR |= BIT(5);*/
+    gpio_set_direction(rx_pin, 1);
     gpio_set_pull_up(rx_pin, 1);
     gpio_set_pull_down(rx_pin, 0);
     return 1;
 }
-u8 gpio_set_uart1(u32 ut_ch)  //ch=-1；0；1；2；3
-{
-    if (ut_ch == -1) {
-        return 0;
-    }
-    JL_IOMC->IOMC0 |=  BIT(7);
-    SFR(JL_IOMC->IOMC0,  8, 2, ut_ch);//USB
-    if (ut_ch == 0) {
-        gpio_set_direction(IO_PORTA_05, 1);//in  /*JL_PORTA->DIR |= BIT(5);*/
-        gpio_set_direction(IO_PORTA_04, 0);//out /*JL_PORTA->DIR &= ~BIT(4);*/
-        gpio_set_pull_up(IO_PORTA_04, 1);
-        gpio_set_pull_up(IO_PORTA_05, 1);
-        return 1;
-    } else if (ut_ch == 1) {
-        gpio_set_direction(IO_PORTB_09, 1);//in  /*JL_PORTA->DIR |= BIT(5);*/
-        gpio_set_direction(IO_PORTB_09, 0);//out /*JL_PORTA->DIR &= ~BIT(4);*/
-        gpio_set_pull_up(IO_PORTB_09, 1);
-        gpio_set_pull_up(IO_PORTB_09, 1);
-        return 1;
-    } else if (ut_ch == 2) {
-        return 0;
-    } else {
-        return 0;
-    }
-}
-u8 gpio_set_uart0(u32 ut_ch)  //ch=-1；0；1
-{
-    if (ut_ch == -1) {
-        return 0;
-    }
-    SFR(JL_IOMC->IOMC0,  4,  1, 1);// JL_IOMC->IOMC0 &= ~BIT(5);
-    SFR(JL_IOMC->IOMC0,  5, 2, ut_ch);//JL_IOMC->IOMC0 |=  BIT(4);
-    if (ut_ch == 0) {
-        gpio_set_direction(IO_PORTA_06, 0);//JL_PORTA->DIR &= ~BIT(4);
-        gpio_set_direction(IO_PORTA_07, 1);
-        return 1;
-    } else if (ut_ch == 1) {
-        gpio_set_direction(IO_PORTA_00, 0);//JL_PORTA->DIR &= ~BIT(4);
-        gpio_set_direction(IO_PORTA_01, 1);
-        return 1;
-    } else if (ut_ch == 2) {
-        return 0;
-    } else {
-        return 0;
-    }
-}
+
+
+
+
 #if 0
 u8 read_buf[64] = {0};
 void uart01_test()
@@ -716,18 +716,18 @@ void uart01_test()
     const uart_bus_t *ut = NULL;
     struct uart_platform_data_t arg;
 
-#if 1//uart0
+#if 0//uart0
 
-    arg.tx_pin = IO_PORTA_06;
-    arg.rx_pin = IO_PORTA_05;
-    arg.rx_cbuf = NULL;
-    arg.rx_cbuf_size = 0;
-    arg.frame_length = 0;
-    arg.rx_timeout = 0;
-    arg.isr_cbfun = NULL;
+    arg.tx_pin = IO_PORTA_06;//不使用发送功能赋值0xff
+    arg.rx_pin = IO_PORTA_05;//不使接收功能赋值0xff
+    arg.rx_cbuf = NULL;  //uart0 不支持
+    arg.rx_cbuf_size = 0;//uart0 不支持
+    arg.frame_length = 0;//uart0 不支持
+    arg.rx_timeout = 0;  //uart0 不支持
+    arg.isr_cbfun = NULL;//中断回调
     arg.argv = JL_UT0;
     arg.is_9bit = 0;
-    arg.baud = 1000000;
+    arg.baud = 1000000;  //波特率
     log_info("----uart0 test!----\n");
     log_char('A');
     log_char('\n');
@@ -756,7 +756,7 @@ void uart01_test()
                 log_info("get byte: %c\n", read_data[0]);
                 rx_cnt--;
             } else {
-                log_info("receive 1 byte fail!\t");
+                log_info("receive 1 byte fail!");
                 log_info("please send 1 byte!\n");
             }
         }
@@ -769,23 +769,23 @@ void uart01_test()
                 }
                 rx_cnt--;
             } else {
-                log_info("receive buf fail!\t");
+                log_info("receive buf fail!");
                 log_info("please send some characters!\n");
             }
         }
     }
 #else//uart1
 
-    arg.tx_pin = IO_PORTA_04; // //IO_PORTA_02;
-    arg.rx_pin = IO_PORTA_05; //
+    arg.tx_pin = IO_PORTA_04; //IO_PORTB_09;//不使用发送功能赋值0xff
+    arg.rx_pin = IO_PORTA_05; //IO_PORTB_09;//不使接收功能赋值0xff
     arg.rx_cbuf = read_buf;
     arg.rx_cbuf_size = sizeof(read_buf);
-    arg.frame_length = sizeof(read_buf);
-    arg.rx_timeout = 200;
-    arg.isr_cbfun = NULL; //
+    arg.frame_length = sizeof(read_buf);//dma接收长(<=sizeof(read_buf))
+    arg.rx_timeout = 200; //单位ms
+    arg.isr_cbfun = NULL; //中断回调
     arg.argv = JL_UT1;
     arg.is_9bit = 0;
-    arg.baud = 1000000;
+    arg.baud = 1000000;//波特率
     log_info("----uart1 test!----\n");
     if (uart_dev_close(&uart1) == 0) {
         log_error("~~~~~~~~~uart1 close fail!~~~~~~~~~~\n");
@@ -799,7 +799,7 @@ void uart01_test()
         ut->putbyte(write_buf[0]);
         ut->putbyte('\n');
         ut->write(write_buf, sizeof(write_buf));
-        u8 temp1[] = "\nTwo serial ports are required!\n";
+        u8 temp1[31] = "\nTwo serial ports are required!";
         ut->write(temp1, sizeof(temp1));
         //接收
         log_info("\nuart1 wait for time !\n");
@@ -810,7 +810,7 @@ void uart01_test()
                 log_info("get byte: %c\n", read_data[0]);
                 rx_cnt--;
             } else {
-                log_info("receive 1 byte fail!\t");
+                log_info("receive 1 byte fail!");
                 log_info("please send 1 byte!\n");
             }
         }
@@ -823,7 +823,7 @@ void uart01_test()
                 }
                 rx_cnt--;
             } else {
-                log_info("receive buf fail!\t");
+                log_info("receive buf fail!");
                 log_info("please send some characters!\n");
             }
         }

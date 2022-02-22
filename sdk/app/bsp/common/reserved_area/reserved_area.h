@@ -1,7 +1,8 @@
 #ifndef _RESERVED_AREA_H
 #define _RESERVED_AREA_H
 
-#define RESERVED_AREA_SIZE		(4*1024)
+u32 get_flash_alignsize(void);
+#define RESERVED_AREA_SIZE		get_flash_alignsize()
 
 /*****************auth*******************/
 typedef struct __auth_header {

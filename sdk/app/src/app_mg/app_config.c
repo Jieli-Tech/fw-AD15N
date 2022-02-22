@@ -32,6 +32,7 @@ const char MIC_RES_BUILT_IN = TRUE;  // MIC使用内置偏置电阻的使能
 const char MIC_RES_IN       = 7;    //内置MIC的电阻,低3bit不能为0
 const char MIC_RES_OUT      = 8;    //外置MIC的电阻,低3bit不能为0
 const char MIC_0DB          = 1;    //MIC_0db_11V   0:6db   1:0db
+const char MIC_LDO_V        = 2;    //MICLDO_VOLSEL_11V   0:1.8V; 1:2.1V; 2:2.4V; 3:2.7V;
 //MIC_PGA_G_11V[4:0] x0000: 0dB x0001:2dB x0010:4db   .... x1110: 28db
 const char MIC_PGA_G        = 14;    //0 ~ 14
 

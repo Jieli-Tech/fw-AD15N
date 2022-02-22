@@ -27,15 +27,15 @@ const struct spi_platform_data spi1_p_data = {
     .port = {
          SPI1_GROUPB_IO
     },
-    .mode = SPI_MODE_BIDIR_1BIT,
+    .mode = HW_SPI_WORK_MODE,
     .clk = 10000000,
     .role = SPI_ROLE_MASTER,
 };
 //norflash
 NORFLASH_DEV_PLATFORM_DATA_BEGIN(norflash_data)
-.spi_hw_num = 1,
-.spi_cs_port = IO_PORTA_05,
-.spi_read_width = SPI_MODE_BIDIR_1BIT,
+.spi_hw_num = SPI_HW_NUM,
+.spi_cs_port = SPI_CS_PORT_SEL,
+.spi_read_width = SPI_READ_DATA_WIDTH,
 .spi_pdata = &spi1_p_data,
 .start_addr = 0,
 .size = 2 * 1024 * 1024,
@@ -73,7 +73,6 @@ SD0_PLATFORM_DATA_BEGIN(sd0_data)
   .detect_io_level        = x,//0:低电平检测到卡  1:高电平检测到卡
 #endif
   .power                  = NULL,
-  .priority               = 3,
 SD0_PLATFORM_DATA_END()
 
 #endif

@@ -42,8 +42,10 @@
 <Add option="-DHAS_USB_EN=0" />
 <Add option="-DHAS_MIO_EN=0" />
 <Add option="-DHAS_UPDATE_EN=0" />
+<Add option="-DHAS_UART_UPDATE_EN=0" />
 <Add option="-DECHO_EN=0" />
 <Add option="-DHOWLING_EN=0" />
+<Add option="-DSIMPLE_FATFS_ENABLE=0" />
 <Add option="-DNOFLOAT" />
 <Add directory="app/bsp/cpu/sh54" />
 <Add directory="include_lib" />
@@ -72,6 +74,7 @@
 <Add option="--gc-sections" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/sh54/cpu_lib.a" />
+<Add option="include_lib/liba/sh54/efuse_trim_value_lib.a" />
 <Add option="--end-group" />
 <Add option="-Tapp/post_build/sh54/app.ld" />
 <Add option="-M=app/post_build/sh54/app.map" />
@@ -117,6 +120,7 @@
 <Unit filename="include_lib/cpu/sh54/cpu.h" />
 <Unit filename="include_lib/cpu/sh54/csfr.h" />
 <Unit filename="include_lib/cpu/sh54/efuse.h" />
+<Unit filename="include_lib/cpu/sh54/efuse_trim_value.h" />
 <Unit filename="include_lib/cpu/sh54/gpio.h" />
 <Unit filename="include_lib/cpu/sh54/hwi.h" />
 <Unit filename="include_lib/cpu/sh54/irq.h" />

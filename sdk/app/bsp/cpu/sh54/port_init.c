@@ -94,9 +94,15 @@ extern u32 spi_get_port(void);
 extern const struct low_power_param power_param;
 void close_gpio(u8 soft_off)
 {
-    u32 porta_value = 0xffff & ~(BIT(0));
+    u32 porta_value = 0xffff;
     u32 portb_value = 0xffff;
     u32 portd_value = 0x1f;
+
+    if (!(POWER_WAKEUP_IO & 0x10)) {
+        porta_value &= ~BIT(POWER_WAKEUP_IO);
+    } else {
+        portb_value &= ~BIT(POWER_WAKEUP_IO & (~0xfff0));
+    }
 
     if (soft_off) {
         mask_io_cfg();

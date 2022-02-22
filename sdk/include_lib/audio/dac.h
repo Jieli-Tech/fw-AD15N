@@ -60,6 +60,13 @@
 #define DAC_CHANNEL_NUMBER 3
 
 
+/************************************************************************/
+typedef enum {
+    DAC_SOURCE = 0,
+    ALINE_SOURCE,
+} AUDIO_TYPE;
+
+
 void dac_resource_init(u8 *buff, u32 len, u32 con0, u32 con1);
 void dac_phy_init(u32 sr_sel);
 void dac_phy_off(void);

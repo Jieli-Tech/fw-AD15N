@@ -6,7 +6,7 @@
 
 void tab_init(rtab_obj *stab, void *tab, u16 size)
 {
-    memset(&stab, size, 0);
+    memset(&stab, sizeof(rtab_obj), 0);
     stab->tab = tab;
     stab->size = size;
 

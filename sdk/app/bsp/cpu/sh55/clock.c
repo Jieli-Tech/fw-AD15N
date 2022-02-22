@@ -18,9 +18,9 @@ const u32 pll_clock_tab0[]  = {
 };
 const u32 pll_clock_tab1[]  = {
     0,
-    192000000L,
-    137000000L,
     107000000L,
+    137000000L,
+    192000000L,
 };
 const u8 div_taba[] = {
     1, 3, 5, 7
@@ -78,6 +78,8 @@ void sfc_resume(u32 disable_spi);
 AT(.ram_code)
 void sfc_suspend(u32 enable_spi)
 {
+    local_irq_disable();
+
     //wait cache idle
     while (!(JL_CACHE->CON & BIT(5)));
     //wait sfc idle
@@ -89,11 +91,14 @@ void sfc_suspend(u32 enable_spi)
 
     JL_SFC->CON &= ~BIT(0);
 
+    JL_PORTD->OUT |=  BIT(2);
     JL_PORTD->DIR &= ~BIT(2);
+    JL_PORTD->PU  &= ~BIT(2);
 
     if (enable_spi) {
         JL_SPI0->CON |= BIT(0);
     }
+    local_irq_enable();
 }
 
 
@@ -120,11 +125,11 @@ static u32 sfc_max_baud(u32 pll_clock, _PLL_DIV pll_div)
     /* log_info("pll set, pll_clock %d, pll_div %d \n", pll_clock, pll_div); */
     if (0 == (3 & pll_clock)) {
         if (0b0100 == (0x0c & pll_clock)) {
-            t_pll_clk = 192;
+            t_pll_clk = 107;
         } else if (0b1000 == (0x0c & pll_clock)) {
             t_pll_clk = 137;
         } else if (0b1100 == (0x0c & pll_clock)) {
-            t_pll_clk = 107;
+            t_pll_clk = 192;
         }
     } else if (1 == (0x03 & pll_clock)) {
         t_pll_clk = 96;
@@ -183,8 +188,9 @@ void pll_sel(u32 pll_clock, _PLL_DIV pll_div, _PLL_B_DIV pll_b_div)
     for (u32 i = 0; i < 8; i++) {
         clock = sys_clock / (i + 1);
         if (clock <= 80000000L) {
-            JL_CLK->CON1 &= ~(7 << 2);
-            JL_CLK->CON1 |= (i & 7) << 2;
+            /* JL_CLK->CON1 &= ~(7 << 2); */
+            /* JL_CLK->CON1 |= (i & 7) << 2; */
+            SFR(JL_CLK->CON1, 2, 3, i);		//lsb div
             break;
         }
     }

@@ -360,10 +360,10 @@ u32 adc_value_to_voltage(u32 adc_vbg, u32 adc_vbat)
     if (ADC_VBG_TRIM_EN) {
         trim = get_vbg_trim();
     }
-    if (trim & BIT(5)) {
-        vbg_center += (trim & 0x0f) * 3;
-    } else {
+    if (trim & BIT(4)) {
         vbg_center -= (trim & 0x0f) * 3;
+    } else {
+        vbg_center += (trim & 0x0f) * 3;
     }
     u32 voltage = (vbg_center) * adc_vbat / adc_vbg;
     return voltage;

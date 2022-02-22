@@ -41,12 +41,15 @@ int c_main(int cfg_addr)
 
     debug_init(1000000);
 
-    log_info("---------  sh5x apps -------------\n");
+    log_info("---------sh5x apps------------- \n");
 
     p33_tx_1byte(P3_PINR_CON, 0);
 
     reset_source_dump();
     power_reset_source_dump();
+
+    //LVD电压配置，默认关闭
+    /* p33_vlvd(LVLD_SEL_19V); */
 
     //注:soft_off会Latch io, 唤醒之后电源初始化才会释放io，所以在电源初始化之后才能翻io/打印
     sys_power_init();

@@ -25,6 +25,7 @@
 #include "mio_api.h"
 #include "sine_play.h"
 #include "list/midi_ctrl_api.h"
+#include "efuse_trim_value.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -114,12 +115,14 @@ struct vfs_attr *get_eeprom_attr_p(void)
     return &eeprom_attr;
 }
 
-
+sec_used(.version)
+u8 const lib_update_version[] = "177491836UPDATE-@20210816-$9c89ae0";
 
 void system_init(void)
 {
     my_malloc_init();
     pll_sel(PLL_320M, PLL_DIV2, PLL_B_DIV2);
+    efuse_trim_value_init();
     /* sys_clock_get(); */
     //--------------------------
     d_key_voice_init();

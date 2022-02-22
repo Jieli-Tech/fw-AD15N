@@ -64,6 +64,9 @@ typedef enum _mm_type {
     MM_SRC,
     MM_MIO,
     MM_SWIN_BUF,
+    MM_VFSCAN_BUF,
+    MM_SCAN_BUF,
+    MM_FF_APIS_BUF,
 } mm_type;
 
 

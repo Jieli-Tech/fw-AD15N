@@ -1189,6 +1189,9 @@ static int _usb_stor_read(struct device *device, void *pBuf, u32 num_lba, u32 lb
     if (lba + num_lba/* - 1*/ >= disk->capacity[curlun].block_num) {
         return -DEV_ERR_OVER_CAPACITY;
     }
+
+__retry_cbw:
+
 #if (UDISK_READ_BIGBLOCK_ASYNC_ENABLE || UDISK_READ_512_ASYNC_ENABLE)
     return _usb_stro_read_async(device, pBuf, num_lba, lba);
 #else
@@ -1206,7 +1209,9 @@ static int _usb_stor_read(struct device *device, void *pBuf, u32 num_lba, u32 lb
                                 udisk_ep.target_epin,
                                 pBuf,
                                 rx_len);
-    if (ret < DEV_ERR_NONE) {
+    if (ret == -DEV_ERR_RXSTALL) {
+
+    } else if (ret < DEV_ERR_NONE) {
         log_error("%s:%d\n", __func__, __LINE__);
         goto __exit;
     }
@@ -1226,6 +1231,13 @@ static int _usb_stor_read(struct device *device, void *pBuf, u32 num_lba, u32 lb
         ret = -DEV_ERR_UNKNOW;
         log_error("%s:%d\n", __func__, __LINE__);
         goto __exit;
+    }
+
+    if (disk->csw.bCSWStatus) {
+        if (read_retry < 1) {
+            read_retry ++;
+            goto __retry_cbw;
+        }
     }
 
     disk->dev_status = DEV_OPEN;

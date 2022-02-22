@@ -1,6 +1,7 @@
 #include "config.h"
 #include "common.h"
 #include "circular_buf.h"
+#include "clock.h"
 
 
 
@@ -10,6 +11,18 @@ void delay(volatile u32 t)
 {
     while (t--) {
         asm("nop");
+    }
+}
+
+AT_RAM
+void udelay(u32 us)
+{
+    u32 mips = (sys_clock_get() / 1000000 / 8);
+
+    while (us--) {
+        for (int i = 0; i < mips; i++) {
+            asm("nop");
+        }
     }
 }
 

@@ -38,6 +38,9 @@
 #define IOCTL_SET_BASE_ADDR             41
 #define IOCTL_SET_ASYNC_MODE            42
 #define IOCTL_SET_READ_USE_CACHE        43
+#define IOCTL_SET_CACHE_SYNC_ISR_EN     44
+#define IOCTL_SET_POWER_DOWN            45
+#define IOCTL_RELEASE_POWER_DOWN        46
 
 #define IOCTL_GET_ID 					100
 #define IOCTL_GET_SECTOR_SIZE			101

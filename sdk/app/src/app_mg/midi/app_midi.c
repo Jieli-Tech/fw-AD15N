@@ -95,11 +95,11 @@ int app_midi(void *param)
         switch (msg[0]) {
         case MSG_NEXT_FILE:
             log_info("music next file\n");
-            music_play_next_file(music_midi_obj);
+            music_play_next_file(&music_midi_obj);
             break;
         case MSG_PRIV_FILE:
             log_info("music priv file\n");
-            music_play_priv_file(music_midi_obj);
+            music_play_priv_file(&music_midi_obj);
             break;
         case MSG_PP:
             log_info("music pp\n");
@@ -138,11 +138,11 @@ int app_midi(void *param)
 
         case MSG_A_FILE_END:
             log_info("decode end :%d \n", music_play_get_decoder_type(music_a_obj));
-            music_play_end_operation(music_a_obj);
+            music_play_end_operation(&music_a_obj);
             break;
         case MSG_MIDI_FILE_END:
             log_info("midi end\n");
-            music_play_end_operation(music_midi_obj);
+            music_play_end_operation(&music_midi_obj);
             break;
         case MSG_MIDI_FILE_ERR:
             log_info("midi err\n");

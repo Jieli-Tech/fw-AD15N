@@ -20,7 +20,7 @@ const struct hw_iic_config hw_iic_cfg[] = {
         .hdrive = 0,
         .io_pu = 1,
         .role = IIC_MASTER,
-        .slave_addr = 0x54,
+        .slave_addr = 0x54,//从机有效。地址:bit7~bit1(可取任意值), bit0:无效. 主机发送0x54/0x55可自动应答
         .isr_en = 0
     },
 };
@@ -235,6 +235,7 @@ int hw_iic_init(hw_iic_dev iic)
     } else {
         iic_role_slave(iic_regs[id]);
         hw_iic_slave_set_addr(iic, iic_info_slave_addr(iic), 1);//0:不自动响应起始位,1:响应
+        iic_recv_nack(iic_regs[id]);
         log_info("hw_iic slave\n");
 //        iic_si_mode_en(iic_regs[id]);
     }
@@ -473,7 +474,10 @@ u8 hw_iic_slave_tx_check_ack(hw_iic_dev iic)
     return iic_send_is_ack(iic_regs[id]);
 }
 
-u8 iic_slave_rxdata[9];
+/***************************iic slave interrupt test***************************/
+//中断法: hw_iic_cfg结构体配置从机模式,地址,使能iic中断即可
+//从机中断接收不可被其它打断(如高优先级中断)，否则可能丢失结束信号导致出错
+u8 iic_slave_rxdata[9];//接收字节数<=9
 SET(interrupt(""))
 void iic_isr()
 {
@@ -481,53 +485,55 @@ void iic_isr()
     if (iic_pnd(iic_regs[0])) {
         if (iic_start_pnd(iic_regs[0])) {
             /*log_info(" start!\n");*/
-            iic_recv_ack(iic_regs[0]);
-            iic_buf_reg(iic_regs[0]) = 0xff;
             iic_start_pnd_clr(iic_regs[0]);
         } else {
             /*log_info("no start!\n");*/
-            iic_recv_ack(iic_regs[0]);
-            iic_buf_reg(iic_regs[0]) = 0xff;
         }
-        iic_slave_rxdata[cnt] = iic_buf_reg(iic_regs[0]);
+        iic_slave_rxdata[cnt++] = iic_buf_reg(iic_regs[0]);
+        iic_recv_ack(iic_regs[0]);
+        iic_buf_reg(iic_regs[0]) = 0xff;
         iic_pnd_clr(iic_regs[0]);
     }
-    cnt++;
     if (iic_end_pnd(iic_regs[0])) {
+        iic_start_pnd_clr(iic_regs[0]);
+        iic_pnd_clr(iic_regs[0]);
+        iic_end_pnd_clr(iic_regs[0]);
+        iic_recv_nack(iic_regs[0]);
+
         log_info_hexdump(iic_slave_rxdata, 9);
         log_info("iic end!\n");
         for (cnt = 0; cnt < 9; cnt++) {
             iic_slave_rxdata[cnt] = 0;
         }
         cnt = 0;
-        iic_start_pnd_clr(iic_regs[0]);
-        iic_pnd_clr(iic_regs[0]);
-        iic_end_pnd_clr(iic_regs[0]);
     }
 }
 
-
-/***************************iic slave test***************************/
-//从机接收有出错概率，需添加校验
-//中断法: hw_iic_cfg结构体配置从机模式地址使能中断即可
-//轮询法：hw_iic_cfg结构体配置从机模式地址关闭中断
+/***************************iic slave polling test***************************/
+//中断法: hw_iic_cfg结构体配置从机模式,地址,使能iic中断即可
+//轮询法：hw_iic_cfg结构体配置从机模式,地址,关闭iic中断
+//接收过程被打断会导致接收出错
 void hw_iic_slave_rx_test(hw_iic_dev iic)
 {
     hw_iic_init(iic);
     u8 id = iic_get_id(iic);
-    u8 temp1 = 0, rx_data[12], i = 0;
+    u8 rx_data[12];//接收需小于12byte
+    u8 temp1 = 0, i = 0;
     temp1 = hw_iic_cfg[iic].slave_addr;
     while (1) {
-        log_info("------------iic slave test------------");
+        log_info("------------iic slave polling test------------");
         /* log_info("------------iic CON:%x------------",JL_IIC->IIC_CON); */
         for (i = 0; i < 12; i++) {
             rx_data[i] = 0;
         }
         i = 0;
-        hw_iic_slave_rx_prepare(id, 1);
-        while (!iic_pnd(iic_regs[id]));
+        local_irq_disable();//关闭所有中断
+        hw_iic_slave_rx_prepare(id, 0);//地址自动应答已打开
+        while (!iic_pnd(iic_regs[id])) {
+            wdt_clear();
+        }
         rx_data[i++] = hw_iic_slave_rx_byte(iic, NULL);
-        hw_iic_slave_rx_prepare(id, 1);
+        hw_iic_slave_rx_prepare(id, 1);//1:收到数据应答
         iic_pnd_clr(iic_regs[id]);
         while (!iic_end_pnd(iic_regs[id])) {
             while (iic_pnd(iic_regs[id])) {
@@ -539,9 +545,10 @@ void hw_iic_slave_rx_test(hw_iic_dev iic)
         }
         iic_end_pnd_clr(iic_regs[id]);
         iic_start_pnd_clr(iic_regs[id]);
+        local_irq_enable();
         log_info("rx addr:%x, slave addr:%x", rx_data[0], temp1);
         log_info_hexdump(rx_data, i);
-        log_info("~~~~~iic rx end~~~~~\n\n");
+        log_info("~~~~~iic rx polling end~~~~~\n\n");
         wdt_clear();
     }
 }

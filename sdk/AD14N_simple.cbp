@@ -43,8 +43,10 @@
 <Add option="-DHAS_USB_EN=1" />
 <Add option="-DHAS_MIO_EN=0" />
 <Add option="-DHAS_UPDATE_EN=0" />
+<Add option="-DHAS_UART_UPDATE_EN=0" />
 <Add option="-DECHO_EN=1" />
 <Add option="-DHOWLING_EN=1" />
+<Add option="-DSIMPLE_FATFS_ENABLE=0" />
 <Add option="-DNOFLOAT" />
 <Add directory="app/src" />
 <Add directory="app/bsp/lib" />
@@ -99,6 +101,7 @@
 <Add option="--gc-sections" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/sh54/cpu_lib.a" />
+<Add option="include_lib/liba/sh54/efuse_trim_value_lib.a" />
 <Add option="include_lib/liba/sh54/fs_lib.a" />
 <Add option="include_lib/liba/sh54/audio_lib.a" />
 <Add option="include_lib/liba/sh54/decoder_mge_lib.a" />
@@ -144,6 +147,7 @@
 <Unit filename="app/bsp/common/decoder/eq.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/a_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/f1a_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/decoder/list/f1x_parsing.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/midi_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/midi_ctrl_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/ump3_api.c"><Option compilerVer="CC"/></Unit>
@@ -288,6 +292,7 @@
 <Unit filename="include_lib/cpu/sh54/csfr.h" />
 <Unit filename="include_lib/cpu/sh54/dac_cpu.h" />
 <Unit filename="include_lib/cpu/sh54/efuse.h" />
+<Unit filename="include_lib/cpu/sh54/efuse_trim_value.h" />
 <Unit filename="include_lib/cpu/sh54/gpio.h" />
 <Unit filename="include_lib/cpu/sh54/hwi.h" />
 <Unit filename="include_lib/cpu/sh54/irq.h" />
@@ -337,6 +342,9 @@
 <Unit filename="include_lib/encoder/encoder_mge.h" />
 <Unit filename="include_lib/encoder/list/a_encoder.h" />
 <Unit filename="include_lib/encoder/list/mp3_encoder.h" />
+<Unit filename="include_lib/fs/fat/fat_resource.h" />
+<Unit filename="include_lib/fs/fat/ff_opr.h" />
+<Unit filename="include_lib/fs/fat/tff.h" />
 <Unit filename="include_lib/fs/nor_fs/nor_fs.h" />
 <Unit filename="include_lib/fs/sydf/sydf_resource.h" />
 <Unit filename="include_lib/fs/sydf/sydfile.h" />

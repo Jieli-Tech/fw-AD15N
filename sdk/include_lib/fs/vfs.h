@@ -2,6 +2,8 @@
 #define _FS_H_
 
 #include "config.h"
+#include "fat/ff_opr.h"
+#include "fat/fat_resource.h"
 
 #define SEEK_SET	0	/* Seek from beginning of file.  */
 #define SEEK_CUR	1	/* Seek from current position.  */
@@ -11,6 +13,7 @@
 #define F_ATTR_ARC      0x02
 #define F_ATTR_DIR      0x04
 #define F_ATTR_VOL      0x08
+
 
 struct vfs_attr {
     u8 attr;		//属性
@@ -48,7 +51,9 @@ enum {
     FS_IOCTL_FILE_SYNC,
     FS_IOCTL_FILE_INDEX,
     FS_IOCTL_FS_INDEX,
+    FS_IOCTL_RESET_VFSCAN,
 };
+
 
 
 struct vfs_operations {
@@ -65,12 +70,18 @@ struct vfs_operations {
     u32(*seek)(void *pfile, u32 offset, u32 mode);
     u32(*close_fs)(void **ppfs);
     u32(*close_file)(void **ppfile);
+    u32(*fdelete)(void *);
     int (*fget_attr)(void *, void *attr);
     int (*flen)(void *, u32 *parm);
     int (*ftell)(void *, u32 *parm);
     u32(*name)(void *, void *name, u32 len);
     int (*ioctl)(void *, int cmd, int arg);
-    int (*fscan)(void *pfs, const char *file_type, u8 max_deepth, u32 clust, u32 *ret_p);
+    int (*fscan_interrupt)(struct vfscan *, void *, const char *path, u8 max_deepth, int (*callback)(void));
+    // int (*fscan)(struct vfscan *, const char *path, u8 max_deepth);
+    // int (*fscan)(void *pfs, const char *file_type, u8 max_deepth, u32 clust, u32 *ret_p);
+    void (*fscan_release)(struct vfscan *);
+    int (*fsel)(struct vfscan *, void *, int sel_mode, void **, int);
+
 
 
     // int (*mount)(struct imount *, int);
@@ -112,6 +123,33 @@ struct imount {
 	const struct vfs_operations ops SEC(.vfs_operations)
 
 
+// typedef struct ffscan {
+//     u32 magic;
+//     u8 order;
+//     // u8 sort_by;
+//     u8 subpath;
+//     u8 store_mode;
+//     u8 cycle_mode;
+//     u16 cur_index;
+//     u16 prev_fnum;
+//     u16 cur_file_number;
+//     u16 first_file_number;
+//     u16 last_file_number;
+//     u32 first_CrtTime;
+//     u32 last_CrtTime;
+//     u32 cur_time;
+//     FF_APIS ff_api;
+// }SCAN;
+//
+
+typedef struct vfscan_reset_info {
+    // struct vfscan *fsn; //扫描句柄
+    u16 file_total; // 当前设备文件总数
+    u16 dir_total;// 当前设备文件夹总数
+    u8 active; //当前设备是否有效，无效需要扫描。
+    u8 scan_over; //当前设备之前是否扫描过，没有需要扫描。
+} VFSCAN_RESET_INFO;
+
 
 
 
@@ -137,11 +175,20 @@ u32 vfs_file_name(void *pvfile, void *name, u32 len);
 int vfs_get_attrs(void *pvfile, void *pvfs_attr);
 int vfs_get_fsize(void *pvfile, void *parm);
 int vfs_ftell(void *pvfile, void *parm);
+u32 vfs_file_delete(void *pvfile);
 int vfs_ioctl(void *pvfile, int cmd, int arg);
-int vfs_fscan(void *pvfs, const char *file_type, u8 max_deepth, u32 clust, u32 *ret_p);
-int vfs_get_folderinfo(void *pvfile, int *start_num, int *end_num);
+// int vfs_fscan(void *pvfs, const char *file_type, u8 max_deepth, u32 clust, u32 *ret_p);
+struct vfscan *vfs_fscan(void *pvfs, const char *path, const char *arg, u8 max_deepth, int (*callback)(void));
+void vfs_fscan_release(void *pvfs, struct vfscan *fs);
+int vfs_select(void *pvfs, void **ppvfile, struct vfscan *fs, int sel_mode, int arg);
+
+// int vfs_get_folderinfo(void *pvfile, int *start_num, int *end_num);
+int vfs_get_folderinfo(void *pvfile, struct vfscan *fs, int *start_num, int *end_num);
 int vfs_mk_dir(void *pvfs, char *folder, u8 mode);
 int vfs_get_encfolder_info(void *pvfs, char *folder, char *ext, u32 *last_num, u32 *total_num);
+
+// int vfs_fscan_new(void *pvfs, const char *path, const char *arg, u8 max_deepth, int (*callback)(void), struct vfscan *fsn, struct vfscan_reset_info *info);
+struct vfscan *vfs_fscan_new(void *pvfs, const char *path, const char *arg, u8 max_deepth, int (*callback)(void), struct vfscan *fsn, struct vfscan_reset_info *info);
 
 
 

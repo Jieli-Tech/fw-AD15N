@@ -330,6 +330,22 @@ void lrc_scan();
 /*-----------------------------------------------------------*/
 void mask_softflag_config(const struct boot_soft_flag_t *softflag);
 
+/*-----------------------------------------------------------*/
+void lvd_reset_en();
+
+void lvd_wkup_en();
+
+void __lvd_irq_handler(void);
+
+void spi_flash_port_unmount(void);
+
+void spi_flash_power_release(void);
+
+void softoff_io_reinit();
+
+void powerdown_io_reinit();
+
+
 typedef u8(*idle_handler_t)(void);
 
 struct lp_target {

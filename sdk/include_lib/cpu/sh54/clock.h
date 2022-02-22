@@ -60,6 +60,10 @@ typedef enum {
     PLL_B_DIV8,
 
 } _PLL_B_DIV;
+typedef enum {
+    PLL_REF_SEL_HTC = 3,
+    PLL_REF_SEL_LRC,
+} _PLL_REF_SEL;
 
 typedef enum {
     CLK_OUTPUT_NONE = 0,
@@ -75,6 +79,11 @@ typedef enum {
     CLK_OUTPUT_PLL_24M = 10,
 } _CLK_OUTPUT_TYPE;
 
+typedef enum {
+    ALINK_CLOCK_12M288K,  //160M div 13, 48k采样率类型
+    ALINK_CLOCK_11M2896K, //192M div 17, 44.1k采样率类型
+} ALINK_INPUT_CLK_TYPE;
+
 void pll_sel(u32 pll_clock, _PLL_DIV pll_div, _PLL_B_DIV pll_b_div);
 u32 sys_clock_get(void);
 u32 sys_clock_peration(void);
@@ -85,6 +94,7 @@ void usb_sof_trim(void (*trim_enter)(void), void (*trim_exit)(void));
 void lrc_trace_init(void);
 void lrc_trace_trim(void);
 u32 lrc_clk_get(void);
+void pll_ref_sel_init(_PLL_REF_SEL pll_ref_select);
 
 
 #endif

@@ -2,7 +2,9 @@
 About Firmware for Generic MCU SDK（AD14N-AD15N series）, Support AD14N,AD15N
 
 [tag download]:https://github.com/Jieli-Tech/fw-AD15N/tags
-[tag_badgen]:https://img.shields.io/github/v/tag/Jieli-Tech/fw-AD15N?style=plastic&logo=bluetooth&labelColor=ffffff&color=informational&label=Tag&logoColor=blue
+[tag_badgen]:https://img.shields.io/github/v/tag/Jieli-Tech/fw-AD15N?style=plastic&labelColor=ffffff&color=informational&label=Tag&
+
+# fw-AD14N-AD15N_SDK   [![tag][tag_badgen]][tag download]
 
 [中文](./README.md) | EN
 

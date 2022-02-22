@@ -26,24 +26,41 @@
 //TOUCH KEY
 #define TOUCH_KEY_SEL				{IO_PORTA_09,IO_PORTA_10,IO_PORTA_11}
 
-/*---------FLASH Configuration---------------*/
-// #define 	EXT_FLASH_EN		0
-
 /*---------KEY VOICE Configuration---------------*/
 #define KEY_VOICE_EN   				0
+
+/*---------power wakeup io---------------*/
+#define POWER_WAKEUP_IO				IO_PORTA_00
 
 /*---------dev upgrade Configuration---------------*/
 #define TFG_DEV_UPGRADE_SUPPORT 1
 #define TFG_UPGRADE_FILE_NAM	"/update.ufw"
 
+/*---------FLASH Configuration---------------*/
+#define TCFG_FLASH_SPI_TYPE_SELECT 		1//1:flash 选择硬件spi; 0:flash use soft_spi
+#define HW_SPI_WORK_MODE				SPI_MODE_BIDIR_1BIT
+#define SPI_READ_DATA_WIDTH				SPI_MODE_BIDIR_1BIT
+#define SPI_CS_PORT_SEL					IO_PORTA_05
+//port select for soft spi
+#define A_CLK_BIT           			BIT(12)// set clk
+#define A_CLK_PORT(x)       			JL_PORTA->x
+#define A_D0_BIT            			BIT(11)// set d0
+#define A_D0_PORT(x)        			JL_PORTA->x
+#define A_D1_BIT            			BIT(11)// set d1
+#define A_D1_PORT(x)        			JL_PORTA->x
+#define SOFT_SPI_WORK_MODE				SPI_MODE_UNIDIR_1BIT//只支持双向或单线
+#if TCFG_FLASH_SPI_TYPE_SELECT
+#define SPI_HW_NUM						1
+#else
+#define SPI_HW_NUM						0
+#endif
+
+/*sd 和 flash复用使能*/
+#define SPI_SD_IO_REUSE					0//SPI_FLASH与SD卡模块IO复用使能
+
 /*---------SD Configuration---------------*/
 #define TFG_SD_EN				0//ENABLE
-/*
- ******************注意事项******************
- *功能描述：实现spi_flash和sd卡的引脚复用
- *注意：尚未完全调试完成，不能使用
- */
-#define SPI_SD_IO_REUSE			0//SPI_FLASH与SD卡模块IO复用使能
+
 /*---------USB Configuration---------------*/
 #if HAS_USB_EN
 #define TCFG_PC_ENABLE						DISABLE  //PC模块使能

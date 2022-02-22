@@ -20,6 +20,8 @@
 #include "power_api.h"
 #include "gpio.h"
 #include "wdt.h"
+#include "app_config.h"
+#include "maskrom.h"
 
 #define ENABLE								1
 #define DISABLE								0
@@ -39,7 +41,6 @@
 #define TCFG_LOWPOWER_VDDIOW_LEVEL			VDDIOW_VOL_28V               //弱VDDIO等级配置
 #define TCFG_KEEP_FLASH_POWER_GATE          0							 //power_gate引脚由用户控制
 #define TCFG_LOWPOWER_DAC_OPEN				1							 //出低功耗是否开dac电源，对于频繁进出低功耗应用建议在dac使用前开dac电源
-#define TCFG_NORFLASH_4BYTE_MODE			0							 //出低功耗是否重新初始化4byte模式flash，大于16M的flash不打开此定义vm会报错
 
 const struct low_power_param power_param = {
     .config         = TCFG_LOWPOWER_LOWPOWER_SEL,          //0：sniff时芯片不进入低功耗  1：sniff时芯片进入powerdown
@@ -58,7 +59,7 @@ const struct port_wakeup port0 = {
     .pullup_down_enable = ENABLE,                          //配置I/O 内部上下拉是否使能
     .edge       = FALLING_EDGE,                            //唤醒方式选择,可选：上升沿\下降沿
     .attribute  = BLUETOOTH_RESUME,                        //保留参数
-    .iomap      = IO_PORTA_00,                             //唤醒口选择
+    .iomap      = POWER_WAKEUP_IO,                             //唤醒口选择
 };
 
 const struct sub_wakeup sub_wkup = {
@@ -184,10 +185,16 @@ void sys_power_down(u32 usec)
         return;
     }
 
-#if TCFG_NORFLASH_4BYTE_MODE
     norflash_check_4byte_mode();
-#endif
+
     OS_EXIT_CRITICAL();
+
+    ///lrct restore
+    extern const char LRC_TRIM_DISABLE;
+    if (!LRC_TRIM_DISABLE) {
+        JL_LRCT->CON = 0;
+        JL_LRCT->CON |= (3 << 1); //32 * 2^3 = 256,单位LRC周期
+    }
 
     if (usb_otg_online(0) == HOST_MODE) {
         usb_host_resume(0);
@@ -208,6 +215,45 @@ void sys_softoff()
 
 __attribute__((weak))
 void tick_timer_sleep_init(void)
+{
+
+}
+
+AT_VOLATILE_RAM_CODE
+void __lvd_irq_handler(void)
+{
+    VLVD_PND_CLR(1);
+    putchar('$');
+#if 0
+    //Garentee Flash power drop below 0.4V
+    spi_flash_port_unmount();
+
+    spi_flash_power_release();
+
+    chip_reset();
+#endif
+
+}
+
+void p33_vlvd(u8 vlvd)
+{
+    u8 reg;
+
+    reg = p33_rx_1byte(P3_VLVD_CON);
+    reg &= ~(BIT(3) | BIT(4) | BIT(5));
+    reg |= vlvd << 3;
+
+    p33_tx_1byte(P3_VLVD_CON, reg);
+}
+
+AT_VOLATILE_RAM_CODE
+void powerdown_io_reinit()
+{
+
+}
+
+AT_VOLATILE_RAM_CODE
+void softoff_io_reinit()
 {
 
 }

@@ -79,8 +79,9 @@ static int notch_howing_run(void *hld, short *inbuf, int len)
     u32 tlen = len;
     u8 *p_inbuf = (void *)inbuf;
     while (0 != tlen) {
-        wlen += cbuf_write(&howling_hdl->cbuf, &p_inbuf[wlen], tlen);
-        tlen -= wlen;
+        u32 cbuf_wlen = cbuf_write(&howling_hdl->cbuf, &p_inbuf[wlen], tlen);
+        wlen += cbuf_wlen;
+        tlen -= cbuf_wlen;
         NH_STRUCT_API *ops;
         sound_in_obj *p_si = hld;
         ops = (NH_STRUCT_API *)p_si->ops;

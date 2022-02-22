@@ -62,7 +62,7 @@ int usb_device_mode(const usb_dev usb_id, const u32 class)
         gpio_set_pull_down(IO_PORT_DP + 2 * usb_id, 0);
         gpio_set_die(IO_PORT_DP + 2 * usb_id, 0);
 
-        os_time_dly(15);
+        os_time_dly(20);
 
         gpio_set_die(IO_PORT_DM + 2 * usb_id, 1);
         gpio_set_die(IO_PORT_DP + 2 * usb_id, 1);

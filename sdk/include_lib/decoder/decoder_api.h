@@ -24,6 +24,7 @@ typedef enum {
     MAD_ERROR_LIMIT            = 0x47,              // NO USED
     MAD_ERROR_NODATA           = 0x48,              // NO USED
     MAD_ERROR_PLAY_END		   = 0x50,				//MIDI CTRL DATA OUTPUT END
+    MAD_ERROR_F1X_START_ADDR   = 0x51,				//F1X起始位置错误
 } MAD_INFO ;
 
 typedef enum {

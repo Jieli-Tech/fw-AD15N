@@ -94,6 +94,8 @@ u8 spi_send_recv_byte(spi_dev spi, u8 byte, int *err);
 int spi_set_baud(spi_dev spi, u32 baud);
 u32 spi_get_baud(spi_dev spi);
 void spi_close(spi_dev spi);
+void hw_spi_suspend(spi_dev spi);
+void hw_spi_resume(spi_dev spi);
 
 void spi_dma_set_addr_for_slave(spi_dev spi, void *buf, u32 len, u8 rw);//rw:1-rx; 0-tx
 void spi_send_recv_byte_for_slave(spi_dev spi, u8 *byte, u8 rw);//rw:1-rx; 0-tx

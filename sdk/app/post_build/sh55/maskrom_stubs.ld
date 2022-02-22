@@ -52,8 +52,8 @@
   LZ4_decompress_safe_continue = ABSOLUTE(0xc27e4);
   LZ4_decompress_generic = ABSOLUTE(0xc27e8);
   LZ4_decompress_safe_usingDict = ABSOLUTE(0xc27ec);
-  mdelay = ABSOLUTE(0xc27f0);
-  udelay = ABSOLUTE(0xc27f4);
+  _mdelay = ABSOLUTE(0xc27f0);
+  _udelay = ABSOLUTE(0xc27f4);
   uart_set_dma_dir = ABSOLUTE(0xc27f8);
   uart_tx_data = ABSOLUTE(0xc27fc);
   boot_arg_list = ABSOLUTE(0x4ed0);

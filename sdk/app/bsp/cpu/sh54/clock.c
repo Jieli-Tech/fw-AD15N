@@ -79,6 +79,8 @@ void sfc_resume(u32 disable_spi);
 AT(.ram_code)
 void sfc_suspend(u32 enable_spi)
 {
+    local_irq_disable();
+
     //wait cache idle
     while (!(JL_CACHE->CON & BIT(5)));
     //wait sfc idle
@@ -90,11 +92,15 @@ void sfc_suspend(u32 enable_spi)
 
     JL_SFC->CON &= ~BIT(0);
 
+    JL_PORTD->OUT |=  BIT(2);
     JL_PORTD->DIR &= ~BIT(2);
+    JL_PORTD->PU  &= ~BIT(2);
 
     if (enable_spi) {
         JL_SPI0->CON |= BIT(0);
     }
+
+    local_irq_enable();
 }
 static u32 sfc_clk;
 #define     SPI_TSHSL   40
@@ -380,6 +386,8 @@ void pll_config(u32 pll_ds)
 }
 void usb_sof_trim(void (*trim_enter)(void), void (*trim_exit)(void))
 {
+    lrc_trace_trim();
+
     memset(&usb_trim, 0, sizeof(usb_trim));
 
     usb_trim.pll_ds = (JL_PLL->CON1 & 0xfff) + 2;
@@ -436,17 +444,28 @@ extern const char libs_debug;   //打印总开关
 #define DS_CENTER   1873
 static u32 lrc_pll_ds = DS_CENTER;
 void LRC_CLK_EN(void);
+void gpcnt_htc_cal();
+extern u32 htc_pll_ds;
 void lrc_trace_init(void)
 {
     if (LRC_TRIM_DISABLE) {
         return;
     }
-    //lrc init
-    LRC_CLK_EN();
 
     JL_LRCT->CON = 0;
     JL_LRCT->CON |= (3 << 1);//32 * 2^3 = 256，单位LRC周期
 
+    if (((JL_PLL->CON0 >> 29) & 0x07) == PLL_REF_SEL_LRC) {
+        gpcnt_htc_cal();
+        log_info("use gpcnt cal htc! htc_pll_ds:%d", htc_pll_ds);
+        lrc_pll_ds = (JL_PLL->CON1 & 0xfff) + 2;
+        return;
+    } else if (((JL_PLL->CON0 >> 29) & 0x07) == PLL_REF_SEL_HTC) {
+        log_info("use mask htc! htc_pll_ds:%d", htc_pll_ds);
+    }
+
+    //lrc init
+    LRC_CLK_EN();
     u32 efuse_page0 = p33_rd_page(0);
     if (!(efuse_page0 & BIT(15))) {
         log_error("efuse_page0 BIT(15) = 0, No lrc pll ds trim !\n");
@@ -474,6 +493,9 @@ void lrc_trace_trim(void)
     if (LRC_TRIM_DISABLE) {
         return;
     }
+    if (((JL_PLL->CON0 >> 29) & 0x07) == PLL_REF_SEL_LRC) {
+        return;
+    }
     JL_LRCT->CON |= BIT(6) | BIT(0);
     while (!(JL_LRCT->CON & BIT(7)));
     u32 num = JL_LRCT->NUM;
@@ -496,6 +518,158 @@ u32 lrc_clk_get(void)
     return 480000000 / lrc_pll_ds / 8;
 }
 
+void lrc_pll_init()
+{
+#define LRC_PLL_CON1                                         (\
+		/*reserved                  2 bit*/     (   0b00 << 30 ) |\
+		/*SYSPLL_REFMOD(1-0)        2 bit*/     (   0b00 << 28 ) |\
+		/*SYSPLL_REFDSEN(1-0)       2 bit*/     (   0b01 << 26 ) |\
+		/*SYSPLL_LDO12D_S(2-0)      3 bit*/     (  0b100 << 23 ) |\
+		/*SYSPLL_LDO12A_S(2-0)      3 bit*/     (  0b100 << 20 ) |\
+		/*reserved                  1 bit*/     (      0 << 19 ) |\
+		/*SYSPLL_TEST_EN            1 bit*/     (      0 << 18 ) |\
+		/*SYSPLL_TEST_S(1-0)        2 bit*/     (   0b00 << 16 ) |\
+		/*SYSPLL_LDO_BYPASS         1 bit*/     (      0 << 15 ) |\
+		/*SYSPLL_IVCOS(2-0)         3 bit*/     (  0b011 << 12 ) |\
+		/*SYSPLL_DS(11-0)          12 bit*/     ((lrc_pll_ds -2 )<< 0))
+
+#define LRC_PLL_CON0                                         (\
+		/*ref_sel                   3 bit*/     (  0b100 << 29 ) |\
+		/*reserved                  3 bit*/     (  0b000 << 26 ) |\
+		/*SYSPLL_CKDAC_OE           1 bit*/     (      0 << 25 ) |\
+		/*SYSPLL_CKOUT_D4P5_OE      1 bit*/     (      1 << 24 ) |\
+		/*SYSPLL_CKOUT_D3P5_OE      1 bit*/     (      1 << 23 ) |\
+		/*SYSPLL_CKOUT_D2P5_OE      1 bit*/     (      1 << 22 ) |\
+		/*SYSPLL_CKOUT_D1P5_OE      1 bit*/     (      1 << 21 ) |\
+		/*SYSPLL_CKOUT_D1_OE        1 bit*/     (      1 << 20 ) |\
+		/*SYSPLL_LPFR2S(2-0)        3 bit*/     (  0b111 << 17 ) |\
+		/*SYSPLL_ICPS(2-0)          3 bit*/     (  0b000 << 14 ) |\
+		/*SYSPLL_PFDS(1-0)          2 bit*/     (   0b01 << 12 ) |\
+		/*SYSPLL_MODE               1 bit*/     (      0 << 11 ) |\
+		/*SYSPLL_TSCK480M_OE        1 bit*/     (      0 << 10 ) |\
+		/*reserved                  1 bit*/     (      0 << 9  ) |\
+		/*SYSPLL_REFDS(6-0)         7 bit*/     (   0x00 << 2  ) |\
+		/*SYSPLL_RN                 1 bit*/     (      0 << 1  ) |\
+		/*SYSPLL_EN                 1 bit*/     (      0 << 0  ))
+
+    u32 pll_con0 = LRC_PLL_CON0;
+    u32 pll_con1 = LRC_PLL_CON1;
+
+    log_info("JL_PLL->CON1 %x", JL_PLL->CON1);
+    local_irq_disable();
+    JL_CLK->CON0 |= BIT(1);
+    JL_CLK->CON0 &= ~BIT(5);          // select hrc
+    delay(10);
+
+    SFR(pll_con1, 0, 12, (lrc_pll_ds));
+    JL_PLL->CON0  = pll_con0;
+    JL_PLL->CON1  = pll_con1;
+
+    JL_PLL->CON0 |= BIT(0);//EN
+    delay(40);//wait 10 us
+    JL_PLL->CON0 |= BIT(1);//RST
+    delay(20);//wait 10 us
+
+    JL_CLK->CON0 |=  BIT(5);          // select mux
+    local_irq_enable();
+    log_info("JL_PLL->CON1 %x", JL_PLL->CON1);
+}
+#define HTC_PLL_CON1                                         (\
+		    /*reserved                  2 bit*/     (   0b00 << 30 ) |\
+		    /*SYSPLL_REFMOD(1-0)        2 bit*/     (   0b00 << 28 ) |\
+		    /*SYSPLL_REFDSEN(1-0)       2 bit*/     (   0b10 << 26 ) |\
+		    /*SYSPLL_LDO12D_S(2-0)      3 bit*/     (  0b100 << 23 ) |\
+		    /*SYSPLL_LDO12A_S(2-0)      3 bit*/     (  0b100 << 20 ) |\
+		    /*reserved                  1 bit*/     (      0 << 19 ) |\
+		    /*SYSPLL_TEST_EN            1 bit*/     (      0 << 18 ) |\
+		    /*SYSPLL_TEST_S(1-0)        2 bit*/     (   0b00 << 16 ) |\
+		    /*SYSPLL_LDO_BYPASS         1 bit*/     (      0 << 15 ) |\
+		    /*SYSPLL_IVCOS(2-0)         3 bit*/     (  0b011 << 12 ) |\
+		    /*SYSPLL_DS(11-0)          12 bit*/     (((480000000/(5200000/21))-2)<< 0))
+
+#define HTC_PLL_CON0                                         (\
+		    /*ref_sel                   3 bit*/     (  0b011 << 29 ) |\
+		    /*reserved                  3 bit*/     (  0b000 << 26 ) |\
+		    /*SYSPLL_CKDAC_OE           1 bit*/     (      0 << 25 ) |\
+		    /*SYSPLL_CKOUT_D4P5_OE      1 bit*/     (      1 << 24 ) |\
+		    /*SYSPLL_CKOUT_D3P5_OE      1 bit*/     (      1 << 23 ) |\
+		    /*SYSPLL_CKOUT_D2P5_OE      1 bit*/     (      1 << 22 ) |\
+		    /*SYSPLL_CKOUT_D1P5_OE      1 bit*/     (      1 << 21 ) |\
+		    /*SYSPLL_CKOUT_D1_OE        1 bit*/     (      1 << 20 ) |\
+		    /*SYSPLL_LPFR2S(2-0)        3 bit*/     (  0b111 << 17 ) |\
+		    /*SYSPLL_ICPS(2-0)          3 bit*/     (  0b000 << 14 ) |\
+		    /*SYSPLL_PFDS(1-0)          2 bit*/     (   0b01 << 12 ) |\
+		    /*SYSPLL_MODE               1 bit*/     (      0 << 11 ) |\
+		    /*SYSPLL_TSCK480M_OE        1 bit*/     (      0 << 10 ) |\
+		    /*reserved                  1 bit*/     (      0 << 9  ) |\
+		    /*SYSPLL_REFDS(6-0)         7 bit*/     (   0x13 << 2  ) |\
+		    /*SYSPLL_RN                 1 bit*/     (      0 << 1  ) |\
+		    /*SYSPLL_EN                 1 bit*/     (      0 << 0  ))
+void htc_pll_init(void)
+{
+    u32 htc_pll_con0 = HTC_PLL_CON0;
+    u32 htc_pll_con1 = HTC_PLL_CON1;
+
+    log_info("JL_PLL->CON1 %x", JL_PLL->CON1);
+    local_irq_disable();
+    JL_CLK->CON0 |= BIT(1);
+    JL_CLK->CON0 &= ~BIT(5);          // select hrc
+    delay(10);
+    SFR(htc_pll_con1, 0, 12, (htc_pll_ds));
+    /* SFR(htc_pll_con1, 0, 12, (htc_pll_ds_temp)); */
+    JL_PLL->CON0  = htc_pll_con0;
+    JL_PLL->CON1  = htc_pll_con1;
+    JL_PLL->CON0 |= BIT(0);//EN
+    delay(40);//wait 10 us
+    JL_PLL->CON0 |= BIT(1);//RST
+    delay(20);
+
+    JL_CLK->CON0 |=  BIT(5);          // select mux
+    local_irq_enable();
+    log_info("JL_PLL->CON1 %x", JL_PLL->CON1);
+
+}
+
+void pll_ref_sel_init(_PLL_REF_SEL pll_ref_select)
+{
+    u8 old_sys_clock_source = (JL_PLL->CON0 >> 29) & 0xff;
+    if (old_sys_clock_source == pll_ref_select) {
+        return;
+    }
+    if (pll_ref_select == PLL_REF_SEL_LRC) {
+        log_info("change pll_ref to lrc!");
+        lrc_pll_init();
+    } else if (pll_ref_select == PLL_REF_SEL_HTC) {
+        log_info("change pll_ref to htc!");
+        htc_pll_init();
+        lrc_trace_trim();
+    }
+}
+
+void gpcnt_htc_cal()
+{
+    u32 gpcnt_con = 0;
+    gpcnt_con |= 2 << 16; //sfc clk :160M
+    gpcnt_con |= 4 << 12; //GSS clk
+    gpcnt_con |= 0xf << 8; //GTS=15(32*2^15=1048576)
+    gpcnt_con |= 3 << 1; //CSS htc clk
+    JL_GPCNT->CON = gpcnt_con;
+    JL_GPCNT->CON |= BIT(6); //clr
+    JL_GPCNT->CON |= BIT(0); //enable
+    while (!(JL_GPCNT->CON & BIT(7)));
+    u32 num = JL_GPCNT->NUM;
+    JL_GPCNT->CON |= BIT(6); //clr
+    JL_GPCNT->CON &= ~BIT(0); //disable
+
+    u8 div75 = ((JL_CLK->CON1 >> 5) & 0x7) + 1;
+    u32 sfc_clk = sys_clock_get() * div75;
+    u32 htc_clk = (u32)((float)(sfc_clk / 1048576.0) * num);
+    log_info("num:%d,htc_clk:%d", num, htc_clk);
+    u8 htc_pll_div = ((HTC_PLL_CON0 >> 2) & 0X7F) + 2;
+    htc_pll_ds = 480000000 / (htc_clk / htc_pll_div) - 2;
+    /* log_info("htc_pll_div:%d,htc_pll_ds:%d",htc_pll_div,htc_pll_ds); */
+}
+
 #if 0
 u32 clock_get_uart(void)
 {
@@ -508,5 +682,6 @@ void clk_out(enum CLK_OUT_SOURCE clk)
 
     JL_CLK->CON0 |= ((clk | BIT(4)) << 10);
 }
+
 #endif
 

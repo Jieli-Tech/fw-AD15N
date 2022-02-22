@@ -174,7 +174,7 @@ int sydf_ioctl_api(void *pfile, int cmd, int arg)
 
 }
 //REGISTER_VFS_OPERATIONS(sydfvfs_ops) = {
-const struct vfs_operations sydf_vfs_ops AT(.vfs_operations) = {
+const struct vfs_operations sydf_vfs_ops sec_used(.vfs_operations) = {
     .fs_type = "sydfile",
     .init        = sydf_init_api,
     /* .init        = NULL, */

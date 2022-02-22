@@ -54,9 +54,10 @@
   LZ4_decompress_safe_usingDict = ABSOLUTE(0xc2ff4);
   uart_set_dma_dir = ABSOLUTE(0xc2ff8);
   uart_tx_data = ABSOLUTE(0xc2ffc);
-  mdelay = ABSOLUTE(0xc1220);
-  udelay = ABSOLUTE(0xc1114);
+  _mdelay = ABSOLUTE(0xc1220);
+  _udelay = ABSOLUTE(0xc1114);
   boot_arg_list = ABSOLUTE(0x7ed0);
+  htc_pll_ds = ABSOLUTE(0x7ee0);
   _IRQ_MEM_ADDR = ABSOLUTE(0x7f00);
   _MASK_MEM_BEGIN = ABSOLUTE(0x7eb0);
   _MASK_MEM_SIZE = ABSOLUTE(0x48);

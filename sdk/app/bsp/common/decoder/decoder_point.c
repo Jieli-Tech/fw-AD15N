@@ -13,14 +13,16 @@
 
 bool get_dp(dec_obj *obj, dp_buff *dbuff)
 {
-    u32 t_size;
-    u32 size = sizeof(dp_buff) - 4;
     decoder_ops_t *ops;
 
     if ((0 == obj) || (0 == dbuff)) {
         log_info(" get decoder point buf null\n");
         return false;
     }
+    u32 t_size;
+    u32 size = (u32)&dbuff->buff[0] - (u32)dbuff;
+    size = sizeof(dp_buff) - size;
+
     ops = obj->dec_ops;
 
     bool bres;
@@ -45,7 +47,7 @@ void *check_dp(dp_buff *dbuff)
 {
     u16 crc;
     if ((0 == dbuff) || (0 == dbuff->len)) {
-        log_info("  check decoder point buf null\n");
+        /* log_info("  check decoder point buf null\n"); */
         return 0;
     }
     crc = CRC16(&dbuff->len, dbuff->len + 2);

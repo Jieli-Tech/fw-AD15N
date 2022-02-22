@@ -78,6 +78,7 @@
 #define E_F1A_TYPE	  (0X9000 + 3)
 #define E_F1A_OUTRGE  (0X9000 + 3)
 
+
 #define E_MIDI_INDEX  (0X9010 + 0)
 #define E_MIDI_DBUF	  (0X9010 + 1)
 #define E_MIDIFORMAT  (0X9010 + 2)
@@ -104,6 +105,13 @@
 #define E_WAV_DBUF	  	(0X9050 + 1)
 #define E_WAV_FORMAT   	(0X9050 + 2)
 #define E_WAV_TYPE	  	(0X9050 + 3)
+
+#define E_F1X_NO_HLEN  (0X9060 + 1)
+#define E_F1X_NO_ULEN  (0X9060 + 2)
+#define E_F1X_HU_ZERO  (0X9060 + 3)
+#define E_F1X_HU_ERR   (0X9060 + 4)
+#define E_F1X_U2LONG   (0X9060 + 5)
+#define E_F1X_FORMAT   (0X9060 + 6)
 
 #define E_ADCANA_PARA (0xA000 + 1)
 #define E_ADC_SR      (0xA000 + 2)

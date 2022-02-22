@@ -24,7 +24,7 @@
 #include "debug.h"
 
 #define F1A_OBUF_SIZE   (DAC_DECODER_BUF_SIZE)
-#define F1A_DBUF_SIZE   (0xc54)
+#define F1A_DBUF_SIZE   (0xc64)
 dec_obj dec_f1a_hld[MAX_F1A_CHANNEL];
 /*************************************************************/
 /* cbuffer_t cbuf_f1a[MAX_F1A_CHANNEL] AT(.f1a_buf); */
@@ -59,7 +59,14 @@ const struct if_decoder_io f1a_dec_io[MAX_F1A_CHANNEL] = {
 const char f1a_ext[] = {".f1a"};
 const char f1b_ext[] = {".f1b"};
 const char f1c_ext[] = {".f1c"};
+const char f1x_ext[] = {".f1x"};
 extern audio_decoder_ops *get_f1a_ops();
+
+u8 g_loop_tab[10] = {
+    0, 1, 2, 0, 0,
+    1, 2, 3, 2, 1
+};
+
 u32 f1a_decode_index(void *p_file, u32 index, dec_obj **p_dec, void *p_dp_buf, f1x_data *p_f1x_data)
 {
     u32 buff_len, i;
@@ -67,7 +74,7 @@ u32 f1a_decode_index(void *p_file, u32 index, dec_obj **p_dec, void *p_dp_buf, f
     /* void *name; */
     /* char name[16] = {0}; */
     char ctype = 0;
-    log_info("f1a_decode_api\n");
+    log_info("f1a_decode_api");
 
     void *p_cbuf;
     dec_obj *p_dec_hld;
@@ -122,26 +129,35 @@ u32 f1a_decode_index(void *p_file, u32 index, dec_obj **p_dec, void *p_dp_buf, f
     /******************************************/
     /* name = vfs_file_name(p_file); */
     int file_len = vfs_file_name(p_file, (void *)g_file_sname, sizeof(g_file_sname));
-    log_info("file name : %s\n", g_file_sname);
-    log_info("f1a_decode_api open\n");
-    ops->open(p_dbuf, p_dec_io, p_dp_buf);         //传入io接口，说明如下
-    log_info("f1a_decode_api open end\n");
-    /* log_info("D\n"); */
+    log_info("file name : %s", g_file_sname);
+    u32 t_par = ops->open(p_dbuf, p_dec_io, p_dp_buf);         //传入io接口，说明如下
     if (check_ext_api(g_file_sname, f1a_ext, 4)) {
-        log_info("file is a f1a\n");
         ctype = 'a';
     } else if (check_ext_api(g_file_sname, f1b_ext, 4)) {
-        log_info("file is a f1b\n");
         ctype = 'b';
     } else if (check_ext_api(g_file_sname, f1c_ext, 4)) {
-        log_info("file is a f1c\n");
         ctype = 'c';
         if (ops->format_check(p_dbuf)) {                  //格式检查
+            log_error("f1c format err\n");
+            return E_F1A_FORMAT;
+        }
+    } else if (check_ext_api(g_file_sname, f1x_ext, 4)) {
+        ctype = 'x';
+        void *pf1x = f1x_play_api(p_file, g_loop_tab, sizeof(g_loop_tab), index, t_par);
+        if (NULL == pf1x) {
+            log_error("f1x null\n");
+            return E_F1X_FORMAT;
+        }
+        ops->dec_confing(p_dbuf, CMD_SET_PLAY_FILE, pf1x);
+        if (ops->format_check(p_dbuf)) {                  //格式检查
+            log_error("f1x format err\n");
             return E_F1A_FORMAT;
         }
     } else {
+        log_error("f1a type err\n");
         return E_F1A_TYPE;
     }
+    log_info("file is a f1%c", ctype);
 
     regist_dac_channel(&p_dec_hld->sound, kick_decoder);//注册到DAC;
 

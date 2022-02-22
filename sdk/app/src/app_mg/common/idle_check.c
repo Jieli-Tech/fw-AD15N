@@ -14,7 +14,7 @@
 #define LOG_TAG             "[normal]"
 #include "debug.h"
 
-#define IDLE_CHECK_EN		1
+#define IDLE_CHECK_EN		0
 
 #define IDLE_SLEEP_TIME		(30 * 2 * 60)//half second
 static u16 idle_cnt = 0;

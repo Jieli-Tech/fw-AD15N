@@ -5,8 +5,8 @@
 #include "typedef.h"
 // #include "common.h"
 
-#define LOG_TAG_CONST       NORM
-#define LOG_TAG             "[normal]"
+// #define LOG_TAG_CONST       NORM
+// #define LOG_TAG             "[normal]"
 #include "debug.h"
 
 #define FS_DEBUG    1
@@ -21,6 +21,10 @@
 #define fs_printf(...)
 #endif
 
+#define FAT_ONLY_SUPPORT_FAT32  1
+#if (FAT_ONLY_SUPPORT_FAT32 == 0)
+#define FAT_EXFAT_ENABLE 0
+#endif
 
 
 #define D_MAX_DEEPTH        1

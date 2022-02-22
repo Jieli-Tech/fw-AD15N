@@ -27,7 +27,7 @@
 #define SEC_USED(x)     __attribute__((section(#x),used))
 #define sec(x)          __attribute__((section(#x)))
 #define SEC(x)          __attribute__((section(#x)))
-#define AT(x)           __attribute__((section(#x),used))
+#define AT(x)           __attribute__((section(#x)))
 #define SET(x)          __attribute__((x))
 #define _GNU_PACKED_	__attribute__((packed))
 #define _INLINE_        __attribute__((always_inline))

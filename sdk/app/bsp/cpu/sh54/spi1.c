@@ -297,14 +297,14 @@ int spi_open(spi_dev spi)
         spi_dir_out(spi_regs[id]);
     } else if (role == SPI_ROLE_SLAVE) {
         spi_role_slave(spi_regs[id]);
-        spi_ie_en(spi_regs[id]);  //从机默认打开中断接收
-        HWI_Install(IRQ_SPI1_IDX, (u32)spi1_isr, 3); //3:中断优先级递增(0~8)
+        spi_ie_en(spi_regs[id]);  //从机默认打开中断
+        HWI_Install(IRQ_SPI1_IDX, (u32)spi1_isr, 5); //5:中断优先级递增(0~7)
         spi_dir_in(spi_regs[id]);
     }
     spi_smp_edge_rise(spi_regs[id]);
     spi_ud_edge_fall(spi_regs[id]);
     spi_cs_idle_h(spi_regs[id]);
-    spi_clk_idle_h(spi_regs[id]);
+    spi_clk_idle_l(spi_regs[id]);
     spi_clr_pnd(spi_regs[id]);
     err = spi_set_baud(spi, clock);
     if (err) {
@@ -535,6 +535,17 @@ void spi_close(spi_dev spi)
     spi_disable(spi_regs[id]);
 }
 
+void hw_spi_suspend(spi_dev spi)
+{
+    spi_close(spi);
+}
+void hw_spi_resume(spi_dev spi)
+{
+    u8 id = spi_get_info_id(spi);
+    u8 mode = spi_get_info_mode(spi);
+    spi_set_bit_mode(spi, mode);
+    spi_enable(spi_regs[id]);
+}
 /*************************slave ************************/
 u8 *rec_data_byte;
 void spi_dma_set_addr_for_slave(spi_dev spi, void *buf, u32 len, u8 rw)//rw:1-rx; 0-tx
@@ -571,95 +582,261 @@ static void spi1_isr()
             }
         } else {//tx:byte/dma
             spi_dir_in(spi_regs[SPI1]);
-            *rec_data_byte = 0;
+            if (rec_data_byte) {
+                *rec_data_byte = 0xff;
+            }
             /* log_info("spi tx\n"); */
         }
     }
     spi_clr_pnd(spi_regs[SPI1]);
 }
 /***********************slave test**************************/
-#if 1
+/**********************************************************
+ *从机模式：只需将device_list.c结构体role改为SPI_ROLE_SLAVE
+ *  *注意：
+ *        1.适配空闲电平、采样边沿，更新数据边沿
+ *        2.为避免干扰，先运行spi主机，再运行从机
+ **********************************************************/
+#if 0
 //slave init
-u8 tx_buff[512], rx_buff[512];
-u8 tx_byte, rx_byte = 0;
+u8 tx_buff[256], rx_buff[256];
+u8 tx_byte, rx_byte = 0xff;
 void spi1_slave_init_test()
 {
     log_info("----------------start-------------------");
-    for (u16 i = 0; i < 512; i++) {
-        tx_buff[i] = i % 10 + '0';
+    for (u16 i = 0; i < 256; i++) {
+        tx_buff[i] = i;//i % 10 + '0';
         rx_buff[i] = 0;
     }
     gpio_set_die(IO_PORTA_05, 1);
     gpio_set_direction(IO_PORTA_05, 1);//cs
+    gpio_set_pull_up(IO_PORTA_05, 1);//cs
+    gpio_set_pull_down(IO_PORTA_05, 0);//cs
     spi_open(1);
     /* spi_send_recv_byte_for_slave(1, &rx_byte, 1);//rw:1-rx; 0-tx */
     /* spi_dma_set_addr_for_slave(1, rx_buff, 12, 1);//rw:1-rx; 0-tx */
 
 }
-//dma tx
-void spi1_slave_dma_send()
+//dma tx(单向)
+void spi1_slave_dma_send_test()
 {
     spi1_slave_init_test();//init spi slave
-    spi_dma_set_addr_for_slave(1, tx_buff, 12, 0);//rw:1-rx; 0-tx
+    spi_dma_set_addr_for_slave(1, tx_buff, 256, 0);//rw:1-rx; 0-tx
     while (1) { //循环发送
-        if (tx_buff[0] == 0) {
-            log_info("---1---");
-            for (u16 i = 0; i < 512; i++) {
-                tx_buff[i] = i % 10 + 'a';
+        if (tx_buff[0] == 0xff) {
+            for (u16 i = 0; i < 256; i++) {
+                tx_buff[i] = i;//i % 10 + 'a';
             }
-            spi_dma_set_addr_for_slave(1, tx_buff, 12, 0);//rw:1-rx; 0-tx
+            spi_dma_set_addr_for_slave(1, tx_buff, 256, 0);//rw:1-rx; 0-tx
+            log_info("---spi slave dma send data:");
+            log_info_hexdump(tx_buff, 256);
         }
         wdt_clear();
         delay(100);
     }
 }
-//dma rx
-void spi1_slave_dma_rec()
+//dma rx(单向)
+void spi1_slave_dma_rec_test()
 {
     spi1_slave_init_test();//init spi slave
-    for (u16 i = 0; i < 512; i++) {
-        rx_buff[i] = 0;
+    for (u16 i = 0; i < 256; i++) {
+        rx_buff[i] = 0xff;
     }
-    spi_dma_set_addr_for_slave(1, rx_buff, 12, 1);//rw:1-rx; 0-tx
+    spi_dma_set_addr_for_slave(1, rx_buff, 256, 1);//rw:1-rx; 0-tx
     while (1) { //循环接收
-        if (rx_buff[0] != 0) { //接收第一字节不为0
-            log_info(":%s\n", rx_buff);
-            rx_buff[0] = 0;
-            spi_dma_set_addr_for_slave(1, rx_buff, 12, 1);//rw:1-rx; 0-tx
+        if (rx_buff[0] != 0xff) { //接收第一字节不为0
+            log_info("spi slave dma receive data:");
+            log_info_hexdump(rx_buff, 256);
+            for (u16 i = 0; i < 256; i++) {
+                rx_buff[i] = 0xff;//清除接收
+            }
+            spi_dma_set_addr_for_slave(1, rx_buff, 256, 1);//rw:1-rx; 0-tx
         }
         wdt_clear();
         delay(10);
     }
 }
-//byte tx
-void spi1_slave_byte_send()
+//byte tx(单向)
+void spi1_slave_byte_send_test()
 {
+    u8 i = 0;
     spi1_slave_init_test();//init spi slave
-    tx_byte = 'a';
+    tx_byte = i;
     spi_send_recv_byte_for_slave(1, &tx_byte, 0);//rw:1-rx; 0-tx
     while (1) {
-        if (tx_byte == 0) {
-            log_info("----2----");
-            tx_byte = 'n';
+        if (tx_byte == 0xff) {
+            log_info("spi slave byte send data:0x%x", i);
+            i++;
+            tx_byte = i;
             spi_send_recv_byte_for_slave(1, &tx_byte, 0);//rw:1-rx; 0-tx
         }
         wdt_clear();
         delay(10);
     }
 }
-//byte rx
-void spi1_slave_byte_rec()
+//byte rx(单向)
+void spi1_slave_byte_rec_test()
 {
     spi1_slave_init_test();//init spi slave
     spi_send_recv_byte_for_slave(1, &rx_byte, 1);//rw:1-rx; 0-tx
     while (1) {
-        if (rx_byte != 0) {
-            log_info(":%c\n", rx_byte);
-            rx_byte = 0;
+        if (rx_byte != 0xff) {
+            log_info("spi slave byte receive data:0x%x", rx_byte);
+            rx_byte = 0xff;//清除接收
             spi_send_recv_byte_for_slave(1, &rx_byte, 1);//rw:1-rx; 0-tx
         }
         wdt_clear();
         delay(10);
     }
 }
+
+
+//byte tx&rx 全双工test
+//spi从机全双工通讯示例,查询法. 需在spi_open关闭spi中断
+//其它单向测试需开中断(从机默认已开)
+void spi1_slave_byte_send_receive_test()
+{
+    u8 i = 0;
+    u16 cnt = 256;
+    spi1_slave_init_test();//init spi slave
+    wdt_disable();//关闭看门狗
+    while (1) {
+        i = 0;
+        cnt = 256;
+        for (u16 ii = 0; ii < 256; ii++) {
+            rx_buff[ii] = 0;
+        }
+
+        local_irq_enable();//关闭所有中断
+        while (1) {
+            tx_byte = i;
+            spi_w_reg_buf(spi_regs[1], tx_byte);//send(0~255)
+            while (!spi_pnd(spi_regs[1]));//1:spi1  //wait png
+            spi_clr_pnd(spi_regs[1]);
+            rx_buff[i] = spi_r_reg_buf(spi_regs[1]);//receive
+            //下方添加代码过多影响正常通信
+            if (rx_buff[i] != (u8)(i - 1)) {
+                log_info("spi slave byte duplex receive fail!");
+                break;
+            }
+            if (i == 255) {
+                log_info("spi slave byte duplex receive success");
+                break;
+            }
+            i++;
+        }
+        local_irq_disable();
+        log_info_hexdump(rx_buff, 256);
+    }
+}
+
+
+
+/**********************spi master配合spi从机测试***********************/
+void spi1_master_demo()
+{
+    u8 tx_byte1 = 0, rx_byte1 = 0;
+    int rx_error = 1;
+    gpio_write(IO_PORTA_05, 1); //spi cs
+    gpio_set_direction(IO_PORTA_05, 0);
+    gpio_set_die(IO_PORTA_05, 1);
+
+//全双工
+#if 0//全双工 test
+    u8 i = 0;
+    u16 cnt = 256;
+    u8 rx__buf[256] = {0};
+    tx_byte1 = 0xff;
+    gpio_write(IO_PORTA_05, 0); //spi cs
+    while (cnt) {
+        rx__buf[i] = spi_send_recv_byte(1, tx_byte1, NULL);
+        tx_byte1 = i;
+        if (rx__buf[i] != i) {
+            log_info("spi master byte duplex receive fail!(%d)", cnt);
+            break;
+        }
+        i++;
+        cnt--;
+        /* udelay(10); */
+    }
+    gpio_write(IO_PORTA_05, 1); //spi cs
+    if (cnt == 0) {
+        log_info("spi master byte receive duplex success!");
+    }
+    log_info_hexdump(rx__buf, 256);
+#else //单向
+#if 1 //byte test
+#if 1 //byte tx
+    static u8 i = 0;
+    tx_byte1 = i++;
+    gpio_write(IO_PORTA_05, 0); //spi cs
+    /* delay_10ms(1); */
+    spi_send_byte(1, tx_byte1);
+    gpio_write(IO_PORTA_05, 1); //spi cs
+    log_info("spi master byte send data:0x%x", tx_byte1);
+#else //byte rx
+    gpio_write(IO_PORTA_05, 0); //spi cs
+    rx_byte1 = spi_recv_byte(1, &rx_error);
+    gpio_write(IO_PORTA_05, 1); //spi cs
+    if (rx_error == 0) {
+        log_info("spi master byte receive ok.data:0x%x", rx_byte1);
+    } else {
+        log_error("spi master byte receive(0x%x) err!", rx_byte1);
+    }
+#endif
+#else //dma test
+#if 1 //dma send
+    u8 tx_dma_buf[256];
+    for (u16 i = 0; i < sizeof(tx_dma_buf); i++) {
+        tx_dma_buf[i] = i;
+    }
+    gpio_write(IO_PORTA_05, 0); //spi cs
+    spi_dma_send(1, tx_dma_buf, sizeof(tx_dma_buf));
+    gpio_write(IO_PORTA_05, 1); //spi cs
+    log_info("spi master dma send data:");
+    log_info_hexdump(tx_dma_buf, sizeof(tx_dma_buf));
+#else  //dma receive
+    u8 rx_dma_buf[256];
+    int ret = 0;
+    for (u16 i = 0; i < sizeof(rx_dma_buf); i++) {
+        rx_dma_buf[i] = 0;
+    }
+    gpio_write(IO_PORTA_05, 0); //spi cs
+    ret = spi_dma_recv(1, rx_dma_buf, sizeof(rx_dma_buf));
+    gpio_write(IO_PORTA_05, 1); //spi cs
+    if (ret == sizeof(rx_dma_buf)) {
+        log_info_hexdump(rx_dma_buf, sizeof(rx_dma_buf));
+        while (ret--) {
+            if (rx_dma_buf[ret] != ret) {
+                log_error("spi master dma receive fail!");
+                return;
+            }
+        }
+        log_info("spi master dma receive ok!");
+    } else {
+        log_error("spi master dma receive err!");
+    }
+#endif //dma send
+#endif //byte test
+#endif //双向
+}
+
+void spi1_master_test()
+{
+    gpio_set_die(IO_PORTA_07, 1); //按键
+    gpio_set_direction(IO_PORTA_07, 1);
+    gpio_set_pull_up(IO_PORTA_07, 1);
+    gpio_set_pull_down(IO_PORTA_07, 0);
+    spi_open(1);
+
+    while (1) {
+        while (!gpio_read(IO_PORTA_07)) { //按键
+            while (!gpio_read(IO_PORTA_07));
+            //os_time_dly(1);//延时10ms
+            spi1_master_demo();
+        }
+        wdt_clear();
+    }
+}
+
 #endif

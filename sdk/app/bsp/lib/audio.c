@@ -35,8 +35,8 @@ void audio_isr(void)
 void audio_init(void)
 {
     HWI_Install(IRQ_AUDIO_IDX, (u32)audio_isr, IRQ_AUDIO_IP) ;
-    JL_CLK->CON1 &= ~AUDIO_CLKDIV_BITS;
-    JL_CLK->CON1 |= AUDIO_CLK_PLL48M;
+    JL_CLK->CON0 &= ~AUDIO_CLKDIV_BITS;
+    JL_CLK->CON0 |= AUDIO_CLK_PLL48M;
     audio_analog_open();
 }
 void audio_off(void)

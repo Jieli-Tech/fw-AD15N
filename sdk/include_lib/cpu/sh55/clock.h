@@ -20,9 +20,9 @@ extern int clk_get(const char *name);
 
 // void clk_out(enum CLK_OUT_SOURCE clk);
 
-#define PLL_192M    0b0100
+#define PLL_192M    0b1100
 #define PLL_137M    0b1000
-#define PLL_107M    0b1100
+#define PLL_107M    0b0100
 #define PLL_96M     0b0001
 #define PLL_320M    0b0010
 #define PLL_480M    0b0011

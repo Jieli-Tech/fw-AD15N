@@ -18,6 +18,8 @@
 #include "gpio.h"
 #include "tick_timer_driver.h"
 #include "wdt.h"
+#include "app_config.h"
+#include "maskrom.h"
 
 #define ENABLE								1
 #define DISABLE								0
@@ -58,7 +60,7 @@ const struct port_wakeup port0 = {
     .pullup_down_enable = ENABLE,                          //配置I/O 内部上下拉是否使能
     .edge       = FALLING_EDGE,                            //唤醒方式选择,可选：上升沿\下降沿
     .attribute  = BLUETOOTH_RESUME,                        //保留参数
-    .iomap      = IO_PORTA_00,                             //唤醒口选择
+    .iomap      = POWER_WAKEUP_IO,                             //唤醒口选择
 };
 
 const struct sub_wakeup sub_wkup = {
@@ -202,6 +204,47 @@ void sys_softoff()
 
 __attribute__((weak))
 void tick_timer_sleep_init(void)
+{
+
+}
+
+AT_VOLATILE_RAM_CODE
+void __lvd_irq_handler(void)
+{
+    VLVD_PND_CLR(1);
+    putchar('$');
+
+#if 0
+    //Garentee Flash power drop below 0.4V
+    spi_flash_port_unmount();
+
+    spi_flash_power_release();
+
+    chip_reset();
+#endif
+
+
+}
+
+void p33_vlvd(u8 vlvd)
+{
+    u8 reg;
+
+    reg = p33_rx_1byte(P3_VLVD_CON);
+    reg &= ~(BIT(3) | BIT(4) | BIT(5));
+    reg |= vlvd << 3;
+
+    p33_tx_1byte(P3_VLVD_CON, reg);
+}
+
+AT_VOLATILE_RAM_CODE
+void powerdown_io_reinit()
+{
+
+}
+
+AT_VOLATILE_RAM_CODE
+void softoff_io_reinit()
 {
 
 }

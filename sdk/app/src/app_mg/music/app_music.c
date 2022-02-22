@@ -16,22 +16,25 @@
 dp_buff dbuff;
 #endif
 
+#define MAX_DIR_NUM				5
 #define DIR_MEMS(ppdir) (sizeof(ppdir)/sizeof(ppdir[0]))
-static const char dir_inner_flash_table[][16] = {
+static const char dir_inner_flash_table[MAX_DIR_NUM][16] = {
     "dir_song",
     "dir_eng",
     "dir_poetry",
     "dir_story",
+    "dir_bin_f1x",
     /* "dir_midi", */
 };
 static const char *const dir_a = {
     "dir_a",
 };
-const u8 vm_index_inner_flash_table[] = {
+const u8 vm_index_inner_flash_table[MAX_DIR_NUM] = {
     VM_INDEX_SONG,
     VM_INDEX_ENG,
     VM_INDEX_POETRY,
     VM_INDEX_STORY,
+    VM_INDEX_F1X,
 };
 
 #if (EXT_FLASH_EN)
@@ -223,11 +226,11 @@ int app_music(void *param)
             break;
         case MSG_NEXT_FILE:
             log_info("music next file\n");
-            music_play_next_file(music_obj);
+            music_play_next_file(&music_obj);
             break;
         case MSG_PRIV_FILE:
             log_info("music priv file\n");
-            music_play_priv_file(music_obj);
+            music_play_priv_file(&music_obj);
             break;
         case MSG_PP:
             log_info("music pp\n");
@@ -287,21 +290,23 @@ int app_music(void *param)
         case MSG_F1A2_FILE_END:
         case MSG_MIDI_FILE_END:
             log_info("decode end :%d \n", music_play_get_decoder_type(music_obj));
-            music_play_end_operation(music_obj);
+            music_play_end_operation(&music_obj);
             break;
         case MSG_A_FILE_END:
             log_info("decode end :%d \n", music_play_get_decoder_type(music_a_obj));
-            music_play_end_operation(music_a_obj);
+            music_play_end_operation(&music_a_obj);
             break;
         case MSG_WAV_FILE_ERR:
         case MSG_F1A1_FILE_ERR:
         case MSG_F1A2_FILE_ERR:
         case MSG_MP3_FILE_ERR:
         case MSG_MIDI_FILE_ERR:
-            music_play_destroy(&music_obj);
+            /* music_play_destroy(&music_obj); */
+            music_play_end_operation(&music_obj);
             break;
         case MSG_A_FILE_ERR:
-            music_play_destroy(&music_a_obj);
+            /* music_play_destroy(&music_a_obj); */
+            music_play_end_operation(&music_a_obj);
             break;
 
         case MSG_NEXT_MODE:

@@ -41,7 +41,7 @@ u32 a_decode_api(void *p_file, void **p_dec, void *p_dp_buf)
     /* void *name; */
     /* char name[VFS_FILE_NAME_LEN] = {0}; */
     decoder_ops_t *ops;
-    log_info("a_decode_api\n");
+    log_info("a_decode_api");
     memset(&dec_a_hld, 0, sizeof(dec_obj));
     dec_a_hld.type = D_TYPE_A;
     ops = get_ima_ops();
@@ -67,38 +67,30 @@ u32 a_decode_api(void *p_file, void **p_dec, void *p_dp_buf)
 
     /* name = vfs_file_name(p_file); */
     int file_len = vfs_file_name(p_file, (void *)g_file_sname, sizeof(g_file_sname));
-    log_info("file g_file_sname : %s\n", g_file_sname);
+    log_info("file g_file_sname : %s", g_file_sname);
     if (check_ext_api(g_file_sname, a_ext, 2)) {
-        log_info("file is a a_file\n");
+        log_info("file is a a_file");
         //ctype = 'a';
         i = 8000;
     } else if (check_ext_api(g_file_sname, b_ext, 2)) {
-        log_info("file is a b_file\n");
+        log_info("file is a b_file");
         //ctype = 'b';
         i = 16000;
     } else { //if (check_ext_api(name,e_ext,2))
-        log_info("file is a e_file\n");
+        log_info("file is a e_file");
         //ctype = 'c';
         if (ops->format_check(A_CAL_BUF)) {                  //格式检查
+            log_error("e_file format check err\n");
             return E_A_FORMAT;
         }
         i = ops->get_dec_inf(A_CAL_BUF)->sr;                //获取采样率
     }
-    /* else */
-    /* { */
-    /* return E_A_TYPE; */
-    /* } */
     regist_dac_channel(&dec_a_hld.sound, kick_decoder); //注册到DAC;
     /*********************************************************/
     log_info("file sr : %d\n", i);
     dec_a_hld.sr = i;
     *p_dec = (void *)&dec_a_hld;
     return 0;
-    /* set_dac_sr(i); */
-    /* dec_a_hld.enable = B_DEC_ENABLE | B_DEC_KICK; */
-    /* debug_u32hex(dec_a_hld.enable); */
-    /* kick_decoder(); */
-    /* return 0; */
 }
 
 extern const u8 a_buf_start[];

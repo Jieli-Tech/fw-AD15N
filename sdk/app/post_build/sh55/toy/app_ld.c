@@ -171,7 +171,9 @@ SECTIONS
     .app_code ALIGN(32):
     {
         *startup.o(.text)
-        *(.version)
+		_VERSION_BEGIN = .;
+        KEEP(*(.version))
+		_VERSION_END = .;
         *(.debug)
         *(.debug_const)
         *(.debug_code)

@@ -186,20 +186,13 @@ int app_record(void *param)
         case MSG_F1A2_FILE_END:
         case MSG_MIDI_FILE_END:
             log_info("decode end :%d \n", music_play_get_decoder_type(music_obj));
-            music_play_end_operation(music_obj);
-            break;
-        case MSG_A_FILE_END:
-            log_info("decode end :%d \n", music_play_get_decoder_type(music_obj));
-            music_play_end_operation(music_obj);
+            music_play_end_operation(&music_obj);
             break;
         case MSG_WAV_FILE_ERR:
         case MSG_F1A1_FILE_ERR:
         case MSG_F1A2_FILE_ERR:
         case MSG_MP3_FILE_ERR:
         case MSG_MIDI_FILE_ERR:
-            music_play_destroy(&music_obj);
-            break;
-        case MSG_A_FILE_ERR:
             music_play_destroy(&music_obj);
             break;
 

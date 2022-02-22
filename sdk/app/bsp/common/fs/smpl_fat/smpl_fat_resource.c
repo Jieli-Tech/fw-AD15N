@@ -56,7 +56,7 @@ u32 smpl_fat_fs_close_api(void **ppfs)
     return (u32) * ppfs;
 }
 
-const struct vfs_operations smpl_fat_vfs_ops AT(.vfs_operations) = {
+const struct vfs_operations smpl_fat_vfs_ops sec_used(.vfs_operations) = {
     .fs_type = "fat",
     /* .init        = fat_init_api, */
     .mount       = smpl_fat_monut_api,
@@ -74,7 +74,7 @@ const struct vfs_operations smpl_fat_vfs_ops AT(.vfs_operations) = {
     .openbyindex = NULL,
     .openbyclust = NULL,
     .openbyfile  = NULL,
-    .fscan       = NULL,
+    /* .fscan       = NULL, */
     .ioctl       = NULL,
 };
 
