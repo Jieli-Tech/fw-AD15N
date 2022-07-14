@@ -6,7 +6,7 @@
 
 #define     UART  JL_UT0
 
-#if UART_DEBUG
+#if UART_LOG
 
 void uart_init(u32 fre)
 {
@@ -66,7 +66,7 @@ void uart_uninit(void)
     UART->CON = BIT(13) | BIT(12);
 #endif
 }
-AT(.UT_RAM)
+AT(..log_ut.text.cache.L2)
 int putchar(int a)
 {
     if (FALSE == libs_debug) {
@@ -86,7 +86,7 @@ int putchar(int a)
     }
     return a;
 }
-AT(.UT_RAM)
+AT(..log_ut.text.cache.L2)
 char get_byte(void)
 {
     char c;
@@ -99,7 +99,7 @@ char get_byte(void)
 }
 
 
-AT(.UT_RAM)
+AT(..log_ut.text.cache.L2)
 void put_u4hex(u8 dat)
 {
     dat = 0xf & dat;
@@ -110,7 +110,7 @@ void put_u4hex(u8 dat)
         putchar(dat + '0');
     }
 }
-AT(.UT_RAM)
+AT(..log_ut.text.cache.L2)
 static void xput_u32hex(u32 dat)
 {
     putchar('0');
@@ -130,7 +130,7 @@ static void xput_u32hex(u32 dat)
 }
 #if 0
 
-AT(.UT_RAM)
+AT(..log_ut.text.cache.L2)
 void put_u32hex0(u32 dat)
 {
     putchar('0');
@@ -148,7 +148,7 @@ void put_u32hex0(u32 dat)
     put_u4hex(dat);
     putchar(' ');
 }
-AT(.UT_RAM)
+AT(..log_ut.text.cache.L2)
 u32 u32d_tab[] = {
     1000000000,
     100000000,
@@ -161,7 +161,7 @@ u32 u32d_tab[] = {
     10,
     1,
 };
-AT(.UT_RAM)
+AT(..log_ut.text.cache.L2)
 void put_u32d(u32 dat)
 {
     u32 i, tmp;
@@ -210,14 +210,14 @@ void put_u16hex(u16 dat)
 
 
 #if 1
-AT(.UT_RAM)
+AT(..log_ut.text.cache.L2)
 void put_u8hex(u8 dat)
 {
     put_u4hex(dat >> 4);
     put_u4hex(dat);
     putchar(' ');
 }
-AT(.UT_RAM)
+AT(..log_ut.text.cache.L2)
 void printf_buf(u8 *buf, u32 len)
 {
 
@@ -246,14 +246,14 @@ void put_buf(u8 *buf, u32 len)
 }
 #else
 
-AT(.UT_RAM)
+AT(..log_ut.text.cache.L2)
 char get_byte(void)
 {
     char c;
     c = 0;
     return c;
 }
-AT(.UT_RAM)
+AT(..log_ut.text.cache.L2)
 int putchar(int a)
 {
     return 0;
@@ -261,4 +261,4 @@ int putchar(int a)
 
 #endif
 
-#endif	/*	UART_DEBUG	*/
+#endif	/*	UART_LOG	*/

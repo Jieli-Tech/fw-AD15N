@@ -11,6 +11,7 @@ typedef struct _MIDI_CONFIG_PARM_ {
 } MIDI_CONFIG_PARM;
 
 extern audio_decoder_ops *get_midi_ops();
+extern int get_midi_tone_compressor(void *work_buf);
 
 
 #define  VOL_Norm_Bit                12
@@ -51,7 +52,7 @@ typedef struct _EX_MELODY_STOP_STRUCT_ {			//主旋律音符停止回调
 
 typedef struct _WDT_CLEAR_ {					//清狗回调，okon 只播主旋时需要清狗
     void *priv;
-    u32 count;									//run count次回调一次
+    u32 count;                                  //副旋count key回调一次
     u32(*wdt_clear_trigger)(void *priv);
 } WDT_CLEAR;
 
@@ -123,7 +124,7 @@ typedef struct _MIDI_W2S_STRUCT_ {
 
 
 enum {
-    CMD_MIDI_SEEK_BACK_N = 0xa0,		//回调								  MIDI_SEEK_BACK_STRUCT 变量
+    CMD_MIDI_SEEK_BACK_N = 0xa0,	//小节回退								  MIDI_SEEK_BACK_STRUCT 变量
     CMD_MIDI_SET_CHN_PROG,			//配置主通道乐器或者所有的通道乐器	  MIDI_PROG_CTRL_STRUCT 变量
     CMD_MIDI_CTRL_TEMPO,			//配置节奏及衰减					  MIDI_PLAY_CTRL_TEMPO 变量
     CMD_MIDI_GOON,					//okon 发声
@@ -133,7 +134,9 @@ enum {
     CMD_INIT_CONFIG,				//初始化配置						  MIDI_INIT_STRUCT 变量
     CMD_INIT_CONFIGS,				//音色文件配置						  MIDI_CONFIG_PARM  变量
     CMD_MIDI_OKON_MODE,				//配置OKON模式						  MIDI_OKON_MODE 变量
-    CMD_MIDI_SET_SEMITONE				//配置移半音					  MIDI_SEMITONE_CTRL_STRUCT 变量
+    CMD_MIDI_SET_SEMITONE,			//配置移半音					  MIDI_SEMITONE_CTRL_STRUCT 变量
+    CMD_MIDI_MELODY_TRIGGER,        //配置音符回调
+    CMD_MIDI_STOP_MELODY_TRIGGER    //配置音符停止回调
 };
 
 enum {
@@ -148,7 +151,8 @@ enum {
     BEAT_TRIG_ENABLE = 0x0100,              //每拍回调的使能
     MELODY_STOP_ENABLE = 0x200,				//主旋律音符停止回调使能
     MARK_LOOP_ENABLE = 0x400,				//使用mark做循环播放使能
-    SEMITONE_ENABLE = 0x800					//移半音使能
+    SEMITONE_ENABLE = 0x800,				//移半音使能
+    MAIN_INTERRUPT_ENABLE = 0x1000,         //主旋律中断使能
 
 };
 

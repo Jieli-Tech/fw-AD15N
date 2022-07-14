@@ -39,6 +39,7 @@ typedef struct _sound_mio_obj {
     u16 r_size;
     u16 dac_step;
     u32 dac_cnt;
+    u32 dac_used_cnt;
     struct mio_info info;
     void *pfile;
     u32(*read)(void *, u8 *, u32);
@@ -60,12 +61,13 @@ __attribute__((weak)) bool mio_open(void **pp_obj, void *pfile, void *);
 __attribute__((weak)) void mio_close(void **pp_obj);
 
 
-#define d_mio_module_init() if(mio_module_init) { mio_module_init();}
-#define d_mio_start(n)      if(mio_start) { mio_start(n);}
-#define d_mio_kick(n,m)     if(mio_kick)  { mio_kick(n,m);}
-#define d_mio_run()         if(mio_run)   { mio_run();}
-#define d_mio_open(n,m,k)   if(mio_open)  { mio_open(n,m,k);}
-#define d_mio_close(n)      if(mio_close) { mio_close(n);}
+extern const char MIO_ENABLE;
+#define d_mio_module_init() if(MIO_ENABLE) { mio_module_init();}
+#define d_mio_start(n)      if(MIO_ENABLE) { mio_start(n);}
+#define d_mio_kick(n,m)     if(MIO_ENABLE) { mio_kick(n,m);}
+#define d_mio_run()         if(MIO_ENABLE) { mio_run();}
+#define d_mio_open(n,m,k)   if(MIO_ENABLE) { mio_open(n,m,k);}
+#define d_mio_close(n)      if(MIO_ENABLE) { mio_close(n);}
 
 // #if HAS_MIO_EN
 

@@ -123,6 +123,7 @@ void irq_decoder_ret(dec_obj *obj, u32 ret);
 void decoder_soft0_isr();
 void decoder_channel_set(u8 dc);
 
+u32 if_decoder_pause(dec_obj *obj);
 void decoder_pause(dec_obj *obj);
 void decoder_stop(dec_obj *obj, DEC_STOP_WAIT wait);
 void decoder_stop_now(dec_obj *obj);

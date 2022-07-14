@@ -11,6 +11,13 @@ u32 f1a_2_buff_api(dec_buf *p_dec_buf);
 
 void *f1x_play_api(void *pfile, u8 *loop_tab, u32 size, u8 index, u32 addr);
 
+
+
+
+extern const int F1A_MASKROM_TAB;
+
+
+
 #endif
 
 

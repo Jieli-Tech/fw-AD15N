@@ -24,6 +24,8 @@
 <Add option="-Wundef" />
 <Add option="-DFPGA=0" />
 <Add option="-DCPU_SH55=1" />
+<Add option="-DFLASH_CACHE_ENABLE=0" />
+<Add option="-DAUDIO_ADC_EN=0" />
 <Add option="-DSPEAKER_EN=0" />
 <Add option="-DVO_PITCH_EN=0" />
 <Add option="-DPCM_EQ_EN=0" />
@@ -34,17 +36,20 @@
 <Add option="-DDECODER_WAV_EN=0" />
 <Add option="-DDECODER_F1A_EN=0" />
 <Add option="-DDECODER_MIDI_EN=0" />
+<Add option="-DDECODER_MIDI_KEYBOARD_EN=0" />
 <Add option="-DDECODER_A_EN=0" />
 <Add option="-DAUDIO_SPEED_EN=0" />
 <Add option="-DEXT_FLASH_EN=0" />
 <Add option="-DFM_EN=0" />
 <Add option="-DEEPROM_EN=0" />
 <Add option="-DHAS_USB_EN=0" />
+<Add option="-DHAS_SDMMC_EN=0" />
 <Add option="-DHAS_MIO_EN=0" />
 <Add option="-DHAS_UPDATE_EN=0" />
 <Add option="-DHAS_UART_UPDATE_EN=0" />
 <Add option="-DECHO_EN=0" />
 <Add option="-DHOWLING_EN=0" />
+<Add option="-DFATFS_ENABLE=0" />
 <Add option="-DSIMPLE_FATFS_ENABLE=0" />
 <Add option="-DNOFLOAT" />
 <Add directory="app/bsp/cpu/sh55" />
@@ -60,29 +65,30 @@
 <Add directory="include_lib/agreement" />
 <Add directory="app/post_build/sh55" />
 <Add directory="app/bsp/lib" />
-<Add directory="app/bsp/start" />
+<Add directory="app/bsp/start/sh54_sh55" />
 <Add directory="app/bsp/common" />
 <Add directory="app/bsp/common/fs" />
 <Add directory="app/bsp/common/msg" />
 <Add directory="app/bsp/common/file_operate" />
 <Add directory="app/bsp/common/api_mg" />
 <Add directory="app/bsp/common/power_manage" />
+<Add directory="app/bsp/common/usb" />
 <Add directory="app/src/mcu" />
 </Compiler>
 <Linker>
 <Add option="--plugin-opt=save-temps" />
 <Add option="--gc-sections" />
 <Add option="--start-group" />
-<Add option="include_lib/liba/sh55/cpu_lib.a" />
-<Add option="include_lib/liba/sh55/efuse_trim_value_lib.a" />
+<Add option="include_lib/liba/sh55/mcu/cpu_lib.a" />
+<Add option="include_lib/liba/sh55/mcu/efuse_trim_value_lib.a" />
 <Add option="--end-group" />
 <Add option="-Tapp/post_build/sh55/app.ld" />
 <Add option="-M=app/post_build/sh55/app.map" />
 <Add library="C:\JL\pi32\lib\libm.a" />
 </Linker>
 <ExtraCommands>
-<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh55\toy\app_ld.c -o app\post_build\sh55\app.ld" />
-<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh55\toy\download_bat.c -o app\post_build\sh55\download.bat" />
+<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh55\mcu\app_ld.c -o app\post_build\sh55\app.ld" />
+<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh55\mcu\download_bat.c -o app\post_build\sh55\download.bat" />
 <Add before="tools\utils\fixbat.exe app\post_build\sh55\download.bat" />
 <Mode before="always" />
 <Add after="app\post_build\sh55\download.bat sdk" />
@@ -113,11 +119,13 @@
 <Unit filename="include_lib/common/includes.h" />
 <Unit filename="include_lib/common/jiffies.h" />
 <Unit filename="include_lib/common/printf.h" />
+<Unit filename="include_lib/common/wdt.h" />
 <Unit filename="include_lib/cpu/sh55/asm/power/p33.h" />
 <Unit filename="include_lib/cpu/sh55/asm/power_interface.h" />
 <Unit filename="include_lib/cpu/sh55/clock.h" />
 <Unit filename="include_lib/cpu/sh55/cpu.h" />
 <Unit filename="include_lib/cpu/sh55/csfr.h" />
+<Unit filename="include_lib/cpu/sh55/dac_cpu.h" />
 <Unit filename="include_lib/cpu/sh55/efuse.h" />
 <Unit filename="include_lib/cpu/sh55/efuse_trim_value.h" />
 <Unit filename="include_lib/cpu/sh55/gpio.h" />
@@ -127,7 +135,6 @@
 <Unit filename="include_lib/cpu/sh55/sfr.h" />
 <Unit filename="include_lib/cpu/sh55/typedef.h" />
 <Unit filename="include_lib/cpu/sh55/uart.h" />
-<Unit filename="include_lib/cpu/sh55/wdt.h" />
 <Unit filename="include_lib/cpu/tick_timer_driver.h" />
 <Unit filename="include_lib/msg/msg.h" />
 </Project>

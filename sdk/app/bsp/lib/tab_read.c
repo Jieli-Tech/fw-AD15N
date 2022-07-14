@@ -6,16 +6,16 @@
 
 void tab_init(rtab_obj *stab, void *tab, u16 size)
 {
-    memset(&stab, sizeof(rtab_obj), 0);
+    memset(stab, 0, sizeof(rtab_obj));
     stab->tab = tab;
     stab->size = size;
 
-    log_info("size %d\n", size);
-    log_info_hexdump(stab->tab, size * 2);
+    //log_info("size %d\n", size);
+    //log_info_hexdump(stab->tab, size * 2);
 
 }
 
-AT(.dac_oput_code)
+AT(.audio_d.text.cache.L2)
 u32 tab_read(void *buff, rtab_obj *stab, u32 len)
 {
     u8 *rbuff = buff;
@@ -45,4 +45,3 @@ u32 tab_read(void *buff, rtab_obj *stab, u32 len)
     /* log_info("remain len : %d\n",len); */
     return len;
 }
-

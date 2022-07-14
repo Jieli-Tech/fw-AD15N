@@ -16,6 +16,7 @@
 #include "simple_usb_slave.h"
 #include "usb/usr/usb_audio_interface.h"
 
+
 void uac_1s_sync(void);
 void app_timer_loop(void)
 {
@@ -56,11 +57,12 @@ void simple_next(void)
 /* void test_openfile_by_file(void); */
 void app(void)
 {
+    log_init(1000000);
 #if ENCODER_EN
     ladc_capless_init(30);
 #endif
-    sys_mode = SIM_AUX;
-    /* sys_mode = SIM_DEC; */
+    /* sys_mode = SIM_AUX; */
+    sys_mode = SIM_DEC;
     log_info("app run\n");
 
     /* test_openfile_by_file(); */
@@ -68,7 +70,9 @@ void app(void)
     while (1) {
         switch (sys_mode) {
         case SIM_DEC:
+            log_info("simple decoder_init\n");
             decoder_init();
+            log_info("simple decoder_demo\n");
             decoder_demo();
             break;
 #if ENCODER_EN

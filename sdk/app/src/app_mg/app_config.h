@@ -33,8 +33,12 @@
 #define POWER_WAKEUP_IO				IO_PORTA_00
 
 /*---------dev upgrade Configuration---------------*/
+#if HAS_UPDATE_EN
 #define TFG_DEV_UPGRADE_SUPPORT 1
 #define TFG_UPGRADE_FILE_NAM	"/update.ufw"
+#else
+#define TFG_DEV_UPGRADE_SUPPORT 0
+#endif
 
 /*---------FLASH Configuration---------------*/
 #define TCFG_FLASH_SPI_TYPE_SELECT 		1//1:flash 选择硬件spi; 0:flash use soft_spi
@@ -59,7 +63,11 @@
 #define SPI_SD_IO_REUSE					0//SPI_FLASH与SD卡模块IO复用使能
 
 /*---------SD Configuration---------------*/
+#if HAS_SDMMC_EN
 #define TFG_SD_EN				0//ENABLE
+#else
+#define TFG_SD_EN				0//ENABLE
+#endif
 
 /*---------USB Configuration---------------*/
 #if HAS_USB_EN
@@ -70,6 +78,7 @@
 #define TCFG_HID_HOST_ENABLE				DISABLE
 #define TCFG_ADB_ENABLE      				DISABLE
 #define TCFG_AOA_ENABLE      				DISABLE
+#define TCFG_PUSH_CODE_ENABLE               DISABLE  //该功能需要关闭OTG使能
 
 #else
 
@@ -80,6 +89,7 @@
 #define TCFG_HID_HOST_ENABLE				DISABLE
 #define TCFG_ADB_ENABLE      				DISABLE
 #define TCFG_AOA_ENABLE      				DISABLE
+#define TCFG_PUSH_CODE_ENABLE               DISABLE  //该功能需要关闭OTG使能
 #endif
 
 
@@ -108,6 +118,12 @@
 #define TCFG_OTG_MODE                       0
 #endif
 
+#if TCFG_PUSH_CODE_ENABLE
+#include "usb_std_class_def.h"
+#include "usb_common_def.h"
+#undef TCFG_OTG_MODE
+#define TCFG_OTG_MODE                       0
+#endif
 /*---------FM Configuration---------------*/
 #define TCFG_FM_RDA5807_ENABLE DISABLE
 #define TCFG_FM_QN8035_ENABLE  DISABLE

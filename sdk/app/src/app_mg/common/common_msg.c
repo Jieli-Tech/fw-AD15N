@@ -33,8 +33,10 @@ int common_msg_deal(int *msg)
 {
     switch (*msg) {
     case MSG_SDMMCA_IN:
-#if (TFG_DEV_UPGRADE_SUPPORT && !CPU_SH55)
+#if TFG_DEV_UPGRADE_SUPPORT
+#ifdef CPU_SH54
         device_upgrate_try();
+#endif
 #endif
         break;
     case MSG_SDMMCA_OUT:

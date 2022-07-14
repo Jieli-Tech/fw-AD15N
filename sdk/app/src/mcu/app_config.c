@@ -20,9 +20,15 @@ const char LRC_TRIM_DISABLE = FALSE;  //LRC trim 主时钟
 
 //内存管理
 const char MM_ASSERT     = TRUE;  //malloc内部断言
-//
-const char MIC_CAPLESS_EN   = FALSE; // MIC省电容的使能
-const char MIC_RES_BUILT_IN = TRUE;  // MIC使用内置偏置电阻的使能
+
+//省电容方案底噪较大，默认不使用
+const char MIC_CAPLESS_EN   = FALSE; // MIC省电容的使能,DAC 1_A,3_C,5_A模式支持省电容
+
+//MIC偏置方式选择
+//0: 使用PA15 LDO偏置
+//1: 使用PA13 BIAS内置偏置
+//2: 使用外部偏置,不占用IO
+const char MIC_RES_BUILT_IN = 1;
 //00000:NA;     00001:2;   00010:5;   00011:1.425; 00100:7;   00101:1.555; 00110:2.916; 00111:1.186;
 //01000:NA;     01001:3;   01010:6;   01011:2.428; 01100:8;   01101:2.555; 01110:3.916; 01111:2.186;
 //10000:NA;     10001:3.5; 10010:6.5; 10011:2.926; 10100:8.5; 10101:3.055; 10110:4.416; 10111:2.686;
@@ -42,14 +48,27 @@ const u8   AUDIO_VCMCAP     = FALSE;	 //TRUE:VCM有电容   FALSE:VCM没有电�
 //
 const char ADC_VBG_TRIM_EN	= TRUE; // VBG TRIM
 
+//MIO 使能
+#if HAS_MIO_EN
+const char MIO_ENABLE = 1;
+#else
+const char MIO_ENABLE = 0;
+#endif
+
 //gpio 临界保护控制使能
 const char GPIO_CRITICAL_OPT = TRUE; //TRUE:有关中断临界保护    FALSE:没有关中断临界保护
 
+#if (DECODER_MIDI_EN | DECODER_MIDI_KEYBOARD_EN)
 //midi主轨选择方式
 const int MAINTRACK_USE_CHN	= 0;//0:用track号来区分  1:用channel号来区分。
+const int MAX_DEC_PLAYER_CNT = 8;//midi乐谱解码最大同时发声的key数
+const int MAX_CTR_PLAYER_CNT = 15;//midi琴最大同时发声的key数
+#endif
 
 //升级使用的区域，0：VM区， 1：eeprom区
 const u8 dev_update_use_eeprom = 0;
+//设备升级时，是否保持住io的状态
+const u8 dev_update_keep_io_status = 0;
 //ufw升级文件的vid要求： 0：vid要相同  1：vid要不一样
 const u8 ufw_vid_need_to_be_different = 0;
 //sd空闲后挂起的最大cnt值，单位时间是sd检测函数的时间，即sd空闲后每次检测函数cnt就加1，为0时，则每次读写完都会发挂起命令

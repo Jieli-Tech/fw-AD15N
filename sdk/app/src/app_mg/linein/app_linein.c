@@ -90,7 +90,7 @@ void linein_off(void)
     audio_adc_off_api();
     unregist_audio_adc_channel(&aux_sound);
     unregist_dac_channel(&aux_sound);
-    dac_sr_api(32000);
+    dac_sr_api(SR_DEFAULT);
 }
 
 

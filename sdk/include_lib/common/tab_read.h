@@ -5,9 +5,9 @@
 
 typedef struct _rtab_obj {
     void  *tab;
-    u16   size;
-    u16   offset;
-    u16   cnt;
+    u32   size;
+    u32   offset;
+    u32   cnt;
 } rtab_obj;
 
 void tab_init(rtab_obj *stab, void *tab, u16 size);

@@ -1,11 +1,21 @@
 #include "key.h"
-#include "key_drv_io.h"
-#include "key_drv_ad.h"
-#include "key_matrix.h"
-#include "key_ir.h"
-#include "key_touch.h"
 #include "msg.h"
 #include "decoder/sine_play.h"
+#if KEY_IO_EN
+#include "key_drv_io.h"
+#endif
+#if KEY_AD_EN
+#include "key_drv_ad.h"
+#endif
+#if KEY_MATRIX_EN
+#include "key_matrix.h"
+#endif
+#if KEY_IR_EN
+#include "key_ir.h"
+#endif
+#if KEY_TOUCH_EN
+#include "key_touch.h"
+#endif
 
 
 #define LOG_TAG_CONST       NORM
@@ -123,12 +133,12 @@ void key_scan()
     static u8 key_type = NO_KEY;        ///<按键类型
     static u8 last_key = NO_KEY;
     static u8 key_press_counter = 0;
-    static u8 key_press_flag = 0;
-    static u8 double_last_key = 0;
     u8 cur_key = 0, key_status = 0, back_last_key = 0;
     key_io_t key;
 
 #if (KEY_DOUBLE_CLICK_EN)
+    static u8 key_press_flag = 0;
+    static u8 double_last_key = 0;
     if (key_press_flag) {
         key_press_flag++;
         if (key_press_flag > KEY_DOUBLE_CLICK_CNT) {

@@ -24,7 +24,9 @@
 <Add option="-Wcast-align" />
 <Add option="-Wundef" />
 <Add option="-DFPGA=0" />
-<Add option="-DCPU_SH55=0" />
+<Add option="-DCPU_SH54=1" />
+<Add option="-DFLASH_CACHE_ENABLE=1" />
+<Add option="-DAUDIO_ADC_EN=1" />
 <Add option="-DSPEAKER_EN=1" />
 <Add option="-DVO_PITCH_EN=1" />
 <Add option="-DPCM_EQ_EN=1" />
@@ -35,22 +37,25 @@
 <Add option="-DDECODER_WAV_EN=0" />
 <Add option="-DDECODER_F1A_EN=1" />
 <Add option="-DDECODER_MIDI_EN=1" />
+<Add option="-DDECODER_MIDI_KEYBOARD_EN=0" />
 <Add option="-DDECODER_A_EN=1" />
 <Add option="-DAUDIO_SPEED_EN=1" />
 <Add option="-DEXT_FLASH_EN=1" />
 <Add option="-DFM_EN=0" />
 <Add option="-DEEPROM_EN=0" />
 <Add option="-DHAS_USB_EN=1" />
+<Add option="-DHAS_SDMMC_EN=1" />
 <Add option="-DHAS_MIO_EN=0" />
 <Add option="-DHAS_UPDATE_EN=0" />
 <Add option="-DHAS_UART_UPDATE_EN=0" />
 <Add option="-DECHO_EN=1" />
 <Add option="-DHOWLING_EN=1" />
+<Add option="-DFATFS_ENABLE=0" />
 <Add option="-DSIMPLE_FATFS_ENABLE=0" />
 <Add option="-DNOFLOAT" />
 <Add directory="app/src" />
 <Add directory="app/bsp/lib" />
-<Add directory="app/bsp/start" />
+<Add directory="app/bsp/start/sh54_sh55" />
 <Add directory="app/bsp/cpu/sh54" />
 <Add directory="app/bsp/cpu/sh54/spi" />
 <Add directory="app/bsp/cpu/sh54/wdt" />
@@ -100,40 +105,41 @@
 <Add option="--plugin-opt=save-temps" />
 <Add option="--gc-sections" />
 <Add option="--start-group" />
-<Add option="include_lib/liba/sh54/cpu_lib.a" />
-<Add option="include_lib/liba/sh54/efuse_trim_value_lib.a" />
-<Add option="include_lib/liba/sh54/fs_lib.a" />
-<Add option="include_lib/liba/sh54/audio_lib.a" />
-<Add option="include_lib/liba/sh54/decoder_mge_lib.a" />
-<Add option="include_lib/liba/sh54/ae_resample_lib.a" />
-<Add option="include_lib/liba/sh54/dev_mg_lib.a" />
-<Add option="include_lib/liba/sh54/malloc_lib.a" />
-<Add option="include_lib/liba/lib_echo_cal.a" />
-<Add option="include_lib/liba/lib_howling_fs.a" />
-<Add option="include_lib/liba/notchHowling.a" />
-<Add option="include_lib/liba/sh54/ae_howling_lib.a" />
-<Add option="include_lib/liba/lib_speed_pitch.a" />
-<Add option="include_lib/liba/sh54/encoder_mge_lib.a" />
-<Add option="include_lib/liba/lib_a_code.a" />
-<Add option="include_lib/liba/lib_mp3_decode.a" />
-<Add option="include_lib/liba/lib_mp2_encode.a" />
-<Add option="include_lib/liba/lib_f1a_decode.a" />
-<Add option="include_lib/liba/lib_midi_decode.a" />
-<Add option="include_lib/liba/lib_a_decode.a" />
-<Add option="include_lib/liba/sh54/periphy_lib.a" />
-<Add option="include_lib/liba/sh54/file_manage_lib.a" />
-<Add option="include_lib/liba/sh54/sdmmc_lib.a" />
-<Add option="include_lib/liba/lib_vopitch_cal.a" />
-<Add option="include_lib/liba/lib_pcm_eq.a" />
-<Add option="include_lib/liba/sh54/ae_pcm_eq_lib.a" />
+<Add option="include_lib/liba/sh54/simple/cpu_lib.a" />
+<Add option="include_lib/liba/sh54/simple/efuse_trim_value_lib.a" />
+<Add option="include_lib/liba/sh54/simple/fs_lib.a" />
+<Add option="include_lib/liba/sh54/simple/audio_lib.a" />
+<Add option="include_lib/liba/sh54/simple/src_lib.a" />
+<Add option="include_lib/liba/sh54/simple/decoder_mge_lib.a" />
+<Add option="include_lib/liba/sh54/simple/ae_resample_lib.a" />
+<Add option="include_lib/liba/sh54/simple/dev_mg_lib.a" />
+<Add option="include_lib/liba/sh54/simple/malloc_lib.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_echo_cal.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_howling_fs.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/notchHowling.a" />
+<Add option="include_lib/liba/sh54/simple/ae_howling_lib.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_speed_pitch.a" />
+<Add option="include_lib/liba/sh54/simple/encoder_mge_lib.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_a_code.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_mp3_decode.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_mp2_encode.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_f1a_decode.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_midi_decode.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_a_decode.a" />
+<Add option="include_lib/liba/sh54/simple/periphy_lib.a" />
+<Add option="include_lib/liba/sh54/simple/file_manage_lib.a" />
+<Add option="include_lib/liba/sh54/simple/sdmmc_lib.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_vopitch_cal.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_pcm_eq.a" />
+<Add option="include_lib/liba/sh54/simple/ae_pcm_eq_lib.a" />
 <Add option="--end-group" />
 <Add option="-Tapp/post_build/sh54/app.ld" />
 <Add option="-M=app/post_build/sh54/app.map" />
 <Add library="C:\JL\pi32\lib\libm.a" />
 </Linker>
 <ExtraCommands>
-<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\toy\app_ld.c -o app\post_build\sh54\app.ld" />
-<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\toy\download_bat.c -o app\post_build\sh54\download.bat" />
+<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\simple\app_ld.c -o app\post_build\sh54\app.ld" />
+<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\simple\download_bat.c -o app\post_build\sh54\download.bat" />
 <Add before="tools\utils\fixbat.exe app\post_build\sh54\download.bat" />
 <Mode before="always" />
 <Add after="app\post_build\sh54\download.bat sdk" />
@@ -149,7 +155,6 @@
 <Unit filename="app/bsp/common/decoder/list/f1a_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/f1x_parsing.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/midi_api.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/common/decoder/list/midi_ctrl_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/ump3_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/sine_play.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/encoder/encoder_api.c"><Option compilerVer="CC"/></Unit>
@@ -180,6 +185,7 @@
 <Unit filename="app/bsp/common/reserved_area/reserved_area.h" />
 <Unit filename="app/bsp/common/sdk_cfg.h" />
 <Unit filename="app/bsp/common/sound_effect_list/echo_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/sound_effect_list/howling_pitchshifter_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sound_effect_list/notch_howling_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sound_effect_list/pcm_eq_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sound_effect_list/speed_api.c"><Option compilerVer="CC"/></Unit>
@@ -238,13 +244,14 @@
 <Unit filename="app/bsp/lib/tab_read.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/modules/soft_isr/soft_isr.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/modules/soft_isr/soft_isr.h" />
-<Unit filename="app/bsp/modules/timer/tick_timer_driver.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/start/bsp_loop.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/start/bsp_loop.h" />
-<Unit filename="app/bsp/start/device_list.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/start/init.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/start/init.h" />
-<Unit filename="app/bsp/start/main.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/modules/timer/tick_timer_modules.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/modules/timer/tick_timer_sys.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/start/sh54_sh55/bsp_loop.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/start/sh54_sh55/bsp_loop.h" />
+<Unit filename="app/bsp/start/sh54_sh55/device_list.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/start/sh54_sh55/init.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/start/sh54_sh55/init.h" />
+<Unit filename="app/bsp/start/sh54_sh55/main.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/src/simple/aa_simple.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/src/simple/app_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/src/simple/app_config.h" />
@@ -274,6 +281,7 @@
 <Unit filename="include_lib/common/circular_buf.h" />
 <Unit filename="include_lib/common/common.h" />
 <Unit filename="include_lib/common/config.h" />
+<Unit filename="include_lib/common/crc16.h" />
 <Unit filename="include_lib/common/debug.h" />
 <Unit filename="include_lib/common/errno-base.h" />
 <Unit filename="include_lib/common/includes.h" />
@@ -282,13 +290,13 @@
 <Unit filename="include_lib/common/printf.h" />
 <Unit filename="include_lib/common/tab_read.h" />
 <Unit filename="include_lib/common/vm.h" />
+<Unit filename="include_lib/common/wdt.h" />
 <Unit filename="include_lib/cpu/sh54/adc_drv.h" />
 <Unit filename="include_lib/cpu/sh54/asm/power/p33.h" />
 <Unit filename="include_lib/cpu/sh54/asm/power_interface.h" />
 <Unit filename="include_lib/cpu/sh54/asm/usb.h" />
 <Unit filename="include_lib/cpu/sh54/clock.h" />
 <Unit filename="include_lib/cpu/sh54/cpu.h" />
-<Unit filename="include_lib/cpu/sh54/crc16.h" />
 <Unit filename="include_lib/cpu/sh54/csfr.h" />
 <Unit filename="include_lib/cpu/sh54/dac_cpu.h" />
 <Unit filename="include_lib/cpu/sh54/efuse.h" />
@@ -300,7 +308,6 @@
 <Unit filename="include_lib/cpu/sh54/sfr.h" />
 <Unit filename="include_lib/cpu/sh54/typedef.h" />
 <Unit filename="include_lib/cpu/sh54/uart.h" />
-<Unit filename="include_lib/cpu/sh54/wdt.h" />
 <Unit filename="include_lib/cpu/tick_timer_driver.h" />
 <Unit filename="include_lib/decoder/MIDI_CTRL_API.h" />
 <Unit filename="include_lib/decoder/MIDI_DEC_API.h" />

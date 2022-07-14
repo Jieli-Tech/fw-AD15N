@@ -56,7 +56,11 @@
 #define SPI_SD_IO_REUSE					0//SPI_FLASH与SD卡模块IO复用使能
 
 /*---------SD Configuration---------------*/
+#if HAS_SDMMC_EN
 #define TFG_SD_EN				0//ENABLE
+#else
+#define TFG_SD_EN				0//ENABLE
+#endif
 ///<SD卡接口选择
 #if TFG_SD_EN
 #define SDMMCA_EN
@@ -72,6 +76,7 @@
 #define TCFG_HID_HOST_ENABLE				DISABLE
 #define TCFG_ADB_ENABLE      				DISABLE
 #define TCFG_AOA_ENABLE      				DISABLE
+#define TCFG_PUSH_CODE_ENABLE               DISABLE  //该功能需要关闭OTG使能
 
 #else
 
@@ -82,6 +87,7 @@
 #define TCFG_HID_HOST_ENABLE				DISABLE
 #define TCFG_ADB_ENABLE      				DISABLE
 #define TCFG_AOA_ENABLE      				DISABLE
+#define TCFG_PUSH_CODE_ENABLE               DISABLE  //该功能需要关闭OTG使能
 #endif
 
 
@@ -123,6 +129,12 @@
 #define TCFG_OTG_MODE                       0
 #endif
 
+#if TCFG_PUSH_CODE_ENABLE
+#include "usb_std_class_def.h"
+#include "usb_common_def.h"
+#undef TCFG_OTG_MODE
+#define TCFG_OTG_MODE                       0
+#endif
 /*---------FM Configuration---------------*/
 #define TCFG_FM_RDA5807_ENABLE DISABLE
 #define TCFG_FM_QN8035_ENABLE  DISABLE

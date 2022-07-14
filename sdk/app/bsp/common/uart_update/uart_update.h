@@ -5,9 +5,11 @@
 
 #define DMA_BUF_LEN			32
 
-#if (CPU_SH55==0)
+#ifdef CPU_SH54
 #define TCFG_UART_UPDATE_PORT		IO_PORTA_09//SH54
-#else
+#endif
+
+#ifdef CPU_SH55
 #define TCFG_UART_UPDATE_PORT		IO_PORTB_09//SH55
 #endif
 

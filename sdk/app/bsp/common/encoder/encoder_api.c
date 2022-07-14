@@ -38,7 +38,7 @@ void rec_phy_suspend(void)
     unregist_audio_adc_channel(&rec_sound);
 }
 
-AT(.adc_oput_code)
+AT(.audio_a.text.cache.L2)
 void kick_encode_api(void *obj)
 {
     kick_encode_isr();

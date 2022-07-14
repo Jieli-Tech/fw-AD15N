@@ -10,6 +10,8 @@
 #define LOG_TAG             "[msg]"
 #include "debug.h"
 
+#define MSG_ENTER_CRITICAL() _OS_ENTER_CRITICAL(BIT(IRQ_TICKTMR_IDX) | BIT(IRQ_AUDIO_IDX))
+#define MSG_EXIT_CRITICAL()  _OS_EXIT_CRITICAL()
 
 #define EVENT_TOTAL     (1+(sizeof(event2msg)/2 -1)/32)
 
@@ -117,7 +119,8 @@ int get_msg(int len, int *msg)
     u16 *t_msg = (u16 *)&param;
     //get_msg
     CPU_SR_ALLOC();
-    OS_ENTER_CRITICAL();
+    /* OS_ENTER_CRITICAL(); */
+    MSG_ENTER_CRITICAL();
     u32 event = get_event();
 
     if (event != NO_EVENT) {
@@ -125,7 +128,8 @@ int get_msg(int len, int *msg)
         clear_one_event(event);
         msg[0] = event2msg[event];
         //log_info("event_mag %d\n ", msg[0]);
-        OS_EXIT_CRITICAL();
+        /* OS_EXIT_CRITICAL(); */
+        MSG_EXIT_CRITICAL();
         return MSG_NO_ERROR;
     }
 
@@ -134,7 +138,8 @@ int get_msg(int len, int *msg)
     if (MSG_HEADER_BYTE_LEN != tlen) {
         /* if (MSG_HEADER_BYTE_LEN != cbuf_read(&msg_cbuf, (void *)&param, MSG_HEADER_BYTE_LEN)) { */
         /* memset(msg, NO_MSG, len); */
-        OS_EXIT_CRITICAL();
+        /* OS_EXIT_CRITICAL(); */
+        MSG_EXIT_CRITICAL();
 
         /* log_info(" gm a 0x%x\n",param); */
         /*get no msg,cpu enter idle.why do this? TODO*/
@@ -146,16 +151,19 @@ int get_msg(int len, int *msg)
     msg[0] = t_msg[0] & (MSG_HEADER_ALL_BIT >> MSG_PARAM_BIT_LEN);
     u32 param_len = param >> MSG_TYPE_BIT_LEN;
     if (param_len > (len - 1)) {
-        OS_EXIT_CRITICAL();
+        /* OS_EXIT_CRITICAL(); */
+        MSG_EXIT_CRITICAL();
         return MSG_BUF_NOT_ENOUGH;
     }
 
     if (param_len != cbuf_read(&msg_cbuf, (void *)(msg + 1), param_len * 4)) {
-        OS_EXIT_CRITICAL();
+        /* OS_EXIT_CRITICAL(); */
+        MSG_EXIT_CRITICAL();
         return MSG_CBUF_ERROR;
     }
 
-    OS_EXIT_CRITICAL();
+    /* OS_EXIT_CRITICAL(); */
+    MSG_EXIT_CRITICAL();
     return MSG_NO_ERROR;
 }
 

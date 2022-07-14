@@ -118,7 +118,7 @@ void sfc_baud_set(u32 baud)
     local_irq_enable();
 }
 
-AT(.ram_code)
+AT(.sfc.text.cache.L2)
 static u32 sfc_max_baud(u32 pll_clock, _PLL_DIV pll_div)
 {
     u32 t_pll_clk = 0;

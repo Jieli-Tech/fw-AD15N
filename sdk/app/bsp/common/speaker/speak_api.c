@@ -24,6 +24,7 @@
 #endif
 #include "echo_api.h"
 #include "notch_howling_api.h"
+#include "howling_pitchshifter_api.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[speak_api]"
@@ -48,7 +49,7 @@ typedef struct __audio_adc_speaker {
 __aa_speaker aa_speaker ;//AT(.aux_data);
 
 
-AT(.adc_oput_code)
+AT(.audio_a.text.cache.L2)
 void kick_sound(void *_sound)
 {
     sound_out_obj *sound = (sound_out_obj *)_sound;
@@ -114,8 +115,11 @@ void audio_adc_speaker_start(void)
     cbuf_init(&cbuf_ads_o, &obuf_ads_o[0], sizeof(obuf_ads_o));
 
 
-#if  HOWLING_EN     //防止啸叫
+#if  HOWLING_EN     //陷波抑制啸叫
     /* p_curr_sound = link_notch_howling_sound(p_curr_sound, &cbuf_ads_o, 0, adc_sr); */
+#endif
+#if  HOWLING_EN     //移频抑制啸叫
+    p_curr_sound = link_pitchshift_howling_sound(p_curr_sound, &cbuf_ads_o, 0, adc_sr);
 #endif
 
 #if ECHO_EN         //混响

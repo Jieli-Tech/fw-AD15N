@@ -75,7 +75,7 @@ u32 sys_clock_peration(void)
 }
 void sfc_resume(u32 disable_spi);
 
-AT(.ram_code)
+AT(.sfc.text.cache.L2)
 void sfc_suspend(u32 enable_spi)
 {
     local_irq_disable();

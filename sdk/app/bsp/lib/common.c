@@ -55,4 +55,3 @@ u32 cbuf_write(cbuffer_t *cbuffer, void *buf, u32 len)
     return res;
 }
 
-

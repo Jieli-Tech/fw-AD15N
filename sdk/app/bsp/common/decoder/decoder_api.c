@@ -30,7 +30,7 @@
 
 extern u32 ump3_buff_api(dec_buf *p_dec_buf);;
 
-AT(.dac_oput_code)
+AT(.audio_d.text.cache.L2)
 u32 dec_hld_tab[] = {
     F1A1_LST
     F1A2_LST
@@ -151,11 +151,11 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
 
     if (0 == res) {
         // 设置解码参数
-        u32 flen = 0;
-        vfs_get_fsize(pfile, &flen);
-        /* log_info("flen:%d \n", flen); */
-        if (flen) {
-            decoder_set_file_size(p_dec, flen);
+        struct vfs_attr fattr = {0};
+        vfs_get_attrs(pfile, &fattr);
+        /* log_info("flen:%d \n", fattr.fsize); */
+        if (fattr.fsize) {
+            decoder_set_file_size(p_dec, fattr.fsize);
         }
         p_curr_sound = &p_dec->sound;
         p_curr_sound->enable = 0;
@@ -177,12 +177,12 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
 
         //硬件src
         p_curr_sound->enable = 0;
-        if (32000 != p_dec->sr) {
-            p_curr_sound = link_src_sound(p_curr_sound, cbuff_o, (void **) &p_dec->src_effect, p_dec->sr, 32000);
+        if (SR_DEFAULT != p_dec->sr) {
+            p_curr_sound = link_src_sound(p_curr_sound, cbuff_o, (void **) &p_dec->src_effect, p_dec->sr, SR_DEFAULT);
         } else {
             void *src_tmp = src_hld_malloc();
             src_reless((void **)&src_tmp);
-            //log_info("do't need src\n");
+            log_info("do't need src\n");
         }
 #if HAS_MIO_EN
         if (0 == mio_res) {
@@ -264,6 +264,14 @@ void decoder_pause(dec_obj *obj)
         obj->sound.enable |= B_DEC_KICK;
         kick_decoder();
     }
+}
+
+u32 if_decoder_pause(dec_obj *obj)
+{
+    if (NULL == obj) {
+        return 1;
+    }
+    return obj->sound.enable & B_DEC_PAUSE;
 }
 
 void decoder_stop_phy(dec_obj *obj, DEC_STOP_WAIT wait, bool fade)

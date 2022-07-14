@@ -7,6 +7,7 @@
 #include "vo_pitch_api.h"
 #include "midi_file0_h.h"
 #include "dac.h"
+#include "audio_adc.h"
 
 
 #define LOG_TAG_CONST       NORM
@@ -15,10 +16,12 @@
 
 #if VO_PITCH_EN
 
-const int  VC_ENABLE_FLAG = 1;
-const  int  EXTRA_DATA_SIZE = 1800;  //影响rap的音频最大允许长度
-const  int  VP_DECAY_VAL = 70;      //ECHO模式的decay速度
-const  int  VP_HIS_LEN = 2000;       //ECHO模式的delay:复用其他模式的Buf的
+const int VC_ENABLE_FLAG        = 1;
+const int EXTRA_DATA_SIZE       = 2000; //rap模式所可以包含的音源长度
+const int VO_RAP_LOOPEN         = 0;    //rap模式是否repeat音源
+const int VO_RAP_COMPRESS_RATE  = 460;  //0到460：越大音源时间压缩越多
+const int VP_DECAY_VAL          = 70;   //ECHO模式的decay速度
+const int VP_HIS_LEN            = 2000; //ECHO模式的delay:复用其他模式的Buf的
 
 VOICE_PITCH_PARA_STRUCT vp_parm AT(.vp_data);
 
@@ -56,9 +59,9 @@ sound_out_obj *link_voice_pitch_sound(sound_out_obj *p_curr_sound, void *p_dac_c
         p_curr_sound->enable |= B_DEC_EFFECT;
         p_curr_sound = p_next_sound;
         p_curr_sound->p_obuf = p_dac_cbuf;
-        log_info("src init succ\n");
+        log_info("voice pitch init succ\n");
     } else {
-        log_info("src init fail\n");
+        log_info("voice pitch init fail\n");
     }
     return p_curr_sound;
 }
@@ -80,15 +83,26 @@ void rap_callback(void *priv, int pos)
     }
 }
 
+/* rap结束后调用该函数重新开始rap模式 */
+u32 VP_BUFLEN[];
+void vp_cmd_rap(VOICE_PITCH_PARA_STRUCT *p_vc_parm);
+void rap_reopen(void)
+{
+    log_info("rap reopen!\n");
+    VOICE_PITCH_PARA_STRUCT p_vc_parm;
+    vp_cmd_rap(&p_vc_parm);
 
+    VOICEPITCH_STUCT_API *ops;
+    ops = get_vopitch_context();
+    ops->open(&VP_BUFLEN[0], &p_vc_parm, NULL);
+}
 
 
 /*************  RAP 模式参数[所有参数都有效]********************/
 void vp_cmd_rap(VOICE_PITCH_PARA_STRUCT *p_vc_parm)
 {
-    u32 sr = dac_sr_read();
     p_vc_parm->do_flag = HARMO_RAP;
-    p_vc_parm->samplerate = sr;              //支持16k/24k
+    p_vc_parm->samplerate = read_audio_adc_sr();
     p_vc_parm->noise_dc = 2048;
     p_vc_parm->hamorrate = 128;
     p_vc_parm->pitchrate = 100;
@@ -98,27 +112,30 @@ void vp_cmd_rap(VOICE_PITCH_PARA_STRUCT *p_vc_parm)
     p_vc_parm->priv = NULL;
 }
 
-/************  机器音模式 [红色部分参数有效]***********************************/
+/************  平调机器音模式 [红色部分参数有效]***********************************/
 void vp_cmd_robot(VOICE_PITCH_PARA_STRUCT *p_vc_parm)
 {
     p_vc_parm->do_flag = HARMO_ROBORT;
+    p_vc_parm->samplerate = read_audio_adc_sr();
     p_vc_parm->noise_dc = 2048;
-    p_vc_parm->hamorrate = 100;
-    p_vc_parm->pitchrate = 80;                          //不同的组合改变输出的机器音的音色
+    p_vc_parm->hamorrate = 100; //机器音音色，50到250
+    p_vc_parm->pitchrate = 80;  //机器音音高，50到250，不同的组合改变输出的机器音的音色
+    //无效参数：
     p_vc_parm->midi_file = midifile_file0_tab;
     p_vc_parm->midifile_len = sizeof(midifile_file0_tab);
     p_vc_parm->callback = rap_callback;
     p_vc_parm->priv = NULL;
 }
 
-/************  机器音模式 [红色部分参数有效]***********************************/
+/************  变调机器音模式 [红色部分参数有效]***********************************/
 void vp_cmd_robot2(VOICE_PITCH_PARA_STRUCT *p_vc_parm)
 {
-    p_vc_parm->noise_dc = 2048;
-    p_vc_parm->samplerate = 16000;
     p_vc_parm->do_flag = HARMO_ROBORT2;
+    p_vc_parm->samplerate = read_audio_adc_sr();
+    p_vc_parm->noise_dc = 2048;
+    p_vc_parm->pitchrate = 180; //调出不同的声音
+    //无效参数：
     p_vc_parm->hamorrate = 128;
-    p_vc_parm->pitchrate = 180;
     p_vc_parm->midi_file = midifile2_file1_tab;
     p_vc_parm->midifile_len = sizeof(midifile2_file1_tab);
     p_vc_parm->callback = rap_callback;
@@ -130,8 +147,11 @@ void vp_cmd_pitchshift(VOICE_PITCH_PARA_STRUCT *p_vc_parm)
 {
     p_vc_parm->do_flag = HARMO_PITCHSHIFT;
     p_vc_parm->noise_dc = 2048;
+    p_vc_parm->samplerate = read_audio_adc_sr();
+    //改变pitchrate可以跳变出女声(80)，娃娃音(60)，怪兽音(200)，男声(150)等
+    p_vc_parm->pitchrate = 80;  //<128音调升高，>128音调变低
+    //无效参数：
     p_vc_parm->hamorrate = 128;
-    p_vc_parm->pitchrate = 80;                 //<128，音调升高，  > 128 音调变低
     p_vc_parm->midi_file = midifile_file0_tab;
     p_vc_parm->midifile_len = sizeof(midifile_file0_tab);
     p_vc_parm->callback = rap_callback;
@@ -145,27 +165,45 @@ void vp_cmd_pitchshift(VOICE_PITCH_PARA_STRUCT *p_vc_parm)
 void vp_cmd_pitchshift2(VOICE_PITCH_PARA_STRUCT *p_vc_parm)
 {
     p_vc_parm->do_flag = HARMO_PITCHSHIFT2;
-    p_vc_parm->noise_dc = 2048;
-    p_vc_parm->hamorrate = 90;
-    p_vc_parm->pitchrate = 60;                                //不同的组合，出来的声音效果会变,这组默认参数比较接近男变女的效果
+    p_vc_parm->samplerate = read_audio_adc_sr();
+    p_vc_parm->hamorrate = 90;  //50到250
+    p_vc_parm->pitchrate = 60;  //50到250，不同的组合，出来的声音效果会变,这组默认参数比较接近男变女的效果
+    //无效参数：
     p_vc_parm->midi_file = midifile_file0_tab;
     p_vc_parm->midifile_len = sizeof(midifile_file0_tab);
     p_vc_parm->callback = rap_callback;
     p_vc_parm->priv = NULL;
 }
 
+/********* 实时RAP模式 [红色部分参数有效]***********************************/
 void vp_cmd_rap_realtime(VOICE_PITCH_PARA_STRUCT *p_vc_parm)
 {
-    p_vc_parm->noise_dc = 2048;
-    p_vc_parm->samplerate = 16000;
     p_vc_parm->do_flag = HARMO_RAP_REALTIME ;
-    p_vc_parm->hamorrate = 128;
-    p_vc_parm->pitchrate = 128;
-    p_vc_parm->midi_file = midifile2_file1_tab;
+    p_vc_parm->noise_dc = 2048;
+    p_vc_parm->samplerate = read_audio_adc_sr();
+    p_vc_parm->hamorrate = 128; //改变音色，50到250
+    p_vc_parm->pitchrate = 128; //改变音高，50到250
+    p_vc_parm->midi_file = midifile2_file1_tab; //改变旋律
     p_vc_parm->midifile_len = sizeof(midifile2_file1_tab);
+    //无效参数：
     p_vc_parm->callback = rap_callback;
     p_vc_parm->priv = NULL;
 
+}
+
+/********* 卡通变声模式 [红色部分参数有效]***********************************/
+void vp_cmd_cartoon(VOICE_PITCH_PARA_STRUCT *p_vc_parm)
+{
+    p_vc_parm->do_flag = HARMO_CARTOON;
+    p_vc_parm->noise_dc = 2048;
+    p_vc_parm->samplerate = read_audio_adc_sr();
+    p_vc_parm->hamorrate = 400; //-800到800
+    p_vc_parm->pitchrate = 70;  //50到250
+    //无效参数：
+    p_vc_parm->midi_file = NULL;
+    p_vc_parm->midifile_len = 0;
+    p_vc_parm->callback = NULL;
+    p_vc_parm->priv = NULL;
 }
 
 bool vp_cmd_case(VP_CMD cmd, VOICE_PITCH_PARA_STRUCT *p_vc_parm)
@@ -188,6 +226,9 @@ bool vp_cmd_case(VP_CMD cmd, VOICE_PITCH_PARA_STRUCT *p_vc_parm)
         break;
     case VP_CMD_RAP_REALTIME:
         vp_cmd_rap_realtime(p_vc_parm);
+        break;
+    case VP_CMD_CARTOON:
+        vp_cmd_cartoon(p_vc_parm);
         break;
     /* case VP_CMD_ECHO: */
     /* break; */
@@ -227,8 +268,9 @@ void *vp_phy(void *obuf, VOICE_PITCH_PARA_STRUCT *pvp_parm, void **ppsound)
 
     ops = get_vopitch_context();           //获取变采样函数接口
     buff_len = ops->need_buf();                          //运算空间获取
+    log_info("vo pitch buff need len: %d\n", buff_len);
     if (buff_len > sizeof(VP_BUFLEN)) {
-        log_info("vo pitch buff need : 0x%x\n", buff_len);
+        log_error("vo pitch buff is not enough big!\n");
         return 0;
     }
     /******************************************/

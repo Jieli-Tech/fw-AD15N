@@ -41,7 +41,7 @@ void mio_a_pwm_run(u32 chl, u32 pwm_var)
 {
 #if MIO_EN
     local_irq_disable();
-    JL_PWM->CH0_CMP = (sys_clock_get() / PWM_FRE) * pwm_var / 255;	//pwm_var范围在0-255
+    JL_PWM->CH0_CMP = (sys_clock_get() / PWM_FRE + 1) * pwm_var / 255;	//pwm_var范围在0-255
     local_irq_enable();
 #endif
 }

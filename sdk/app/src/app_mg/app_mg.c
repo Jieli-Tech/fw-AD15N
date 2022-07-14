@@ -10,6 +10,9 @@
 #if APP_MODE_MIDI_EN
 #include "app_mg/midi/app_midi.h"
 #endif
+#if APP_MODE_MIDI_KEYBOARD_EN
+#include "app_mg/midi/app_midi_ctrl.h"
+#endif
 #if APP_MODE_RECORD_EN
 #include "app_mg/record/app_record.h"
 #endif
@@ -164,6 +167,11 @@ void app(void)
 #if APP_MODE_MIDI_EN
         case APP_MIDI:
             app_midi(app_param);
+            break;
+#endif
+#if APP_MODE_MIDI_KEYBOARD_EN
+        case APP_MIDI_KEYBOARD:
+            app_midi_keyboard(app_param);
             break;
 #endif
 #if APP_MODE_POWEROFF_EN

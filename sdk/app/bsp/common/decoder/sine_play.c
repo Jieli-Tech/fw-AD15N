@@ -127,7 +127,7 @@ void sine_voice_kick(void)
     g_sine_obj.enable |= SINE_ENABLE;
 }
 
-AT(.dac_oput_code)
+AT(.audio_d.text.cache.L2)
 u32 sine_read(void *buff, u32 len)
 {
     u32 rlen = len;

@@ -96,11 +96,11 @@ void audio_adc_off_api(void)
 
 /* extern void kick_encode_api(void); */
 /* //弱定义函数，定义不可修改，由扩音模式重新实现 */
-/* __attribute__((weak))void kick_loudsperaker(void *_sound)AT(.adc_oput_code) */
+/* __attribute__((weak))void kick_loudsperaker(void *_sound)AT(.audio_a.text.cache.L2) */
 /* { */
 
 /* } */
-AT(.adc_oput_code)
+AT(.audio_a.text.cache.L2)
 void fill_audio_adc_fill(u8 *buf, u32 len)
 {
     u32 i;

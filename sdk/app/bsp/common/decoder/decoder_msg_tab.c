@@ -50,7 +50,7 @@ const u8 f1a_evt[MAX_F1A_CHANNEL][10] = {
 };
 #endif
 
-#if DECODER_MIDI_EN
+#if (DECODER_MIDI_EN || DECODER_MIDI_KEYBOARD_EN)
 const u8 midi_evt[10] = {
     EVENT_MIDI_END,
     0xff,

@@ -433,7 +433,7 @@ enum {
 
 #define VDDIOW_VOL_SEL(lev)     P33_CON_SET(P3_ANA_CON5, 3, 3, lev)
 
-#define GET_VDDIOW_VOL()        (P33_CON_GET(P3_ANA_CON5)>>4 & 0x3)
+#define GET_VDDIOW_VOL()        (P33_CON_GET(P3_ANA_CON5)>>4 & 0x7)
 
 #define VDDIO_HD_SEL(cur)       P33_CON_SET(P3_ANA_CON5, 6, 2, cur)
 
@@ -578,11 +578,10 @@ enum {
 /*
  *-------------------P3_LRC_CON1
  */
-//#define RC32K_PNPS_SEL(sel)     P33_CON_SET(P3_LRC_CON1, 0, 2, sel)
+#define RC32K_PNPS_SEL(sel)     P33_CON_SET(P3_LRC_CON1, 0, 2, sel)
 
 #define RC32K_CAP_SEL(sel)      P33_CON_SET(P3_LRC_CON1, 2, 3, sel)
 
-#define RC32K_LDO_SEL(sel)      P33_CON_SET(P3_LRC_CON1, 5, 2, sel)
 /*******************************************************************/
 
 /*

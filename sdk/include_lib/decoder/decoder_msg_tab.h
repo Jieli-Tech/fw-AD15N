@@ -19,6 +19,8 @@ enum {
 #endif
 #if DECODER_MIDI_EN
     INDEX_MIDI,
+#endif
+#if DECODER_MIDI_KEYBOARD_EN
     INDEX_MIDI_CTRL,
 #endif
 #if DECODER_WAV_EN
@@ -115,19 +117,21 @@ enum {
 #define MIDI_MUT_TAB  (u32)midi_buff_api,
 #define MIDI_HLD      (u32)&dec_midi_hld
 #define BIT_MIDI      BIT(INDEX_MIDI)
-
-#define MIDI_CTRL_LST      MIDI_CTRL_HLD,
-#define MIDI_CTRL_API      (u32)midi_ctrl_decode_api,
-#define MIDI_CTRL_MUT_TAB  (u32)midi_ctrl_buff_api,
-#define MIDI_CTRL_HLD      (u32)&dec_midi_ctrl_hld
-#define BIT_MIDI_CTRL      BIT(INDEX_MIDI_CTRL)
 #else
 #define MIDI_LST
 #define MIDI_API
 #define MIDI_MUT_TAB
 #define MIDI_HLD  (u32)NULL
 #define BIT_MIDI   0
+#endif
 
+#if DECODER_MIDI_KEYBOARD_EN
+#define MIDI_CTRL_LST      MIDI_CTRL_HLD,
+#define MIDI_CTRL_API      (u32)midi_ctrl_decode_api,
+#define MIDI_CTRL_MUT_TAB  (u32)midi_ctrl_buff_api,
+#define MIDI_CTRL_HLD      (u32)&dec_midi_ctrl_hld
+#define BIT_MIDI_CTRL      BIT(INDEX_MIDI_CTRL)
+#else
 #define MIDI_CTRL_LST
 #define MIDI_CTRL_API
 #define MIDI_CTRL_MUT_TAB

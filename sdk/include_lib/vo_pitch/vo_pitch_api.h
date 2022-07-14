@@ -12,6 +12,7 @@ typedef enum {
     VP_CMD_RAP,          //RAP音效
     VP_CMD_PITCHSHIFT2,  //变速变调2
     VP_CMD_RAP_REALTIME, //实时RAP音效
+    VP_CMD_CARTOON,      //卡通音效
 } VP_CMD ;
 
 //----fireware io

@@ -9,17 +9,15 @@ typedef enum {
     SR_CONSTANT,
 } SR_WORKMODE;
 
-#define DAC_PACKET_SIZE     (32*8)
-
-#define DAC_DECODER_KICK_SIZE     (DAC_PACKET_SIZE * 4)
-
-#define DAC_DECODER_BUF_SIZE     (DAC_PACKET_SIZE * 5)
+#define DAC_PACKET_SIZE         (32*8)
+#define DAC_DECODER_KICK_SIZE   (DAC_PACKET_SIZE * 4)
+#define DAC_DECODER_BUF_SIZE    (DAC_PACKET_SIZE * 5)
 
 
 
 bool dac_mute(bool mute);
 void dac_mode_init(u16 vol);
-void dac_init_api(u32 sr);
+void dac_init_api(u32 sr, bool delay_flag);
 void dac_sr_api(u32 sr);
 void dac_off_api(void);
 // void dac_sr_api(u32 sr);

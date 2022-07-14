@@ -73,6 +73,17 @@ music_play_obj *music_play_create(music_play_obj *hdl, const char *dir, u32 inde
     //DECODER TYPE初始化
     hdl->decoder_type = decoder_type;
 
+    //MIDI琴不需要打开文件,decode_io()的pfile直接传入NULL
+    if (decoder_type == BIT_MIDI_CTRL) {
+        log_info("midi ctrl init!\n");
+        dec_obj *obj = decoder_io(NULL, hdl->decoder_type, NULL, 0);
+        if (obj == 0) {
+            return NULL;
+        }
+        hdl->decode_api.p_dec = obj;
+        return hdl;
+    }
+
     //文件夹内容初始化
     hdl->dir.dir = dir;
 

@@ -22,6 +22,7 @@
 #include "wdt.h"
 #include "app_config.h"
 #include "maskrom.h"
+#include "dac_cpu.h"
 
 #define ENABLE								1
 #define DISABLE								0
@@ -115,7 +116,7 @@ int power_wakeup_reason(void)
 
 static u8 dac_state = 1;
 void dac_power_off();
-void dac_power_on();
+void dac_power_on(u32 sr, bool delay_flag);
 void norflash_check_4byte_mode(void);
 __attribute__((weak))
 void dac_power_off()
@@ -124,7 +125,7 @@ void dac_power_off()
 }
 
 __attribute__((weak))
-void dac_power_on()
+void dac_power_on(u32 sr, bool delay_flag)
 {
     //audio_init();
     //dac_init_api(32000);
@@ -155,8 +156,8 @@ void board_set_soft_poweroff(void)
     dac_power_off();
 }
 
-extern u8 sys_low_power_request;
-extern u32 lowpower_usec;
+volatile extern u8 sys_low_power_request;
+volatile extern u32 lowpower_usec;
 /*----------------------------------------------------------------------------*/
 /**@brief 进入powerdown 模式
    @param usec: -2:静态睡眠，需要等待按键唤醒  非-2：睡眠时间，单位us，例如1000000为睡眠1S后自动唤醒
@@ -185,7 +186,7 @@ void sys_power_down(u32 usec)
         return;
     }
 
-    norflash_check_4byte_mode();
+    /* norflash_check_4byte_mode(); */
 
     OS_EXIT_CRITICAL();
 
@@ -203,7 +204,7 @@ void sys_power_down(u32 usec)
 
 #if TCFG_LOWPOWER_DAC_OPEN
     if (dac_state == 0) {
-        dac_power_on();
+        dac_power_on(SR_DEFAULT, 0);
     }
 #endif
 }
@@ -213,17 +214,14 @@ void sys_softoff()
     power_set_soft_poweroff();
 }
 
-__attribute__((weak))
-void tick_timer_sleep_init(void)
-{
-
-}
+void tick_timer_sleep_init(void);
 
 AT_VOLATILE_RAM_CODE
 void __lvd_irq_handler(void)
 {
     VLVD_PND_CLR(1);
     putchar('$');
+    sys_softoff();
 #if 0
     //Garentee Flash power drop below 0.4V
     spi_flash_port_unmount();
@@ -235,15 +233,21 @@ void __lvd_irq_handler(void)
 
 }
 
-void p33_vlvd(u8 vlvd)
+void p33_vlvd(u8 vlvd, u8 irs_mode)//irs_mode:0:reset, 1:interrupt(wkup)
 {
     u8 reg;
 
     reg = p33_rx_1byte(P3_VLVD_CON);
     reg &= ~(BIT(3) | BIT(4) | BIT(5));
-    reg |= vlvd << 3;
+    reg |= (vlvd << 3 | BIT(2) | BIT(0));
 
     p33_tx_1byte(P3_VLVD_CON, reg);
+    if (irs_mode) {
+        lvd_wkup_en();
+    } else {
+        lvd_reset_en();
+    }
+    /* log_info("P3_RST_CON0:0x%x",p33_rx_1byte(P3_RST_CON0)); */
 }
 
 AT_VOLATILE_RAM_CODE
@@ -273,5 +277,38 @@ void sys_power_init()
     power_keep_dacvdd_en(0);
 
     power_wakeup_init(&wk_param);
+}
+
+volatile u8 sys_low_power_request = 0;
+volatile u32 lowpower_usec = -2;
+static void *power_ctrl;
+
+static u32 __power_get_timeout(void *priv)
+{
+    //-2 , endless sleep mode
+    return lowpower_usec;
+}
+
+static void __power_suspend_post(void *priv, u32 usec)
+{
+    sys_low_power_request = 1;
+}
+
+static void __power_resume(void *priv, u32 usec)
+{
+    sys_low_power_request = 0;
+}
+
+const struct low_power_operation sys_power_ops  = {
+    .get_timeout 	= __power_get_timeout,
+
+    .suspend_probe 	= NULL,
+    .suspend_post 	= __power_suspend_post,
+    .resume 		= __power_resume,
+};
+
+void tick_timer_sleep_init(void)
+{
+    power_ctrl = low_power_sys_get(NULL, &sys_power_ops);
 }
 

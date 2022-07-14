@@ -20,14 +20,14 @@ if exist %NAME%.elf (
 %OBJDUMP% -t %NAME%.elf > %NAME%.symbol.txt
 
 copy /b %NAME%.bin+data.bin+debug_data.bin app.bin
-copy app.bin toy/app.bin
+copy app.bin app_mg/app.bin
 
 )
 
 
-cd toy
-isd_download.exe -tonorflash -dev sh54 -boot 0xb00 -div8 -wait 300 -uboot uboot.boot -uboot_compress -app app.bin 0x20000 -res midi_cfg dir_midi dir_a dir_song dir_eng dir_poetry dir_story dir_notice dir_bin_f1x
-@rem isd_download.exe -tonorflash -dev sh54 -boot 0xb00 -div8 -wait 300 -uboot uboot.boot -uboot_compress -app app.bin 0x20000 -res midi_cfg dir_midi dir_a dir_song dir_eng dir_poetry dir_story dir_notice -wflash dir_song 0 [PA05_1B_NULL]
+cd app_mg
+isd_download.exe -tonorflash -dev sh54 -boot 0xb00 -div8 -wait 300 -uboot uboot.boot -uboot_compress -app app.bin 0x20000 -res midi_cfg midi_ctrl_prog dir_midi dir_a dir_song dir_eng dir_poetry dir_story dir_notice dir_bin_f1x midi_ctrl_prog
+@rem isd_download.exe -tonorflash -dev sh54 -boot 0xb00 -div8 -wait 300 -uboot uboot.boot -uboot_compress -app app.bin 0x20000 -res midi_cfg midi_ctrl_prog dir_midi dir_a dir_song dir_eng dir_poetry dir_story dir_notice dir_bin_f1x midi_ctrl_prog -wflash dir_song 0 [PA05_1B_NULL]
 
 @REM
 @rem -format vm

@@ -22,6 +22,13 @@
 #else
 #define APP_MODE_MIDI_EN			0
 #endif
+
+#if DECODER_MIDI_KEYBOARD_EN
+#define APP_MODE_MIDI_KEYBOARD_EN   1
+#else
+#define APP_MODE_MIDI_KEYBOARD_EN   0
+#endif
+
 #define APP_MODE_MUSIC_EN			1
 #if ENCODER_EN
 #define APP_MODE_RECORD_EN			1
@@ -51,6 +58,9 @@ typedef enum {
 #endif
 #if APP_MODE_MIDI_EN
     APP_MIDI,
+#endif
+#if APP_MODE_MIDI_KEYBOARD_EN
+    APP_MIDI_KEYBOARD,
 #endif
 #if APP_MODE_POWEROFF_EN
     APP_POWEROFF,

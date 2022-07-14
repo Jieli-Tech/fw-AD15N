@@ -14,10 +14,13 @@
 
 void *notch_howling_api(void *obuf, u32 sr, void **ppsound)
 {
-    NH_PARA_STRUCT nhparm = {0};
-    nhparm.depth          = 10;  //深度
-    nhparm.bandwidth      = 45; //带宽
-    nhparm.sampleRate     = sr;//采样率
+    /* 调试顺序：gain -> Q -> threshold。gain压制越多，Q越小会容易出现说话过程中声音断续的问题 */
+    NotchHowlingParam nhparm    = {0};
+    nhparm.gain                 = (int)(-20.0 * (1 << 20)); //陷波器压制程度，越大放啸叫越好，但发声啸叫频点误检时音质会更差
+    nhparm.Q                    = (int)(0.3 * (1 << 24));   //陷波器带宽，越小放啸叫越好，但发声啸叫频点误检时音质会更差
+    nhparm.fade_time            = 1000;                     //启动时间与施放时间，越小启动与释放越快，可能导致杂音出现切音质变差
+    nhparm.threshold            = (int)(25.0 * (1 << 15));  //频点啸叫判定阈值，越小越容易判定啸叫频点，但可能误检导致音质变差
+    nhparm.SampleRate           = sr;                       //采样率
 
     return notch_howling_phy(obuf, &nhparm, ppsound);
 }
@@ -47,23 +50,23 @@ typedef struct _NH_HOWLING_HDL {
     EFFECT_OBJ obj;//必须在第一个
     sound_in_obj si;
     NH_IO_CONTEXT io;
-    NH_PARA_STRUCT parm;
+    NotchHowlingParam parm;
     u32 update;
     cbuffer_t cbuf;
 } NH_HOWLING_HDL;
 
 
-u32 notch_howling_work_buf[(9340 + 3) / 4] AT(.notch_howling_data);
+u32 notch_howling_work_buf[(3152 + 3) / 4] AT(.notch_howling_data);
 NH_HOWLING_HDL notch_howling_hdl_save AT(.notch_howling_data);
-u8 notch_howling_in_buf[160 * 2] AT(.notch_howling_data); //陷波器啸叫抑制，固定160点运算一次
+/* u8 notch_howling_in_buf[160 * 2] AT(.notch_howling_data); //陷波器啸叫抑制，固定160点运算一次 */
 
 
-void notch_howing_parm_update(NH_PARA_STRUCT *parm)
+void notch_howing_parm_update(NotchHowlingParam *parm)
 {
     NH_HOWLING_HDL *howling_hdl = &notch_howling_hdl_save;
     if (howling_hdl) {
         if (parm) {
-            memcpy(&howling_hdl->parm, parm, sizeof(NH_PARA_STRUCT));
+            memcpy(&howling_hdl->parm, parm, sizeof(NotchHowlingParam));
             howling_hdl->update = 1;
         }
     }
@@ -71,6 +74,25 @@ void notch_howing_parm_update(NH_PARA_STRUCT *parm)
 
 static int notch_howing_run(void *hld, short *inbuf, int len)
 {
+    NH_HOWLING_HDL *howling_hdl = &notch_howling_hdl_save;
+    if (!howling_hdl) {
+        return 0;
+    }
+
+    NH_STRUCT_API *ops;
+    int res = 0;
+    sound_in_obj *p_si = hld;
+    ops = (NH_STRUCT_API *)p_si->ops;
+    res = ops->run(p_si->p_dbuf, inbuf, len);//len 为indata 字节数，返回值为实际消耗indata的字节数
+
+    if (howling_hdl->update) {
+        howling_hdl->update = 0;
+        ops->update(p_si->p_dbuf, &howling_hdl->parm);
+    }
+
+    return res;
+
+#if 0
     int wlen = 0;
     NH_HOWLING_HDL *howling_hdl = &notch_howling_hdl_save;
     if (!howling_hdl) {
@@ -101,18 +123,21 @@ static int notch_howing_run(void *hld, short *inbuf, int len)
     }
 
     return wlen;
+#endif
 }
 
 
 void notch_howling_parm_debug(NH_HOWLING_HDL *howling_hdl)
 {
-    log_info("howling->parm.depth %d\n", howling_hdl->parm.depth);
-    log_info("howling->parm.bandwidth %d\n", howling_hdl->parm.bandwidth);
-    log_info("howling->parm.sampleRate %d\n", howling_hdl->parm.sampleRate);
+    log_info("howling->parm.gain %d", howling_hdl->parm.gain);
+    log_info("howling->parm.Q %d", howling_hdl->parm.Q);
+    log_info("howling->parm.fade_time %d", howling_hdl->parm.fade_time);
+    log_info("howling->parm.threshold %d", howling_hdl->parm.threshold);
+    log_info("howling->parm.SampleRate %d\n", howling_hdl->parm.SampleRate);
 }
 
 
-void *notch_howling_phy(void *obuf, NH_PARA_STRUCT *parm, void **ppsound)
+void *notch_howling_phy(void *obuf, NotchHowlingParam *parm, void **ppsound)
 {
     u32 buf_len, i;
     NH_STRUCT_API *ops;
@@ -123,12 +148,12 @@ void *notch_howling_phy(void *obuf, NH_PARA_STRUCT *parm, void **ppsound)
         return NULL;
     }
     ops = (NH_STRUCT_API *)get_notchHowling_ops(); //接口获取
-    buf_len = ops->need_buf();           //运算空间获取
+    buf_len = ops->need_buf(parm);           //运算空间获取
     log_info("notch_howling work_buf_len %d\n", buf_len);
     memset(&notch_howling_hdl_save, 0x0, sizeof(NH_HOWLING_HDL));
     NH_HOWLING_HDL *howling_hdl = &notch_howling_hdl_save;
     if (howling_hdl && parm) {
-        memcpy(&howling_hdl->parm, parm, sizeof(NH_PARA_STRUCT));
+        memcpy(&howling_hdl->parm, parm, sizeof(NotchHowlingParam));
         notch_howling_parm_debug(howling_hdl);
     }
     unsigned int *howling_hdl_ptr = (unsigned int *)notch_howling_work_buf;
@@ -152,7 +177,6 @@ void *notch_howling_phy(void *obuf, NH_PARA_STRUCT *parm, void **ppsound)
     *ppsound = &howling_obj->sound;
 
     ops->open(howling_hdl_ptr, &howling_hdl->parm, &howling_hdl->io);
-
-    cbuf_init(&howling_hdl->cbuf, &notch_howling_in_buf[0], sizeof(notch_howling_in_buf));
+    /* cbuf_init(&howling_hdl->cbuf, &notch_howling_in_buf[0], sizeof(notch_howling_in_buf)); */
     return howling_obj;
 }

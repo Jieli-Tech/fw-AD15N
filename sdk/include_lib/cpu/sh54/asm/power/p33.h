@@ -27,6 +27,7 @@
 #define P33_OR              0b001
 #define P33_AND             0b010
 #define P33_XOR             0b011
+
 //===============================================================================//
 //
 //
@@ -425,7 +426,7 @@ enum {
 
 #define VDDIOW_VOL_SEL(lev)     P33_CON_SET(P3_ANA_CON5, 3, 3, lev)
 
-#define GET_VDDIOW_VOL()        (P33_CON_GET(P3_ANA_CON5)>>4 & 0x3)
+#define GET_VDDIOW_VOL()        (P33_CON_GET(P3_ANA_CON5)>>4 & 0x7)
 
 #define VDDIO_HD_SEL(cur)       P33_CON_SET(P3_ANA_CON5, 6, 2, cur)
 

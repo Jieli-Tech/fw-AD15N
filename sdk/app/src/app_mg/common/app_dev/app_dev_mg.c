@@ -13,7 +13,7 @@
 
 static u8 app_active_dev = APP_DEV_INNER_FLASH;
 
-#if (TFG_DEV_UPGRADE_SUPPORT && !CPU_SH55)
+#if (TFG_DEV_UPGRADE_SUPPORT)
 #include "update.h"
 void device_upgrate_try(void)
 {

@@ -10,6 +10,11 @@
 #define LOG_TAG             "[normal]"
 #include "debug.h"
 
+u32 dp_buff_len(void)
+{
+    dp_buff *p_dbuf = (void *)0;
+    return sizeof(dp_buff) - ((u32)&p_dbuf->buff[0] - (u32)p_dbuf);
+}
 
 bool get_dp(dec_obj *obj, dp_buff *dbuff)
 {
@@ -46,8 +51,12 @@ bool get_dp(dec_obj *obj, dp_buff *dbuff)
 void *check_dp(dp_buff *dbuff)
 {
     u16 crc;
-    if ((0 == dbuff) || (0 == dbuff->len)) {
-        /* log_info("  check decoder point buf null\n"); */
+    if (NULL == dbuff) {
+        log_info("  check decoder point buf null\n");
+        return 0;
+    }
+    u32 len = dbuff->len;
+    if ((0 == len) || (len > dp_buff_len())) {
         return 0;
     }
     crc = CRC16(&dbuff->len, dbuff->len + 2);

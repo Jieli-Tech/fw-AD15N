@@ -3,7 +3,7 @@
 #include "device_drive.h"
 #include "clock.h"
 /* #include "os/os_compat.h" */
-#if TCFG_UDISK_ENABLE || TCFG_ADB_ENABLE ||TCFG_AOA_ENABLE || TCFG_HID_HOST_ENABLE
+#if TCFG_UDISK_ENABLE || TCFG_ADB_ENABLE ||TCFG_AOA_ENABLE || TCFG_HID_HOST_ENABLE || TCFG_PUSH_CODE_ENABLE
 #include "usb_config.h"
 #include "usb/host/usb_host.h"
 #include "usb/usb_phy.h"

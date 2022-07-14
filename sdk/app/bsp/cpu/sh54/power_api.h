@@ -26,6 +26,6 @@ void sys_power_down(u32 usec);
 
 void sys_softoff();
 
-void p33_vlvd(u8 vlvd);
+void p33_vlvd(u8 vlvd, u8 irs_mode);//irs_mode:0:reset, 1:interrupt(wkup)
 
 #endif

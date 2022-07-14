@@ -7,6 +7,7 @@
 
 #define LOG_ASSERT_ENABLE
 
+void register_handle_printf_putchar(int (*handle)(int a));
 // void printf_buf(u8 *buf, u32 len);
 
 #define PRINTF(format, ...)         printf(format, ## __VA_ARGS__)

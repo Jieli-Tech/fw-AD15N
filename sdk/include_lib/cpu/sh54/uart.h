@@ -1,11 +1,11 @@
 #ifndef _UART_
 #define _UART_
 #include "typedef.h"
-#include "wdt.h"
+// #include "wdt.h"
 
-#define UART_DEBUG    1
+#define UART_LOG    1
 
-#if UART_DEBUG
+#if UART_LOG
 
 #define UART0_EN  0
 #define UART1_EN  1

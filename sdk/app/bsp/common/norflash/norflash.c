@@ -1,3 +1,9 @@
+/* #pragma bss_seg(".ext_flash.data.bss") */
+/* #pragma data_seg(".ext_flash.data") */
+/* #pragma const_seg(".ext_flash.text.const") */
+/* #pragma code_seg(".ext_flash.text") */
+/* #pragma str_literal_override(".ext_flash.text.const") */
+
 #include "norflash.h"
 #include "app_config.h"
 /* #include "clock.h" */
@@ -42,19 +48,19 @@ static struct norflash_partition nor_part[MAX_NORFLASH_PART_NUM];
 struct norflash_info {//last
     u32 flash_id;
     u32 flash_capacity;
-    int spi_num;
-    int spi_err;
+    s8 spi_num;
+    /* int spi_err; */
     u8 spi_cs_io;
     u8 spi_r_width;
     u8 part_num;
     u8 open_cnt;
-    struct norflash_partition *const part_list;
     flash_mutex mutex;
+    struct norflash_partition *const part_list;
     u32 max_end_addr;
 };
 
 static struct norflash_info _norflash = {
-    .spi_num = (int) - 1,
+    .spi_num = (s8) - 1,
     .part_list = nor_part,
 };
 
@@ -81,7 +87,7 @@ int _norflash_eraser(u8 eraser, u32 addr);
 
 /*******************************flash 软硬件spi选择*****************************/
 #if(TCFG_FLASH_SPI_TYPE_SELECT)
-#define spi_read_byte()             spi_recv_byte(_norflash.spi_num, &_norflash.spi_err)
+#define spi_read_byte()             spi_recv_byte(_norflash.spi_num, NULL /* &_norflash.spi_err */)
 #define spi_write_byte(x)           spi_send_byte(_norflash.spi_num, x)
 #define spi_dma_read(x, y)          spi_dma_recv(_norflash.spi_num, x, y)
 #define spi_dma_write(x, y)         spi_dma_send(_norflash.spi_num, x, y)
@@ -91,7 +97,7 @@ int _norflash_eraser(u8 eraser, u32 addr);
 #define spi_suspend()           hw_spi_suspend(_norflash.spi_num)
 #define spi_resume()            hw_spi_resume(_norflash.spi_num)
 #else
-#define spi_read_byte()     soft_spi_recv_byte(_norflash.spi_num, &_norflash.spi_err)
+#define spi_read_byte()     soft_spi_recv_byte(_norflash.spi_num, NULL /* &_norflash.spi_err */)
 #define spi_write_byte(x)   soft_spi_send_byte(_norflash.spi_num, x)
 #define spi_dma_read(x, y)  soft_spi_dma_recv(_norflash.spi_num, x, y)
 #define spi_dma_write(x, y) soft_spi_dma_send(_norflash.spi_num, x, y)
@@ -177,13 +183,6 @@ static int norflash_verify_part(struct norflash_partition *p)
     return 0;
 }
 
-
-
-#if (CPU_SH55)
-#define FLASH_CACHE_ENABLE  0
-#else
-#define FLASH_CACHE_ENABLE  1
-#endif
 
 #if FLASH_CACHE_ENABLE
 #define    FLASH_READ_NO_USE_CACHE  0
@@ -302,7 +301,7 @@ static u32 _norflash_read_id()
 int _norflash_init(const char *name, struct norflash_dev_platform_data *pdata)
 {
     log_info("norflash_init !\n");
-    if (_norflash.spi_num == (int) - 1) {
+    if (_norflash.spi_num == (s8) - 1) {
         _norflash.spi_num 	  = pdata->spi_hw_num;
         _norflash.spi_cs_io   = pdata->spi_cs_port;
         _norflash.spi_r_width = pdata->spi_read_width;
@@ -1028,6 +1027,10 @@ __close_exit:
 }
 static int norflash_bulk_read(struct device *device, void *buf, u32 len, u32 offset)
 {
+    if (!len) {
+        return 0;
+    }
+
     int reg = 0;
 #if NORFLASH_NO_SYS
     idle_cnt = 0;
@@ -1085,6 +1088,10 @@ __dev_bulk_read_exit2:
 //写入前进行检查，非空会执行擦除（支持4k）
 static int norflash_bulk_write(struct device *device, void *buf, u32 len, u32 offset)
 {
+    if (!len) {
+        return 0;
+    }
+
     int reg = 0;
 #if NORFLASH_NO_SYS
     idle_cnt = 0;
@@ -1202,7 +1209,11 @@ const struct device_operations norflash_dev_ops = {
 /****************************************************************************************/
 static int norflash_byte_read(struct device *device, void *buf, u32 len, u32 offset)
 {
+    if (!len) {
+        return 0;
+    }
     int reg = 0;
+
 #if NORFLASH_NO_SYS
     idle_cnt = 0;
 #endif
@@ -1251,6 +1262,10 @@ __dev_byte_read_exit2:
 //写入前不进行检查不擦除
 static int norflash_byte_write(struct device *device, void *buf, u32 len, u32 offset)
 {
+    if (!len) {
+        return 0;
+    }
+
     int reg = 0;
 #if NORFLASH_NO_SYS
     idle_cnt = 0;

@@ -66,12 +66,10 @@
 
 // section definitions
 #define AT_POWER        	AT(.poweroff_text)
-#define AT_AUDIO        	AT(.audio_text)
 
 #define AT_RAM 				AT(.common)
 #define AT_VM 				AT(.vm)
 #define AT_SPI_CODE         AT(.spi_code)
-#define AT_ADC_CODE         AT(.adc_code)
 #define AT_ENC_ISR_CODE     AT(.enc_isr_code)
 #define AT_WFIL_ISR_CODE    AT(.efil_isr_code)
 //#define AT_POWER_DOWN		AT(.powerdown_text)

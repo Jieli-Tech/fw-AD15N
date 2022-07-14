@@ -4,7 +4,7 @@
 #include "typedef.h"
 #include "audio_analog.h"
 
-#if ENCODER_EN
+#if AUDIO_ADC_EN
 void audio_adc_mode_init(void);
 void audio_adc_isr(void);
 u32 audio_adc_init_api(u32 sr, ADC_MODE mode, u32 ch);

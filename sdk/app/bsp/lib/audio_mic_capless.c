@@ -36,12 +36,12 @@ s16 mic_capless_dtb_read(void)
     return g_dtb;
 }
 
-AT(.adc_oput_code)
+AT(.audio_a.text.cache.L2)
 u16 get_ladc_capless_bud(void)
 {
     return 200;
 }
-AT(.adc_oput_code)
+AT(.audio_a.text.cache.L2)
 bool ladc_capless_adjust_abandon()
 {
     static u8 abandon = 0;
@@ -52,7 +52,7 @@ bool ladc_capless_adjust_abandon()
     return false;
 }
 
-AT(.adc_oput_code)
+AT(.audio_a.text.cache.L2)
 s16 ladc_capless_adjust_step(s16 curr_dtb, s16 dac32_dtb)
 {
     static u8 cnt = 0;

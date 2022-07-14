@@ -25,7 +25,7 @@ void mio_start(void *mio_obj)
     }
 }
 #define MIO_WORKING (B_MIO_EN | B_MIO_START)
-AT(.dac_oput_code)
+AT(.audio_d.text.cache.L2)
 void mio_kick(void *mio_obj, u32 dac_packt)
 {
     if (NULL == mio_obj) {
@@ -58,6 +58,20 @@ static bool mio_run_one(void *mio_obj)
     /* { */
     /* return false; */
     /* } */
+#if 1
+    u64 tmp_cnt = obj->dac_cnt;
+    tmp_cnt = tmp_cnt * (32000 / 100) / (SR_DEFAULT / 100);
+    u32 tmp_dac_cnt = tmp_cnt;
+    tmp_dac_cnt -= obj->dac_used_cnt;
+    /* log_info("t_cnt:%d used_cnt:%d", tmp_dac_cnt, obj->dac_used_cnt); */
+    if (tmp_dac_cnt < obj->dac_step) {
+        obj->status &= ~B_MIO_KICK;
+        return false;
+    }
+    local_irq_disable();
+    obj->dac_used_cnt += obj->dac_step;
+    local_irq_enable();
+#else
     if (obj->dac_cnt < obj->dac_step) {
         obj->status &= ~B_MIO_KICK;
         return false;
@@ -65,6 +79,7 @@ static bool mio_run_one(void *mio_obj)
     local_irq_disable();
     obj->dac_cnt -= obj->dac_step;
     local_irq_enable();
+#endif
     u32 size = obj->read(obj->pfile, obj->r_buf, obj->r_size);
     if (size != obj->r_size) {
         obj->status |= B_MIO_ERR;

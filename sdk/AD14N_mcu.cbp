@@ -23,7 +23,9 @@
 <Add option="-Wcast-align" />
 <Add option="-Wundef" />
 <Add option="-DFPGA=0" />
-<Add option="-DCPU_SH55=0" />
+<Add option="-DCPU_SH54=1" />
+<Add option="-DFLASH_CACHE_ENABLE=1" />
+<Add option="-DAUDIO_ADC_EN=1" />
 <Add option="-DSPEAKER_EN=0" />
 <Add option="-DVO_PITCH_EN=0" />
 <Add option="-DPCM_EQ_EN=0" />
@@ -34,17 +36,20 @@
 <Add option="-DDECODER_WAV_EN=0" />
 <Add option="-DDECODER_F1A_EN=0" />
 <Add option="-DDECODER_MIDI_EN=0" />
+<Add option="-DDECODER_MIDI_KEYBOARD_EN=0" />
 <Add option="-DDECODER_A_EN=0" />
 <Add option="-DAUDIO_SPEED_EN=0" />
 <Add option="-DEXT_FLASH_EN=0" />
 <Add option="-DFM_EN=0" />
 <Add option="-DEEPROM_EN=0" />
-<Add option="-DHAS_USB_EN=0" />
+<Add option="-DHAS_USB_EN=1" />
+<Add option="-DHAS_SDMMC_EN=0" />
 <Add option="-DHAS_MIO_EN=0" />
 <Add option="-DHAS_UPDATE_EN=0" />
 <Add option="-DHAS_UART_UPDATE_EN=0" />
 <Add option="-DECHO_EN=0" />
 <Add option="-DHOWLING_EN=0" />
+<Add option="-DFATFS_ENABLE=0" />
 <Add option="-DSIMPLE_FATFS_ENABLE=0" />
 <Add option="-DNOFLOAT" />
 <Add directory="app/bsp/cpu/sh54" />
@@ -60,29 +65,30 @@
 <Add directory="include_lib/agreement" />
 <Add directory="app/post_build/sh54" />
 <Add directory="app/bsp/lib" />
-<Add directory="app/bsp/start" />
+<Add directory="app/bsp/start/sh54_sh55" />
 <Add directory="app/bsp/common" />
 <Add directory="app/bsp/common/fs" />
 <Add directory="app/bsp/common/msg" />
 <Add directory="app/bsp/common/file_operate" />
 <Add directory="app/bsp/common/api_mg" />
 <Add directory="app/bsp/common/power_manage" />
+<Add directory="app/bsp/common/usb" />
 <Add directory="app/src/mcu" />
 </Compiler>
 <Linker>
 <Add option="--plugin-opt=save-temps" />
 <Add option="--gc-sections" />
 <Add option="--start-group" />
-<Add option="include_lib/liba/sh54/cpu_lib.a" />
-<Add option="include_lib/liba/sh54/efuse_trim_value_lib.a" />
+<Add option="include_lib/liba/sh54/mcu/cpu_lib.a" />
+<Add option="include_lib/liba/sh54/mcu/efuse_trim_value_lib.a" />
 <Add option="--end-group" />
 <Add option="-Tapp/post_build/sh54/app.ld" />
 <Add option="-M=app/post_build/sh54/app.map" />
 <Add library="C:\JL\pi32\lib\libm.a" />
 </Linker>
 <ExtraCommands>
-<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\toy\app_ld.c -o app\post_build\sh54\app.ld" />
-<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\toy\download_bat.c -o app\post_build\sh54\download.bat" />
+<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\mcu\app_ld.c -o app\post_build\sh54\app.ld" />
+<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\mcu\download_bat.c -o app\post_build\sh54\download.bat" />
 <Add before="tools\utils\fixbat.exe app\post_build\sh54\download.bat" />
 <Mode before="always" />
 <Add after="app\post_build\sh54\download.bat sdk" />
@@ -90,6 +96,8 @@
 </ExtraCommands>
 </Target>
 </Build>
+<Unit filename="app/bsp/common/usb/usb_common_def.h" />
+<Unit filename="app/bsp/common/usb/usb_std_class_def.h" />
 <Unit filename="app/bsp/cpu/sh54/clock.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/port_init.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/power_api.c"><Option compilerVer="CC"/></Unit>
@@ -113,12 +121,14 @@
 <Unit filename="include_lib/common/includes.h" />
 <Unit filename="include_lib/common/jiffies.h" />
 <Unit filename="include_lib/common/printf.h" />
+<Unit filename="include_lib/common/wdt.h" />
 <Unit filename="include_lib/cpu/sh54/asm/power/p33.h" />
 <Unit filename="include_lib/cpu/sh54/asm/power_interface.h" />
 <Unit filename="include_lib/cpu/sh54/asm/usb.h" />
 <Unit filename="include_lib/cpu/sh54/clock.h" />
 <Unit filename="include_lib/cpu/sh54/cpu.h" />
 <Unit filename="include_lib/cpu/sh54/csfr.h" />
+<Unit filename="include_lib/cpu/sh54/dac_cpu.h" />
 <Unit filename="include_lib/cpu/sh54/efuse.h" />
 <Unit filename="include_lib/cpu/sh54/efuse_trim_value.h" />
 <Unit filename="include_lib/cpu/sh54/gpio.h" />
@@ -128,7 +138,6 @@
 <Unit filename="include_lib/cpu/sh54/sfr.h" />
 <Unit filename="include_lib/cpu/sh54/typedef.h" />
 <Unit filename="include_lib/cpu/sh54/uart.h" />
-<Unit filename="include_lib/cpu/sh54/wdt.h" />
 <Unit filename="include_lib/cpu/tick_timer_driver.h" />
 <Unit filename="include_lib/dev_mg/atomic.h" />
 <Unit filename="include_lib/dev_mg/dev_manage.h" />

@@ -61,7 +61,8 @@ void demo_soft_init(void)
     bit_set_swi(3);
 }
 #endif
-AT_RAM
+/* AT_RAM */
+AT(.audio_d.text.cache.L2)
 void bit_set_swi0(void)
 {
     bit_set_swi(0);

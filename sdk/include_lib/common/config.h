@@ -7,35 +7,35 @@
 
 
 
-#if UART_DEBUG
-#define  DEBUG_EN
+#if UART_LOG
+#define  UT_LOG_EN
 #endif
 
 extern const char libs_debug;
 
-#ifdef DEBUG_EN
-#define debug_init(x)           uart_init(x)
-#define debug_uninit()          uart_uninit()
-// #define debug_putchar(x)        putchar(x)
-// #define debug_puts(x)           puts(x)
-// #define debug_u32d(x)           put_u32d(x)
-// #define debug_u32hex(x)         put_u32hex(x)
-// #define debug_u16hex0(x)        put_u16hex0(x)
-#define debug_u8hex(x)          put_u8hex(x)
-// #define debug_buf(x,y)          printf_buf(x,y)
-// #define debug                   printf
+#ifdef UT_LOG_EN
+#define log_init(x)           uart_init(x)
+#define log_uninit()          uart_uninit()
+// #define log_putchar(x)        putchar(x)
+// #define log_puts(x)           puts(x)
+// #define log_u32d(x)           put_u32d(x)
+// #define log_u32hex(x)         put_u32hex(x)
+// #define log_u16hex0(x)        put_u16hex0(x)
+#define log_u8hex(x)          put_u8hex(x)
+// #define log_buf(x,y)          printf_buf(x,y)
+// #define log                   printf
 #else
-#define debug_init(...)
-#define debug_uninit()
-// #define debug_putchar(...)
-// #define debug_puts(...)
-// #define debug_u32d(...)
-// #define debug_u32hex(...)
-// #define debug_u16hex0(...)
-#define debug_u8hex(...)
-// #define debug_buf(...)
+#define log_init(...)
+#define log_uninit()
+// #define log_putchar(...)
+// #define log_puts(...)
+// #define log_u32d(...)
+// #define log_u32hex(...)
+// #define log_u16hex0(...)
+#define log_u8hex(...)
+// #define log_buf(...)
 #endif
-#define debug(...)
+#define log(...)
 
 
 //< huayue add

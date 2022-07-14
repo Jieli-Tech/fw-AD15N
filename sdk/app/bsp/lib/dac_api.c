@@ -104,10 +104,15 @@ void dac_mode_init(u16 vol)
     dac_resource_init((u8 *)&double_dac_buf[0], sizeof(double_dac_buf), con, 0);
 }
 
-void dac_init_api(u32 sr)
+//1:有延时 0:没有延时, 上电开机调用需要延时至少1.2ms
+void dac_init_api(u32 sr, bool delay_flag)
 {
     dac_phy_init(dac_sr_lookup(sr));
-    delay_10ms(2);
+    /* delay_10ms(2); */
+    /* delay(5000); */
+    if (delay_flag) {
+        udelay(1000);//约1.2ms
+    }
     dac_cpu_mode();
 }
 
@@ -129,7 +134,7 @@ void dac_off_api(void)
 /* dac_sr_set(dac_sr_lookup(sr)); */
 /* } */
 
-AT(.dac_oput_code)
+AT(.audio_d.text.cache.L2)
 void fill_dac_fill_phy(u8 *buf, u32 len)
 {
     u32 i, sp_cnt, active_flag;
@@ -160,6 +165,7 @@ void fill_dac_fill_phy(u8 *buf, u32 len)
         }
         rptr[i] = cbuf_read_alloc(dac_mge.sound[i]->p_obuf, &olen[i]);
         if (0 == olen[i]) {
+            log_char('z');
             rptr[i] = 0;
         }
         d_mio_kick(dac_mge.sound[i]->mio, DAC_PACKET_SIZE);
@@ -174,7 +180,10 @@ void fill_dac_fill_phy(u8 *buf, u32 len)
             }
             if (0 == olen[i]) {
                 rptr[i] = cbuf_read_alloc(dac_mge.sound[i]->p_obuf, &olen[i]);
-                /* log_char('x'); */
+                if (0 == olen[i]) {
+                    log_char('x');
+                    rptr[i] = 0;
+                }
                 continue;
             }
             /* log_info("b\n"); */
@@ -190,6 +199,8 @@ void fill_dac_fill_phy(u8 *buf, u32 len)
                 p_cnt[i] = 0;
                 rptr[i] = cbuf_read_alloc(dac_mge.sound[i]->p_obuf, &olen[i]);
                 if (0 == olen[i]) {
+                    log_char('y');
+                    rptr[i] = 0;
                 }
 
             }
@@ -223,7 +234,7 @@ void fill_dac_fill_phy(u8 *buf, u32 len)
     }
 }
 
-AT(.dac_oput_code)
+AT(.audio_d.text.cache.L2)
 void fill_dac_fill(u8 *buf, u32 len, AUDIO_TYPE type)
 {
     fill_dac_fill_phy(buf, len);

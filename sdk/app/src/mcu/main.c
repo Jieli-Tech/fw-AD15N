@@ -38,7 +38,7 @@ int c_main(int cfg_addr)
     mask_init(exception_analyze, putchar);
     all_init_isr();
 
-    debug_init(1000000);
+    log_init(1000000);
 
     log_info("--------- sh5x-apps -------------\n");
 

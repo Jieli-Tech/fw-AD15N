@@ -6,12 +6,13 @@
 #include "csfr.h"
 #include "hwi.h"
 #include "cpu.h"
+#include "wdt.h"
 
+#include "uart.h"
+#include "jiffies.h"
 #include "printf.h"
 #include "string.h"
-#include "uart.h"
 #include "gpio.h"
-#include "jiffies.h"
 
 #endif
 

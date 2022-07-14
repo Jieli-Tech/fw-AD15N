@@ -29,11 +29,11 @@ void *g_pvfs = 0;
 
 dp_buff dp_ctl[4];
 static const char *const dir_tab[] = {
-    "/dir_bin_f1x/",
+    /* "/dir_bin_f1x/", */
     "/dir_song/",
     "/dir_story/",
     "/dir_poetry/",
-    /* "/dir_eng/", */
+    "/dir_eng/",
 };
 
 static const char *const dir_tab_a[] = {
@@ -72,36 +72,38 @@ void print_audio_sfr(void);
 
 void print_audio_sfr(void)
 {
-    log_info(" JL_ADDA->DAC_CON0    0x%x;",   JL_ADDA->DAC_CON0);
-    log_info(" JL_ADDA->DAC_CON1    0x%x;",   JL_ADDA->DAC_CON1);
-    log_info(" JL_ADDA->DAC_TRM     0x%x;",   JL_ADDA->DAC_TRM);
-    log_info(" JL_ADDA->DAC_ADR     0x%x;",   JL_ADDA->DAC_ADR);
-    log_info(" JL_ADDA->DAC_LEN     0x%x;",   JL_ADDA->DAC_LEN);
-    log_info(" JL_ADDA->DAC_COP     0x%x;",   JL_ADDA->DAC_COP);
-    log_info(" JL_ADDA->DAC_DTB     0x%x;",   JL_ADDA->DAC_DTB);
-    log_info(" JL_ADDA->ADC_CON     0x%x;",   JL_ADDA->ADC_CON);
-    log_info(" JL_ADDA->ADC_ADR     0x%x;",   JL_ADDA->ADC_ADR);
-    log_info(" JL_ADDA->ADC_LEN     0x%x;",   JL_ADDA->ADC_LEN);
-    log_info(" JL_ADDA->RAM_SPD     0x%x;",   JL_ADDA->RAM_SPD);
-    log_info(" JL_ADDA->DAA_CON0    0x%x;",   JL_ADDA->DAA_CON0);
-    log_info(" JL_ADDA->DAA_CON1    0x%x;",   JL_ADDA->DAA_CON1);
-    log_info(" JL_ADDA->ADA_CON0    0x%x;",   JL_ADDA->ADA_CON0);
-    log_info(" JL_ADDA->ADA_CON1    0x%x;",   JL_ADDA->ADA_CON1);
-    log_info(" JL_ADDA->ADA_CON2    0x%x;\n",   JL_ADDA->ADA_CON2);
+    /* log_info(" JL_ADDA->DAC_CON0    0x%x;",   JL_ADDA->DAC_CON0); */
+    /* log_info(" JL_ADDA->DAC_CON1    0x%x;",   JL_ADDA->DAC_CON1); */
+    /* log_info(" JL_ADDA->DAC_TRM     0x%x;",   JL_ADDA->DAC_TRM); */
+    /* log_info(" JL_ADDA->DAC_ADR     0x%x;",   JL_ADDA->DAC_ADR); */
+    /* log_info(" JL_ADDA->DAC_LEN     0x%x;",   JL_ADDA->DAC_LEN); */
+    /* log_info(" JL_ADDA->DAC_COP     0x%x;",   JL_ADDA->DAC_COP); */
+    /* log_info(" JL_ADDA->DAC_DTB     0x%x;",   JL_ADDA->DAC_DTB); */
+    /* log_info(" JL_ADDA->ADC_CON     0x%x;",   JL_ADDA->ADC_CON); */
+    /* log_info(" JL_ADDA->ADC_ADR     0x%x;",   JL_ADDA->ADC_ADR); */
+    /* log_info(" JL_ADDA->ADC_LEN     0x%x;",   JL_ADDA->ADC_LEN); */
+    /* log_info(" JL_ADDA->RAM_SPD     0x%x;",   JL_ADDA->RAM_SPD); */
+    /* log_info(" JL_ADDA->DAA_CON0    0x%x;",   JL_ADDA->DAA_CON0); */
+    /* log_info(" JL_ADDA->DAA_CON1    0x%x;",   JL_ADDA->DAA_CON1); */
+    /* log_info(" JL_ADDA->ADA_CON0    0x%x;",   JL_ADDA->ADA_CON0); */
+    /* log_info(" JL_ADDA->ADA_CON1    0x%x;",   JL_ADDA->ADA_CON1); */
+    /* log_info(" JL_ADDA->ADA_CON2    0x%x;\n",   JL_ADDA->ADA_CON2); */
 }
 
 void decoder_demo(void)
 {
-    dac_sr_api(32000);
+    log_info("decoder_demo\n");
+    dac_sr_api(SR_DEFAULT);
     /* dac_init_api(32000); */
     u32 i, err;
     u32 dir_index;
-    log_info("decoder_demo\n");
+    log_info("decoder_demo 001\n");
     memset(&pctl[0], 0, sizeof(pctl));
 
     pctl[0].findex = 1;                 //需要播放的文件号
     pctl[0].dir_index = 0;
-    pctl[0].type = BIT_UMP3 | BIT_F1A1;  //播放需要使用的解码器
+    /* pctl[0].type = BIT_UMP3 | BIT_F1A1;  //播放需要使用的解码器 */
+    pctl[0].type = BIT_F1A1;  //播放需要使用的解码器
     pctl[0].pdir = (void *)&dir_tab[0]; //播放的路径
     pctl[0].loop = 0;                   //0 ~ 254无缝循环次数；255一直无缝循环播放
 
@@ -120,13 +122,16 @@ void decoder_demo(void)
     /* } */
     /* c = 0; */
 
+    log_info("decoder_demo 002\n");
     err = post_msg(1, MSG_PLAY_FILE1);
     post_msg(1, MSG_PLAY_FILE2);
+    log_info("decoder_demo 003\n");
 
     int msg[2];
     /* msg[0] : (len << 12) |(msg& 0x0fff) */
     /* msg[1] : para */
     while (1) {
+        /* log_char('a'); */
         err = get_msg(2, &msg[0]);
         bsp_loop();
 

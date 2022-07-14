@@ -29,8 +29,8 @@
 // static inline void os_mutex_post(OS_MUTEX *mutex) {}
 #include "jiffies.h"
 #include "wdt.h"
-typedef volatile u32 flash_mutex;
-static inline void flash_mutex_create(flash_mutex *sem, u32 count)//初始化
+typedef volatile u8 flash_mutex;
+static inline void flash_mutex_create(flash_mutex *sem, u8 count)//初始化
 {
     *sem = count;
 }
@@ -38,7 +38,7 @@ static inline void flash_mutex_post(flash_mutex *sem)//
 {
     (*sem) = 1;
 }
-static inline s32 flash_mutex_pend(flash_mutex *sem, u32 timeout)// 当为timeout=0时，死等
+static inline s8 flash_mutex_pend(flash_mutex *sem, u32 timeout)// 当为timeout=0时，死等
 {
     u32 _timeout = timeout + jiffies;
     extern void wdt_clear();
@@ -54,7 +54,7 @@ static inline s32 flash_mutex_pend(flash_mutex *sem, u32 timeout)// 当为timeou
     }
     return 0;
 }
-static inline s32 query_flash_mutex_pend(flash_mutex *sem, u32 timeout)// 当为timeout=0时，死等
+static inline s8 query_flash_mutex_pend(flash_mutex *sem, u32 timeout)// 当为timeout=0时，死等
 {
     while (1) {
         if (*sem) {
@@ -65,7 +65,7 @@ static inline s32 query_flash_mutex_pend(flash_mutex *sem, u32 timeout)// 当为
     }
     return 0;
 }
-static inline void flash_mutex_set(flash_mutex *sem, u32 count)
+static inline void flash_mutex_set(flash_mutex *sem, u8 count)
 {
     *sem = count;
 }
@@ -102,9 +102,9 @@ enum {
 
 
 struct norflash_dev_platform_data {
-    int spi_hw_num;         //只支持SPI1或SPI2
-    u32 spi_cs_port;        //cs的引脚
-    u32 spi_read_width;     //flash读数据的线宽
+    s8 spi_hw_num;         //只支持SPI1或SPI2
+    u8 spi_cs_port;        //cs的引脚
+    u8 spi_read_width;     //flash读数据的线宽
     const struct spi_platform_data *spi_pdata;
     u32 start_addr;         //分区起始地址
     u32 size;               //分区大小，若只有1个分区，则这个参数可以忽略

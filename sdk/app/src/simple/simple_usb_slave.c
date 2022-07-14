@@ -24,7 +24,7 @@
 extern void simple_next(void);
 void usb_slave(void)
 {
-    dac_init_api(32000);
+    dac_init_api(SR_DEFAULT, 0);
     /* dac_vol(0, 31); */
     dac_fade_in_api();
     int msg[2];

@@ -18,16 +18,19 @@
 #define LOG_TAG             "[normal]"
 #include "debug.h"
 
+/* midi乐谱解码最大同时发声的key数,该值影响音符的叠加,值越大需要的解码buffer越大,需要的buffer大小由need_dcbuf_size()获取 */
+extern const int MAX_DEC_PLAYER_CNT;//该值在app_config.c中定义
 
-
+/* param */
 static u32 midi_tone_tab = 0;
-cbuffer_t cbuf_midi AT(.midi_buf);
+static MIDI_CONFIG_PARM midi_t_parm     AT(.midi_buf);
+static MIDI_INIT_STRUCT init_info       AT(.midi_buf);
+/* decode */
 dec_obj dec_midi_hld;
-u16 obuf_midi[DAC_DECODER_BUF_SIZE / 2] AT(.midi_buf) ;
-u32 midi_decode_buff[(4984 + 3) / 4] AT(.midi_buf) ;
+cbuffer_t cbuf_midi                     AT(.midi_buf);
+u16 obuf_midi[DAC_DECODER_BUF_SIZE / 2] AT(.midi_buf);
+u32 midi_decode_buff[(3580 + 3) / 4]    AT(.midi_buf);
 #define MIDI_CAL_BUF ((void *)&midi_decode_buff[0])
-static MIDI_CONFIG_PARM midi_t_parm AT(.midi_buf);
-static MIDI_INIT_STRUCT init_info AT(.midi_buf);
 
 
 const struct if_decoder_io midi_dec_io0 = {
@@ -36,6 +39,10 @@ const struct if_decoder_io midi_dec_io0 = {
     mp_output,
 };
 
+u32 *get_midi_switch_info(void)
+{
+    return &init_info.switch_info;
+}
 
 static u8 midi_musicsr_to_cfgsr(u32 sr)
 {
@@ -85,7 +92,7 @@ u32 midi_decode_api(void *p_file, void **ppdec, void *p_dp_buf)
 
     ops = get_midi_ops();
     buff_len = ops->need_dcbuf_size();
-    log_info("buff_len:%d \n", buff_len);
+    log_info("MIDI_DEC Need Buff Len:%d\n", buff_len);//buff大小会随MAX_DEC_PLAYER_CNT改变
     if (buff_len > sizeof(midi_decode_buff)) {
         return E_MIDI_DBUF;
     }
@@ -113,7 +120,7 @@ u32 midi_decode_api(void *p_file, void **ppdec, void *p_dp_buf)
     //dac_sr_api(sr);
     log_info(">>>>>>>sr:%d \n", sr);
     /**************相对MP3的调用流程多了这个，其他一致。这个一定要配置***************/
-    midi_t_parm.player_t = 8;                                //设置需要合成的最多按键个数，8到32可配
+    midi_t_parm.player_t = MAX_DEC_PLAYER_CNT;                                //设置需要合成的最多按键个数，8到32可配
     midi_t_parm.sample_rate = midi_musicsr_to_cfgsr(sr);                            //采样率设为16k
     midi_t_parm.spi_pos = (u8 *)midi_tone_tab;                    //spi_memory为音色文件数据起始地址
     log_info_hexdump(midi_t_parm.spi_pos, 16);
@@ -142,10 +149,14 @@ void midi_decode_init(void)
         return;
     }
 
-    err = vfs_openbypath(pvfs, &pvfile, "/midi_cfg/midi_cfg.bin");
+    err = vfs_openbypath(pvfs, &pvfile, "/midi_cfg/00_MIDI.mda");
     if (err != 0) {
-        vfs_fs_close(&pvfs);
-        return;
+        log_info("midi dec mda open fail, try old midi_cfg.bin!\n");
+        err = vfs_openbypath(pvfs, &pvfile, "/midi_cfg/midi_cfg.bin");
+        if (err != 0) {
+            vfs_fs_close(&pvfs);
+            return;
+        }
     }
 
     ///获取midi音色库的cache地址

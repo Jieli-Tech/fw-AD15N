@@ -65,6 +65,12 @@ struct UPDATA_PARM {
 struct UPDATA_EXT_PARM {
     char sd_port;
     u32 sd_speed;
+    u32 porta_die_dir;
+    u32 porta_pu_pd;
+    u32 porta_out_dieh;
+    u32 portb_die_dir;
+    u32 portb_pu_pd;
+    u32 portb_out_dieh;
 };
 
 struct jlfs_file_head {

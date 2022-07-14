@@ -112,7 +112,10 @@ void vm_api_write_mult(u16 start_id, u16 end_id, void *buf, u16 len, u32 delay);
 int vm_api_read_mult(u16 start_id, u16 end_id, void *buf, u16 len);
 VM_ERR syscfg_vm_init(u32 eeprom_saddr, u32 eeprom_size);
 u16 vm_buff_alloc(u8 **buf);
-void vm_isr_response_index_register(u8 index);
+
+// 兼容旧程序,旧程序vm擦写时只能放出一个中断!
+#define vm_isr_response_index_register(index) vm_isr_response_list_register(BIT(index) | BIT(IRQ_AUDIO_IDX))
+void vm_isr_response_list_register(u32 bit_list);
 
 
 #endif  //_VM_H_

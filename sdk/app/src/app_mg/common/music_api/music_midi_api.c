@@ -125,11 +125,11 @@ void midi_init_info(MIDI_INIT_STRUCT *init_info)
 {
     log_info(">>>>>>>>>midi information init<<<<<<<<<< \n");
 
-    //模式设定
-    init_info->mode_info.mode = CMD_MIDI_CTRL_MODE_1,
+    ///模式设定
+    init_info->mode_info.mode = CMD_MIDI_CTRL_MODE_1;
 
-                         //midi节奏初始化
-                         init_info->tempo_info.tempo_val = 1042;
+    ///midi节奏初始化
+    init_info->tempo_info.tempo_val = 1042;
     for (int i = 0; i < CTRL_CHANNEL_NUM; i++) {
         init_info->tempo_info.decay_val[i] = ((u16)31 << 11) | 1024;
     }
@@ -152,7 +152,12 @@ void midi_init_info(MIDI_INIT_STRUCT *init_info)
     init_info->prog_info.ex_vol = 1024;
     init_info->prog_info.replace_mode = 0;
 
-    //OKON 解码副旋空转回调注册
+    ///midi音符移半音设置
+    for (int i = 0; i < CTRL_CHANNEL_NUM; i++) {
+        init_info->semitone_info.key_diff[i] = 12;
+    }
+
+    ///OKON 解码副旋空转回调注册
     init_info->wdt_clear.priv = NULL;
     init_info->wdt_clear.count = 68;
     init_info->wdt_clear.wdt_clear_trigger = wdt_clear_trigger;
@@ -174,7 +179,7 @@ void midi_init_info(MIDI_INIT_STRUCT *init_info)
     init_info->tmDiv_info.timeDiv_trigger = midi_timeDiv_trigger;
 
     ///使能控制
-    init_info->switch_info = MELODY_STOP_ENABLE | MARK_ENABLE | MELODY_ENABLE | TIM_DIV_ENABLE | BEAT_TRIG_ENABLE | MELODY_PLAY_ENABLE | EX_VOL_ENABLE;
+    init_info->switch_info = MELODY_STOP_ENABLE | MARK_ENABLE | MELODY_ENABLE | TIM_DIV_ENABLE | BEAT_TRIG_ENABLE | MELODY_PLAY_ENABLE | EX_VOL_ENABLE;// | SEMITONE_ENABLE;
 }
 
 #endif
