@@ -2,7 +2,7 @@
 #define LOG_TAG     "[spi1]"
 //#define LOG_ERROR_ENABLE
 //#define LOG_DEBUG_ENABLE
-#include "debug.h"
+#include "log.h"
 #include "gpio.h"
 #include "clock.h"
 #include "spi1.h"

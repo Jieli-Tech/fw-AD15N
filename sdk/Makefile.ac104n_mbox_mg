@@ -1,0 +1,500 @@
+
+# make 编译并下载
+# make VERBOSE=1 显示编译详细过程
+# make clean 清除编译临时文件
+#
+# 注意： Linux 下编译方式：
+#     1. 从 http://pkgman.jieliapp.com/doc/all 处找到下载链接
+#     2. 下载后，解压到 /opt/jieli 目录下，保证
+#       /opt/jieli/common/bin/clang 存在（注意目录层次）
+#     3. 确认 ulimit -n 的结果足够大（建议大于8096），否则链接可能会因为打开文件太多而失败
+#       可以通过 ulimit -n 8096 来设置一个较大的值
+#
+
+# 工具路径设置
+ifeq ($(OS), Windows_NT)
+# Windows 下工具链位置
+TOOL_DIR := C:/JL/pi32/bin
+CC    := clang.exe
+CXX   := clang.exe
+LD    := lto-wrapper.exe
+AR    := lto-ar.exe
+MKDIR := mkdir_win -p
+RM    := rm -rf
+
+SYS_LIB_DIR := C:/JL/pi32/libc
+SYS_INC_DIR := C:/JL/pi32/include/libc
+EXT_CFLAGS  := # Windows 下不需要 -D__SHELL__
+export PATH:=$(TOOL_DIR);$(PATH)
+
+## 后处理脚本
+FIXBAT          := tools\utils\fixbat.exe # 用于处理 utf8->gbk 编码问题
+POST_SCRIPT     := app\post_build\sh54\download.bat
+RUN_POST_SCRIPT := $(POST_SCRIPT)
+else
+# Linux 下工具链位置
+TOOL_DIR := /opt/jieli/pi32/bin
+CC    := clang
+CXX   := clang++
+LD    := lto-wrapper
+AR    := lto-ar
+MKDIR := mkdir -p
+RM    := rm -rf
+export OBJDUMP := $(TOOL_DIR)/objdump
+export OBJCOPY := $(TOOL_DIR)/objcopy
+export OBJSIZEDUMP := $(TOOL_DIR)/objsizedump
+
+SYS_LIB_DIR := $(TOOL_DIR)/../lib
+SYS_INC_DIR := $(TOOL_DIR)/../include
+EXT_CFLAGS  := -D__SHELL__ # Linux 下需要这个保证正确处理 download.c
+export PATH:=$(TOOL_DIR):$(PATH)
+
+## 后处理脚本
+FIXBAT          := touch # Linux下不需要处理 bat 编码问题
+POST_SCRIPT     := app/post_build/sh54/download.sh
+RUN_POST_SCRIPT := bash $(POST_SCRIPT)
+endif
+
+CC  := $(TOOL_DIR)/$(CC)
+CXX := $(TOOL_DIR)/$(CXX)
+LD  := $(TOOL_DIR)/$(LD)
+AR  := $(TOOL_DIR)/$(AR)
+# 输出文件设置
+OUT_ELF   := app/post_build/sh54/sdk.elf
+OBJ_FILE  := $(OUT_ELF).objs.txt
+# 编译路径设置
+BUILD_DIR := ac104n_mbox_mg_objs
+
+# 编译参数设置
+CFLAGS := \
+	-target pi32 \
+	-integrated-as \
+	-fno-builtin \
+	-mllvm -pi32-memreg-opt \
+	-mllvm -pi32-mem-offset-adj-opt \
+	-mllvm -pi32-const-spill \
+	-mllvm -pi32-enable-jz \
+	-mllvm -pi32-tailcall-opt \
+	-mllvm -inline-threshold=5 \
+	-mllvm -pi32-enable-itblock=1 \
+	-Oz \
+	-flto \
+	-integrated-as \
+	-g \
+	-Oz \
+	-flto \
+	-fprefer-gnu-section \
+	-fms-extensions \
+	-Wno-empty-body \
+	-Wcast-align \
+	-Wundef \
+
+
+# C++额外的编译参数
+CXXFLAGS :=
+
+
+# 宏定义
+DEFINES := \
+	-DD_MBOX_SDK=1 \
+	-DD_APP_MBOX=1 \
+	-DMAX_F1A_CHANNEL=2 \
+	-DFPGA=0 \
+	-DCPU_SH54=1 \
+	-DFLASH_CACHE_ENABLE=1 \
+	-DAUDIO_ADC_EN=1 \
+	-DSPEAKER_EN=1 \
+	-DVO_PITCH_EN=1 \
+	-DPCM_EQ_EN=1 \
+	-DAUX_EN=1 \
+	-DENCODER_EN=1 \
+	-DDECODER_UMP3_EN=1 \
+	-DDECODER_MP3_ST_EN=1 \
+	-DDECODER_WAV_EN=1 \
+	-DDECODER_F1A_EN=1 \
+	-DDECODER_MIDI_EN=1 \
+	-DDECODER_MIDI_KEYBOARD_EN=0 \
+	-DDECODER_A_EN=1 \
+	-DAUDIO_SPEED_EN=1 \
+	-DEXT_FLASH_EN=0 \
+	-DFM_EN=1 \
+	-DEEPROM_EN=0 \
+	-DHAS_USB_EN=1 \
+	-DHAS_SDMMC_EN=1 \
+	-DHAS_MIO_EN=1 \
+	-DHAS_UPDATE_EN=1 \
+	-DHAS_UART_UPDATE_EN=1 \
+	-DECHO_EN=1 \
+	-DHOWLING_EN=1 \
+	-DFATFS_ENABLE=1 \
+	-DSIMPLE_FATFS_ENABLE=0 \
+	-DNOFLOAT \
+
+
+DEFINES += $(EXT_CFLAGS) # 额外的一些定义
+
+# 头文件搜索路径
+INCLUDES := \
+	-Iapp/src \
+	-Iapp/bsp/lib \
+	-Iapp/bsp/start/sh54_sh55 \
+	-Iapp/bsp/cpu/sh54 \
+	-Iapp/bsp/cpu/sh54/spi \
+	-Iapp/bsp/cpu/sh54/wdt \
+	-Iapp/bsp/cpu/sh54/audio \
+	-Iinclude_lib \
+	-Iapp/post_build/sh54 \
+	-Iinclude_lib/common \
+	-Iinclude_lib/cpu/sh54 \
+	-Iinclude_lib/cpu \
+	-Iinclude_lib/fs \
+	-Iinclude_lib/msg \
+	-Iinclude_lib/fs/sydf \
+	-Iinclude_lib/dev_mg \
+	-Iinclude_lib/audio \
+	-Iinclude_lib/sdmmc \
+	-Iinclude_lib/update \
+	-Iinclude_lib/decoder \
+	-Iinclude_lib/decoder/list \
+	-Iinclude_lib/encoder \
+	-Iinclude_lib/encoder/list \
+	-Iinclude_lib/device \
+	-Iinclude_lib/ex_mcu \
+	-Iapp/bsp/common \
+	-Iapp/bsp/common/fs \
+	-Iapp/bsp/common/iic_soft \
+	-Iapp/bsp/common/eeprom \
+	-Iapp/bsp/common/msg \
+	-Iapp/bsp/common/file_operate \
+	-Iapp/bsp/common/api_mg \
+	-Iapp/bsp/common/key \
+	-Iapp/bsp/common/power_manage \
+	-Iapp/bsp/common/norflash \
+	-Iapp/bsp/common/spi_soft \
+	-Iapp/bsp/common/reserved_area \
+	-Iapp/bsp/modules \
+	-Iapp/bsp/modules/timer \
+	-Iapp/src/mbox_mg \
+	-Iapp/bsp/common/fm \
+	-Iapp/bsp/common/fm/rda5807 \
+	-Iapp/bsp/common/fm/qn8035 \
+	-Iapp/bsp/common/fm/bk1080 \
+	-Iinclude_lib/agreement \
+	-Iapp/bsp/common/uart_update \
+	-Iapp/bsp/common/speaker \
+	-Iinclude_lib/speaker \
+	-Iapp/bsp/common/vo_pitch \
+	-Iinclude_lib/vo_pitch \
+	-Iapp/bsp/common/usb \
+	-Iapp/bsp/common/usb/device \
+	-Iapp/bsp/common/usb/host \
+	-I$(SYS_INC_DIR) \
+
+
+# 需要编译的 .c 文件
+c_SRC_FILES := \
+	app/bsp/common/decoder/decoder_api.c \
+	app/bsp/common/decoder/decoder_msg_tab.c \
+	app/bsp/common/decoder/decoder_point.c \
+	app/bsp/common/decoder/eq.c \
+	app/bsp/common/decoder/list/a_api.c \
+	app/bsp/common/decoder/list/f1a_api.c \
+	app/bsp/common/decoder/list/f1x_parsing.c \
+	app/bsp/common/decoder/list/midi_api.c \
+	app/bsp/common/decoder/list/mio_phy.c \
+	app/bsp/common/decoder/list/mp3_standard_api.c \
+	app/bsp/common/decoder/list/ump3_api.c \
+	app/bsp/common/decoder/list/wav_api.c \
+	app/bsp/common/decoder/mio_api.c \
+	app/bsp/common/decoder/sine_play.c \
+	app/bsp/common/encoder/encoder_api.c \
+	app/bsp/common/encoder/list/a_encoder.c \
+	app/bsp/common/encoder/list/mp3_encoder.c \
+	app/bsp/common/encoder/list/ump3_encoder.c \
+	app/bsp/common/fm/bk1080/Bk1080.c \
+	app/bsp/common/fm/fm_iic_dri.c \
+	app/bsp/common/fm/qn8035/QN8035.c \
+	app/bsp/common/fm/rda5807/RDA5807.c \
+	app/bsp/common/fs/fat/fat_resource.c \
+	app/bsp/common/fs/nor_fs/nor_fs_resource.c \
+	app/bsp/common/fs/sydf/sydf_resource.c \
+	app/bsp/common/fs/vfs.c \
+	app/bsp/common/fs/vfs_fat.c \
+	app/bsp/common/fs/vfs_resource.c \
+	app/bsp/common/iic_soft/iic_soft.c \
+	app/bsp/common/key/key.c \
+	app/bsp/common/key/key_drv_ad.c \
+	app/bsp/common/key/key_drv_io.c \
+	app/bsp/common/key/key_ir.c \
+	app/bsp/common/key/key_matrix.c \
+	app/bsp/common/key/key_touch.c \
+	app/bsp/common/msg/msg.c \
+	app/bsp/common/power_manage/app_power_mg.c \
+	app/bsp/common/reserved_area/reserved_area.c \
+	app/bsp/common/sound_effect_list/echo_api.c \
+	app/bsp/common/sound_effect_list/howling_pitchshifter_api.c \
+	app/bsp/common/sound_effect_list/notch_howling_api.c \
+	app/bsp/common/sound_effect_list/pcm_eq_api.c \
+	app/bsp/common/sound_effect_list/speed_api.c \
+	app/bsp/common/sound_effect_list/vo_pitch_api.c \
+	app/bsp/common/speaker/speak_api.c \
+	app/bsp/common/spi_soft/spi_soft.c \
+	app/bsp/common/uart_update/uart_update.c \
+	app/bsp/common/usb/device/descriptor.c \
+	app/bsp/common/usb/device/hid.c \
+	app/bsp/common/usb/device/msd.c \
+	app/bsp/common/usb/device/msd_upgrade.c \
+	app/bsp/common/usb/device/task_pc.c \
+	app/bsp/common/usb/device/uac1.c \
+	app/bsp/common/usb/device/uac_stream.c \
+	app/bsp/common/usb/device/usb_device.c \
+	app/bsp/common/usb/device/user_setup.c \
+	app/bsp/common/usb/host/usb_bulk_transfer.c \
+	app/bsp/common/usb/host/usb_ctrl_transfer.c \
+	app/bsp/common/usb/host/usb_host.c \
+	app/bsp/common/usb/host/usb_storage.c \
+	app/bsp/common/usb/usb_config.c \
+	app/bsp/common/usb/usb_host_config.c \
+	app/bsp/common/usb/usb_test.c \
+	app/bsp/common/usb/usr/usb_audio_interface.c \
+	app/bsp/common/vm/vm_api.c \
+	app/bsp/cpu/sh54/adc_drv.c \
+	app/bsp/cpu/sh54/clock.c \
+	app/bsp/cpu/sh54/cpu.c \
+	app/bsp/cpu/sh54/dac_cpu.c \
+	app/bsp/cpu/sh54/iic_hw.c \
+	app/bsp/cpu/sh54/irflt.c \
+	app/bsp/cpu/sh54/pl_cnt.c \
+	app/bsp/cpu/sh54/port_init.c \
+	app/bsp/cpu/sh54/port_wkup.c \
+	app/bsp/cpu/sh54/power_api.c \
+	app/bsp/cpu/sh54/uart.c \
+	app/bsp/cpu/sh54/uart_dev.c \
+	app/bsp/lib/adc_api.c \
+	app/bsp/lib/audio.c \
+	app/bsp/lib/audio_mic_capless.c \
+	app/bsp/lib/common.c \
+	app/bsp/lib/dac_api.c \
+	app/bsp/lib/my_malloc.c \
+	app/bsp/lib/tab_read.c \
+	app/bsp/modules/soft_isr/soft_isr.c \
+	app/bsp/modules/timer/tick_timer_modules.c \
+	app/bsp/modules/timer/tick_timer_sys.c \
+	app/bsp/start/sh54_sh55/bsp_loop.c \
+	app/bsp/start/sh54_sh55/device_list.c \
+	app/bsp/start/sh54_sh55/init.c \
+	app/bsp/start/sh54_sh55/main.c \
+	app/src/mbox_mg/app_config.c \
+	app/src/mbox_mg/common/hot_msg.c \
+	app/src/mbox_mg/common/mbox_common.c \
+	app/src/mbox_mg/common/pa_mute.c \
+	app/src/mbox_mg/common/ui/led5x7.c \
+	app/src/mbox_mg/common/ui/led_ui_api.c \
+	app/src/mbox_mg/common/ui/ui_common.c \
+	app/src/mbox_mg/fm/fm_api.c \
+	app/src/mbox_mg/fm/fm_key.c \
+	app/src/mbox_mg/fm/fm_radio.c \
+	app/src/mbox_mg/line_in/line_in_key.c \
+	app/src/mbox_mg/line_in/line_in_mode.c \
+	app/src/mbox_mg/loudspeaker/loudspeaker_key.c \
+	app/src/mbox_mg/loudspeaker/loudspeaker_mode.c \
+	app/src/mbox_mg/mbox_main.c \
+	app/src/mbox_mg/music/break_point.c \
+	app/src/mbox_mg/music/device.c \
+	app/src/mbox_mg/music/get_music_file.c \
+	app/src/mbox_mg/music/music_auto_save_bp.c \
+	app/src/mbox_mg/music/music_key_table.c \
+	app/src/mbox_mg/music/music_play.c \
+	app/src/mbox_mg/music/play_file.c \
+	app/src/mbox_mg/rec/rec_api.c \
+	app/src/mbox_mg/rec/rec_device.c \
+	app/src/mbox_mg/rec/rec_key.c \
+	app/src/mbox_mg/rec/rec_mode.c \
+	app/src/mbox_mg/usb_device/usb_device_mode.c \
+	app/src/mbox_mg/usb_device/usb_key_table.c \
+
+
+# 需要编译的 .S 文件
+S_SRC_FILES :=
+
+
+# 需要编译的 .s 文件
+s_SRC_FILES :=
+
+
+# 需要编译的 .cpp 文件
+cpp_SRC_FILES :=
+
+
+# 需要编译的 .cc 文件
+cc_SRC_FILES :=
+
+
+# 需要编译的 .cxx 文件
+cxx_SRC_FILES :=
+
+
+# 链接参数
+LFLAGS := \
+	--plugin-opt=save-temps \
+	--gc-sections \
+	--start-group \
+	include_lib/liba/sh54/mbox_mg/cpu_lib.a \
+	include_lib/liba/sh54/mbox_mg/address_lib.a \
+	include_lib/liba/sh54/mbox_mg/efuse_trim_value_lib.a \
+	include_lib/liba/sh54/mbox_mg/fs_lib.a \
+	include_lib/liba/sh54/mbox_mg/audio_lib.a \
+	include_lib/liba/sh54/mbox_mg/src_lib.a \
+	include_lib/liba/sh54/mbox_mg/decoder_mge_lib.a \
+	include_lib/liba/sh54/mbox_mg/ae_resample_lib.a \
+	include_lib/liba/sh54/mbox_mg/dev_mg_lib.a \
+	include_lib/liba/sh54/mbox_mg/malloc_lib.a \
+	include_lib/liba/sh54/mbox_mg/file_crc16_lib.a \
+	include_lib/liba/ARCH/pi32_lto/lib_echo_cal.a \
+	include_lib/liba/ARCH/pi32_lto/lib_howling_fs.a \
+	include_lib/liba/ARCH/pi32_lto/notchHowling.a \
+	include_lib/liba/sh54/mbox_mg/ae_howling_lib.a \
+	include_lib/liba/ARCH/pi32_lto/lib_speed_pitch.a \
+	include_lib/liba/sh54/mbox_mg/update_lib.a \
+	include_lib/liba/sh54/mbox_mg/uart_update_lib.a \
+	include_lib/liba/sh54/mbox_mg/agreement.a \
+	include_lib/liba/sh54/mbox_mg/encoder_mge_lib.a \
+	include_lib/liba/ARCH/pi32_lto/lib_a_code.a \
+	include_lib/liba/ARCH/pi32_lto/lib_mp3_decode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_mp2_encode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_mp3_standard_decode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_mp2standard_encode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_wav_decode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_f1a_decode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_midi_decode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_a_decode.a \
+	include_lib/liba/sh54/mbox_mg/periphy_lib.a \
+	include_lib/liba/sh54/mbox_mg/file_manage_lib.a \
+	include_lib/liba/sh54/mbox_mg/sdmmc_lib.a \
+	include_lib/liba/ARCH/pi32_lto/lib_vopitch_cal.a \
+	include_lib/liba/ARCH/pi32_lto/lib_pcm_eq.a \
+	include_lib/liba/sh54/mbox_mg/ae_pcm_eq_lib.a \
+	--end-group \
+	-Tapp/post_build/sh54/app.ld \
+	-M=app/post_build/sh54/app.map \
+	--plugin-opt=-pi32-memreg-opt \
+	--plugin-opt=-pi32-mem-offset-adj-opt \
+	--plugin-opt=-pi32-const-spill \
+	--plugin-opt=-pi32-enable-jz \
+	--plugin-opt=-pi32-tailcall-opt \
+	--plugin-opt=-inline-threshold=5 \
+	--plugin-opt=-pi32-enable-itblock=1 \
+
+
+LIBPATHS := \
+	-L$(SYS_LIB_DIR) \
+
+
+LIBS := \
+	C:/JL/pi32/lib/libc.a \
+	C:/JL/pi32/lib/libm.a \
+	C:/JL/pi32/lib/libcompiler-rt.a \
+
+
+
+c_OBJS    := $(c_SRC_FILES:%.c=%.c.o)
+S_OBJS    := $(S_SRC_FILES:%.S=%.S.o)
+s_OBJS    := $(s_SRC_FILES:%.s=%.s.o)
+cpp_OBJS  := $(cpp_SRC_FILES:%.cpp=%.cpp.o)
+cxx_OBJS  := $(cxx_SRC_FILES:%.cxx=%.cxx.o)
+cc_OBJS   := $(cc_SRC_FILES:%.cc=%.cc.o)
+
+OBJS      := $(c_OBJS) $(S_OBJS) $(s_OBJS) $(cpp_OBJS) $(cxx_OBJS) $(cc_OBJS)
+DEP_FILES := $(OBJS:%.o=%.d)
+
+
+OBJS      := $(addprefix $(BUILD_DIR)/, $(OBJS))
+DEP_FILES := $(addprefix $(BUILD_DIR)/, $(DEP_FILES))
+
+
+VERBOSE ?= 0
+ifeq ($(VERBOSE), 1)
+QUITE :=
+else
+QUITE := @
+endif
+
+# 一些旧的 make 不支持 file 函数，需要 make 的时候指定 LINK_AT=0 make
+LINK_AT ?= 1
+
+# 表示下面的不是一个文件的名字，无论是否存在 all, clean, pre_build 这样的文件
+# 还是要执行命令
+# see: https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html
+.PHONY: all clean pre_build
+
+# 不要使用 make 预设置的规则
+# see: https://www.gnu.org/software/make/manual/html_node/Suffix-Rules.html
+.SUFFIXES:
+
+all: pre_build $(OUT_ELF)
+	$(info +POST-BUILD)
+	$(QUITE) $(RUN_POST_SCRIPT) sdk
+
+pre_build:
+	$(info +PRE-BUILD)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh54/mbox_mg/app_ld.c -o app/post_build/sh54/app.ld
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh54/mbox_mg/download_bat.c -o $(POST_SCRIPT)
+	$(QUITE) $(FIXBAT) $(POST_SCRIPT)
+
+clean:
+	$(QUITE) $(RM) $(OUT_ELF)
+	$(QUITE) $(RM) $(BUILD_DIR)
+
+
+
+ifeq ($(LINK_AT), 1)
+$(OUT_ELF): $(OBJS)
+	$(info +LINK $@)
+	$(shell $(MKDIR) $(@D))
+	$(file >$(OBJ_FILE), $(OBJS))
+	$(QUITE) $(LD) -o $(OUT_ELF) @$(OBJ_FILE) $(LFLAGS) $(LIBPATHS) $(LIBS)
+else
+$(OUT_ELF): $(OBJS)
+	$(info +LINK $@)
+	$(shell $(MKDIR) $(@D))
+	$(QUITE) $(LD) -o $(OUT_ELF) $(OBJS) $(LFLAGS) $(LIBPATHS) $(LIBS)
+endif
+
+
+$(BUILD_DIR)/%.c.o : %.c
+	$(info +CC $<)
+	@$(MKDIR) $(@D)
+	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.S.o : %.S
+	$(info +AS $<)
+	@$(MKDIR) $(@D)
+	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.s.o : %.s
+	$(info +AS $<)
+	@$(MKDIR) $(@D)
+	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.cpp.o : %.cpp
+	$(info +CXX $<)
+	@$(MKDIR) $(@D)
+	@$(CXX) $(CFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.cxx.o : %.cxx
+	$(info +CXX $<)
+	@$(MKDIR) $(@D)
+	@$(CXX) $(CFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.cc.o : %.cc
+	$(info +CXX $<)
+	@$(MKDIR) $(@D)
+	@$(CXX) $(CFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+-include $(DEP_FILES)

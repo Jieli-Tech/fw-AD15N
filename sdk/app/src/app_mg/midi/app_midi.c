@@ -8,7 +8,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 #define DIR_MEMS(ppdir) (sizeof(ppdir)/sizeof(ppdir[0]))
 static const char *const dir_table = {
@@ -71,6 +71,7 @@ static int app_midi_close(void)
     log_info("app_midi_close \n");
     music_play_destroy(&music_midi_obj);
     music_play_destroy(&music_a_obj);
+    music_decode_succ_cb_regist(NULL);
     return 0;
 }
 

@@ -26,7 +26,7 @@
 #define LOG_INFO_ENABLE
 /* #define LOG_DUMP_ENABLE */
 #define LOG_CLI_ENABLE
-#include "debug.h"
+#include "log.h"
 
 #define     OS_TIMEOUT  1
 #if TCFG_UDISK_ENABLE

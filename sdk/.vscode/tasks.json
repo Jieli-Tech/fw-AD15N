@@ -65,6 +65,16 @@
             "group": "build"
         }
         ,{
+            "label": "ac104n_mbox_mg",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat ac104n_mbox_mg"
+            },
+            "command": "make ac104n_mbox_mg -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
             "label": "ad15n_mcu",
             "type": "shell",
             "windows": {
@@ -121,6 +131,16 @@
                 "command": ".vscode/winmk.bat clean_ad14n_app_mg"
             },
             "command": "make clean_ad14n_app_mg -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "clean_ac104n_mbox_mg",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat clean_ac104n_mbox_mg"
+            },
+            "command": "make clean_ac104n_mbox_mg -j`nproc`",
             "problemMatcher": [],
             "group": "build"
         }

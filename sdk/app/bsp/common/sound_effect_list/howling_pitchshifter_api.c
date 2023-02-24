@@ -6,7 +6,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 /* sdk需要添加这个定义，代表滤波器阶数参数: 配置范围为2<=>8，它的大小跟运算量成正相关 */
 const int FRESHIFT_SPEED_MODE_QUALITY = 2;

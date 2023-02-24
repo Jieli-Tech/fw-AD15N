@@ -9,9 +9,15 @@ typedef enum {
     SR_CONSTANT,
 } SR_WORKMODE;
 
+#ifdef CPU_SH57
+#define DAC_PACKET_SIZE         (32*2)
+#define DAC_DECODER_KICK_SIZE   (DAC_PACKET_SIZE * 4 * 4)
+#define DAC_DECODER_BUF_SIZE    (DAC_PACKET_SIZE * 4 * 5)
+#else
 #define DAC_PACKET_SIZE         (32*8)
 #define DAC_DECODER_KICK_SIZE   (DAC_PACKET_SIZE * 4)
 #define DAC_DECODER_BUF_SIZE    (DAC_PACKET_SIZE * 5)
+#endif
 
 
 

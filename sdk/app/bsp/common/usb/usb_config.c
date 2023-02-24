@@ -9,7 +9,7 @@
 #define LOG_INFO_ENABLE
 /* #define LOG_DUMP_ENABLE */
 #define LOG_CLI_ENABLE
-#include "debug.h"
+#include "log.h"
 
 
 

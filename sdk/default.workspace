@@ -5,6 +5,7 @@
 		<Project filename="AD14N_simple.cbp" />
 		<Project filename="AD14N_mcu.cbp" />
 		<Project filename="AD14N_app_mg.cbp" />
+		<Project filename="AC104N_mbox_mg.cbp" />
 		<Project filename="AD15N_mcu.cbp" />
 		<Project filename="AD15N_simple.cbp" />
 	</Workspace>

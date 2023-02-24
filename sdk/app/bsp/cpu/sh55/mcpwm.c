@@ -7,7 +7,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 
 #define pwm_frq_cnt(f)  (clk_get("lsb")/f)

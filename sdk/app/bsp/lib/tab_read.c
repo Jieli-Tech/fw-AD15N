@@ -2,9 +2,9 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[sine]"
-#include "debug.h"
+#include "log.h"
 
-void tab_init(rtab_obj *stab, void *tab, u16 size)
+void tab_init(rtab_obj *stab, void *tab, u32 size)
 {
     memset(stab, 0, sizeof(rtab_obj));
     stab->tab = tab;
@@ -14,7 +14,7 @@ void tab_init(rtab_obj *stab, void *tab, u16 size)
     //log_info_hexdump(stab->tab, size * 2);
 
 }
-
+#ifndef CPU_SH57
 AT(.audio_d.text.cache.L2)
 u32 tab_read(void *buff, rtab_obj *stab, u32 len)
 {
@@ -45,3 +45,4 @@ u32 tab_read(void *buff, rtab_obj *stab, u32 len)
     /* log_info("remain len : %d\n",len); */
     return len;
 }
+#endif

@@ -81,6 +81,7 @@ struct vfs_operations {
     // int (*fscan)(void *pfs, const char *file_type, u8 max_deepth, u32 clust, u32 *ret_p);
     void (*fscan_release)(struct vfscan *);
     int (*fsel)(struct vfscan *, void *, int sel_mode, void **, int);
+    int (*file_crc)(void *pfile);
 
 
 

@@ -84,7 +84,6 @@
 <Add option="--end-group" />
 <Add option="-Tapp/post_build/sh55/app.ld" />
 <Add option="-M=app/post_build/sh55/app.map" />
-<Add library="C:\JL\pi32\lib\libm.a" />
 </Linker>
 <ExtraCommands>
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh55\mcu\app_ld.c -o app\post_build\sh55\app.ld" />
@@ -114,10 +113,10 @@
 <Unit filename="include_lib/common/circular_buf.h" />
 <Unit filename="include_lib/common/common.h" />
 <Unit filename="include_lib/common/config.h" />
-<Unit filename="include_lib/common/debug.h" />
 <Unit filename="include_lib/common/errno-base.h" />
 <Unit filename="include_lib/common/includes.h" />
 <Unit filename="include_lib/common/jiffies.h" />
+<Unit filename="include_lib/common/log.h" />
 <Unit filename="include_lib/common/printf.h" />
 <Unit filename="include_lib/common/wdt.h" />
 <Unit filename="include_lib/cpu/sh55/asm/power/p33.h" />

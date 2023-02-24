@@ -13,7 +13,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[dac cpu]"
-#include "debug.h"
+#include "log.h"
 
 
 void dac_cpu_mode(void)

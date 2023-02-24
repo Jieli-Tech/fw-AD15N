@@ -13,7 +13,7 @@ extern u32 __dev_read(void *p, u8 *buf, u32 addr);
 extern u32 __dev_write(void *p, u8 *buf, u32 addr);
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 extern FIL pfi;
 /****************api*****************/

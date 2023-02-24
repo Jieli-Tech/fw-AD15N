@@ -8,7 +8,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[msg]"
-#include "debug.h"
+#include "log.h"
 
 #define MSG_ENTER_CRITICAL() _OS_ENTER_CRITICAL(BIT(IRQ_TICKTMR_IDX) | BIT(IRQ_AUDIO_IDX))
 #define MSG_EXIT_CRITICAL()  _OS_EXIT_CRITICAL()
@@ -156,7 +156,8 @@ int get_msg(int len, int *msg)
         return MSG_BUF_NOT_ENOUGH;
     }
 
-    if (param_len != cbuf_read(&msg_cbuf, (void *)(msg + 1), param_len * 4)) {
+    u32 rlen = cbuf_read(&msg_cbuf, (void *)(msg + 1), param_len * sizeof(int));
+    if (param_len != rlen * sizeof(int)) {
         /* OS_EXIT_CRITICAL(); */
         MSG_EXIT_CRITICAL();
         return MSG_CBUF_ERROR;
@@ -198,7 +199,7 @@ int post_msg(int argc, ...)
 
     for (u32 i = 0; i < argc - 1; i++) {
         param = va_arg(argptr, int);
-        cbuf_write(&msg_cbuf, (void *)&param, 4);
+        cbuf_write(&msg_cbuf, (void *)&param, sizeof(int));
     }
     va_end(argptr);
     OS_EXIT_CRITICAL();

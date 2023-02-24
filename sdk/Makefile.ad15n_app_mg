@@ -282,6 +282,7 @@ LFLAGS := \
 	--gc-sections \
 	--start-group \
 	include_lib/liba/sh55/app_mg/cpu_lib.a \
+	include_lib/liba/sh55/app_mg/address_lib.a \
 	include_lib/liba/sh55/app_mg/efuse_trim_value_lib.a \
 	include_lib/liba/sh55/app_mg/fs_lib.a \
 	include_lib/liba/sh55/app_mg/audio_lib.a \
@@ -290,6 +291,7 @@ LFLAGS := \
 	include_lib/liba/sh55/app_mg/ae_resample_lib.a \
 	include_lib/liba/sh55/app_mg/dev_mg_lib.a \
 	include_lib/liba/sh55/app_mg/malloc_lib.a \
+	include_lib/liba/sh55/app_mg/file_crc16_lib.a \
 	include_lib/liba/sh55/app_mg/uart_update_lib.a \
 	include_lib/liba/sh55/app_mg/agreement.a \
 	include_lib/liba/ARCH/pi32_lto/lib_f1a_decode.a \
@@ -313,7 +315,6 @@ LIBPATHS := \
 
 
 LIBS := \
-	C:/JL/pi32/lib/libm.a \
 	C:/JL/pi32/lib/libc.a \
 	C:/JL/pi32/lib/libm.a \
 	C:/JL/pi32/lib/libcompiler-rt.a \

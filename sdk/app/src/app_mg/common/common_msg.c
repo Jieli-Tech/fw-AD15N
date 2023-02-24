@@ -17,7 +17,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 void music_vol_update(void)
 {

@@ -17,7 +17,7 @@
 /* #define LOG_DUMP_ENABLE */
 #define LOG_CLI_ENABLE
 
-#include "debug.h"
+#include "log.h"
 static void usb_device_init(const usb_dev usb_id)
 {
     usb_config(usb_id);

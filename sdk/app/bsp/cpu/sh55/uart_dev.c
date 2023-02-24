@@ -17,7 +17,7 @@
 
 #define LOG_TAG_CONST       UTD
 #define LOG_TAG             "[uart dev]"
-#include "debug.h"
+#include "log.h"
 
 
 #ifdef SUPPORT_MS_EXTENSIONS

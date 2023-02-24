@@ -6,7 +6,7 @@
 
 #define LOG_TAG_CONST       MUGRD
 #define LOG_TAG             "[mugrd]"
-#include "debug.h"
+#include "log.h"
 
 #if TCFG_PC_ENABLE
 

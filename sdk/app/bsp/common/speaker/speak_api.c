@@ -28,7 +28,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[speak_api]"
-#include "debug.h"
+#include "log.h"
 
 extern const char MIC_PGA_G;
 

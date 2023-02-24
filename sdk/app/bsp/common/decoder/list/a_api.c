@@ -14,7 +14,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 
 #define A_OBUF_SIZE DAC_DECODER_BUF_SIZE
@@ -22,7 +22,8 @@
 cbuffer_t cbuf_a AT(.a_data);
 u16 obuf_a[A_OBUF_SIZE / 2] AT(.a_data) ;
 dec_obj dec_a_hld ;
-u32 a_decode_buff[228 / 4] AT(.a_data) ;
+/* u32 a_decode_buff[228 / 4] AT(.a_data) ; */
+u32 a_decode_buff[228 / 4] AT(.a_dec.data.bss);//兼容ac104 src无法访问cache_ram数据
 #define A_CAL_BUF ((void *)&a_decode_buff[0])
 
 const char a_ext[] = {".a"};
@@ -34,6 +35,13 @@ const struct if_decoder_io a_dec_io0 = {
     mp_input,
     mp_output,
 };
+
+static u32 a_dp_buff[24 / 4] AT(.a_data) ;
+
+u32 get_a_dp_buff_size(void)
+{
+    return sizeof(a_dp_buff);
+}
 
 u32 a_decode_api(void *p_file, void **p_dec, void *p_dp_buf)
 {
@@ -58,7 +66,7 @@ u32 a_decode_api(void *p_file, void **p_dec, void *p_dp_buf)
     dec_a_hld.p_dbuf       = A_CAL_BUF;
     dec_a_hld.dec_ops      = ops;
     dec_a_hld.event_tab    = (u8 *)&a_evt[0];
-    dec_a_hld.p_dp_buf     = p_dp_buf;
+    dec_a_hld.p_dp_buf     = &a_dp_buff[0];// p_dp_buf;
     /* debug_puts("B\n"); */
     //
     /* reg_dac_channel_api(&dec_a_hld.dac, &dec_a_hld, &cbuf_a, 255); */
@@ -85,6 +93,7 @@ u32 a_decode_api(void *p_file, void **p_dec, void *p_dp_buf)
         }
         i = ops->get_dec_inf(A_CAL_BUF)->sr;                //获取采样率
     }
+    memcpy(&a_dp_buff[0], (void *)ops->get_bp_inf(A_CAL_BUF), sizeof(a_dp_buff));
     regist_dac_channel(&dec_a_hld.sound, kick_decoder); //注册到DAC;
     /*********************************************************/
     log_info("file sr : %d\n", i);

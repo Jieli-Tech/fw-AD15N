@@ -4,7 +4,7 @@
 
 #define LOG_TAG_CONST       KEYM
 #define LOG_TAG             "[keym]"
-#include "debug.h"
+#include "log.h"
 
 #if KEY_MATRIX_EN
 #define ARRAY_MEMS(array)  (sizeof(array)/sizeof(array[0]))

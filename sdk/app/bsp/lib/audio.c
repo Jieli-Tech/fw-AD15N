@@ -20,7 +20,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[audio]"
-#include "debug.h"
+#include "log.h"
 
 
 extern void dac_isr_t(void);

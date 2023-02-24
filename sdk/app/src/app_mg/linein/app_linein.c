@@ -16,7 +16,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 cbuffer_t cbuf_aux_o AT(.aux_data);
 u8 obuf_aux_o[1024] AT(.aux_data) ;

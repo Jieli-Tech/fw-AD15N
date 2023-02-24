@@ -5,7 +5,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 #define MIO_EN				0
 /* MIO最多支持4路PWM通道 */

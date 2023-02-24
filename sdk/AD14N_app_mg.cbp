@@ -109,6 +109,7 @@
 <Add option="--gc-sections" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/sh54/app_mg/cpu_lib.a" />
+<Add option="include_lib/liba/sh54/app_mg/address_lib.a" />
 <Add option="include_lib/liba/sh54/app_mg/efuse_trim_value_lib.a" />
 <Add option="include_lib/liba/sh54/app_mg/fs_lib.a" />
 <Add option="include_lib/liba/sh54/app_mg/audio_lib.a" />
@@ -117,6 +118,7 @@
 <Add option="include_lib/liba/sh54/app_mg/ae_resample_lib.a" />
 <Add option="include_lib/liba/sh54/app_mg/dev_mg_lib.a" />
 <Add option="include_lib/liba/sh54/app_mg/malloc_lib.a" />
+<Add option="include_lib/liba/sh54/app_mg/file_crc16_lib.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_echo_cal.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_howling_fs.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/notchHowling.a" />
@@ -139,7 +141,6 @@
 <Add option="--end-group" />
 <Add option="-Tapp/post_build/sh54/app.ld" />
 <Add option="-M=app/post_build/sh54/app.map" />
-<Add library="C:\JL\pi32\lib\libm.a" />
 </Linker>
 <ExtraCommands>
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\app_mg\app_ld.c -o app\post_build\sh54\app.ld" />
@@ -314,10 +315,11 @@
 <Unit filename="include_lib/common/common.h" />
 <Unit filename="include_lib/common/config.h" />
 <Unit filename="include_lib/common/crc16.h" />
-<Unit filename="include_lib/common/debug.h" />
 <Unit filename="include_lib/common/errno-base.h" />
+<Unit filename="include_lib/common/flash_wp.h" />
 <Unit filename="include_lib/common/includes.h" />
 <Unit filename="include_lib/common/jiffies.h" />
+<Unit filename="include_lib/common/log.h" />
 <Unit filename="include_lib/common/my_malloc.h" />
 <Unit filename="include_lib/common/printf.h" />
 <Unit filename="include_lib/common/tab_read.h" />

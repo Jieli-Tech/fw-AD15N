@@ -9,7 +9,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 
 void *notch_howling_api(void *obuf, u32 sr, void **ppsound)

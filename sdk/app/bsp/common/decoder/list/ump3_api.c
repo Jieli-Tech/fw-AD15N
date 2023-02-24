@@ -13,7 +13,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 
 #define ump3_OBUF_SIZE DAC_DECODER_BUF_SIZE

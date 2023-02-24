@@ -299,6 +299,7 @@ LFLAGS := \
 	--gc-sections \
 	--start-group \
 	include_lib/liba/sh54/simple/cpu_lib.a \
+	include_lib/liba/sh54/simple/address_lib.a \
 	include_lib/liba/sh54/simple/efuse_trim_value_lib.a \
 	include_lib/liba/sh54/simple/fs_lib.a \
 	include_lib/liba/sh54/simple/audio_lib.a \
@@ -307,6 +308,7 @@ LFLAGS := \
 	include_lib/liba/sh54/simple/ae_resample_lib.a \
 	include_lib/liba/sh54/simple/dev_mg_lib.a \
 	include_lib/liba/sh54/simple/malloc_lib.a \
+	include_lib/liba/sh54/simple/file_crc16_lib.a \
 	include_lib/liba/ARCH/pi32_lto/lib_echo_cal.a \
 	include_lib/liba/ARCH/pi32_lto/lib_howling_fs.a \
 	include_lib/liba/ARCH/pi32_lto/notchHowling.a \
@@ -342,7 +344,6 @@ LIBPATHS := \
 
 
 LIBS := \
-	C:/JL/pi32/lib/libm.a \
 	C:/JL/pi32/lib/libc.a \
 	C:/JL/pi32/lib/libm.a \
 	C:/JL/pi32/lib/libcompiler-rt.a \

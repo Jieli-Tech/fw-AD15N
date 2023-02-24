@@ -10,7 +10,7 @@
 
 #define LOG_TAG_CONST       IIC
 #define LOG_TAG             "[iic]"
-#include "debug.h"
+#include "log.h"
 
 //硬件IIC设备数据初始化
 const struct hw_iic_config hw_iic_cfg[] = {

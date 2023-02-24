@@ -19,7 +19,7 @@
 #define LOG_INFO_ENABLE
 /* #define LOG_DUMP_ENABLE */
 #define LOG_CLI_ENABLE
-#include "debug.h"
+#include "log.h"
 
 #if TCFG_UDISK_ENABLE || TCFG_ADB_ENABLE ||TCFG_AOA_ENABLE || TCFG_PUSH_CODE_ENABLE
 

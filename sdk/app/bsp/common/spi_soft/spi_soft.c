@@ -13,7 +13,7 @@
 #define LOG_TAG     "[spi_soft]"
 //#define LOG_ERROR_ENABLE
 //#define LOG_DEBUG_ENABLE
-#include "debug.h"
+#include "log.h"
 
 // | func\port |  A   |  B   |
 // |-----------|------|------|

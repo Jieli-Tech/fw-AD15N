@@ -16,7 +16,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 /* midi琴最大同时发声的key数,该值影响音符的叠加,值越大需要的解码buffer越大,需要的buffer大小由need_dcbuf_size()获取 */
 extern const int MAX_CTR_PLAYER_CNT;//该值在app_config.c中定义
@@ -29,7 +29,7 @@ MIDI_CTRL_PARM midi_ctrl_parmt                  AT(.midi_ctrl_buf);
 dec_obj dec_midi_ctrl_hld;
 cbuffer_t cbuf_midi_ctrl                        AT(.midi_ctrl_buf);
 u16 obuf_midi_ctrl[DAC_DECODER_BUF_SIZE / 2]    AT(.midi_ctrl_buf);
-u32 midi_ctrl_decode_buff[(5120 + 3) / 4]       AT(.midi_ctrl_buf);
+u32 midi_ctrl_decode_buff[(5616 + 3) / 4]       AT(.midi_ctrl_buf);
 #define MIDI_CTRL_CAL_BUF ((void *)&midi_ctrl_decode_buff[0])
 
 
@@ -166,15 +166,14 @@ static u32 midi_ctrl_need_bpbuf_size()
 static u32 midi_ctrl_dec_confing(void *work_buf, u32 cmd, void *parm)
 {
     MIDI_CTRL_CONTEXT *ops = get_midi_ctrl_ops();
-    dec_midi_ctrl_hld.sound.enable &= ~B_DEC_PAUSE;
     u32 ret = ops->ctl_confing(work_buf, cmd, parm);
-    kick_decoder();
     return ret;
 }
 u32 midi_ctrl_set_prog(void *work_buf, u8 prog, u8 chn)
 {
     MIDI_CTRL_CONTEXT *ops = get_midi_ctrl_ops();
     dec_midi_ctrl_hld.sound.enable &= ~B_DEC_PAUSE;
+    dec_midi_ctrl_hld.sound.enable |= B_DEC_KICK;
     u32 ret = ops->set_prog(work_buf, prog, chn);
     kick_decoder();
     return ret;
@@ -183,15 +182,17 @@ u32 midi_ctrl_note_on(void *work_buf, u8 nkey, u8 nvel, u8 chn)
 {
     MIDI_CTRL_CONTEXT *ops = get_midi_ctrl_ops();
     dec_midi_ctrl_hld.sound.enable &= ~B_DEC_PAUSE;
+    dec_midi_ctrl_hld.sound.enable |= B_DEC_KICK;
     u32 ret = ops->note_on(work_buf, nkey, nvel, chn);
     kick_decoder();
     return ret;
 }
-u32 midi_ctrl_note_off(void *work_buf, u8 nkey, u8 chn)
+u32 midi_ctrl_note_off(void *work_buf, u8 nkey, u8 chn, u16 decay_time)
 {
     MIDI_CTRL_CONTEXT *ops = get_midi_ctrl_ops();
     dec_midi_ctrl_hld.sound.enable &= ~B_DEC_PAUSE;
-    u32 ret = ops->note_off(work_buf, nkey, chn);
+    dec_midi_ctrl_hld.sound.enable |= B_DEC_KICK;
+    u32 ret = ops->note_off(work_buf, nkey, chn, decay_time);
     kick_decoder();
     return ret;
 }
@@ -199,6 +200,7 @@ u32 midi_ctrl_vel_vibrate(void *work_buf, u8 nkey, u8 vel_step, u8 vel_rate, u8 
 {
     MIDI_CTRL_CONTEXT *ops = get_midi_ctrl_ops();
     dec_midi_ctrl_hld.sound.enable &= ~B_DEC_PAUSE;
+    dec_midi_ctrl_hld.sound.enable |= B_DEC_KICK;
     u32 ret = ops->vel_vibrate(work_buf, nkey, vel_step, vel_rate, chn);
     kick_decoder();
     return ret;
@@ -207,9 +209,16 @@ u32 midi_ctrl_pitch_bend(void *work_buf, u16 pitch_val, u8 chn)
 {
     MIDI_CTRL_CONTEXT *ops = get_midi_ctrl_ops();
     dec_midi_ctrl_hld.sound.enable &= ~B_DEC_PAUSE;
+    dec_midi_ctrl_hld.sound.enable |= B_DEC_KICK;
     u32 ret = ops->pitch_bend(work_buf, pitch_val, chn);
     kick_decoder();
     return ret;
+}
+
+u8 *midi_ctrl_query_play_key(void *work_buf, u8 chn)
+{
+    MIDI_CTRL_CONTEXT *ops = get_midi_ctrl_ops();
+    return ops->query_play_key(work_buf, chn);
 }
 
 static const decoder_ops_t midi_ctrl_ops = {

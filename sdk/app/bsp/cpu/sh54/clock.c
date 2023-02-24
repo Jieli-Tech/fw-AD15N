@@ -8,7 +8,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[clock]"
-#include "debug.h"
+#include "log.h"
 
 
 const u32 pll_clock_tab0[]  = {

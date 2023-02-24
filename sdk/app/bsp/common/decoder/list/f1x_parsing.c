@@ -9,7 +9,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 #define F1X_MAX_UNIT  10
 

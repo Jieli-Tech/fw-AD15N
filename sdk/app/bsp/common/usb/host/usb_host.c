@@ -20,7 +20,7 @@
 #define LOG_INFO_ENABLE
 /* #define LOG_DUMP_ENABLE */
 #define LOG_CLI_ENABLE
-#include "debug.h"
+#include "log.h"
 
 
 static struct usb_host_device host_devices[USB_MAX_HW_NUM];// SEC(.usb_h_bss);

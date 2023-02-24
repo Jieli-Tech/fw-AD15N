@@ -6,7 +6,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 sound_mio_obj *g_mio_obj[2];
 

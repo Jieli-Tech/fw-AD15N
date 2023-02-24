@@ -59,10 +59,10 @@ const char MIO_ENABLE = 0;
 const char GPIO_CRITICAL_OPT = TRUE; //TRUE:有关中断临界保护    FALSE:没有关中断临界保护
 
 #if (DECODER_MIDI_EN | DECODER_MIDI_KEYBOARD_EN)
-//midi主轨选择方式
-const int MAINTRACK_USE_CHN	= 0;//0:用track号来区分  1:用channel号来区分。
-const int MAX_DEC_PLAYER_CNT = 8;//midi乐谱解码最大同时发声的key数
-const int MAX_CTR_PLAYER_CNT = 15;//midi琴最大同时发声的key数
+const int MAINTRACK_USE_CHN = 0;    //0:用track号来区分  1:用channel号来区分。
+const int MAX_DEC_PLAYER_CNT = 8;   //midi乐谱解码最大同时发声的key数,范围[1,31]
+const int MAX_CTR_PLAYER_CNT = 15;  //midi琴最大同时发声的key数,范围[1,31]
+const int NOTE_OFF_TRIGGER = 0;     //midi琴note_off回调 1：time传0时，不会回调 0：time传0时，回调
 #endif
 
 //升级使用的区域，0：VM区， 1：eeprom区

@@ -9,7 +9,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 static music_play_obj *music_obj = NULL;
 
 static u16 poweroff_msg_filter(u8 key_status, u8 key_num, u8 key_type)

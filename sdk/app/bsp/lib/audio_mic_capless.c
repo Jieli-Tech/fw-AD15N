@@ -14,7 +14,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[cles]"
-#include "debug.h"
+#include "log.h"
 
 volatile s16 g_dtb;
 extern const char MIC_CAPLESS_EN;

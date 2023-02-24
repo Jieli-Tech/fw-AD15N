@@ -6,7 +6,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 #define FLASH_ADDR2CPU_ADDR(flash_addr) \
 	(boot_info.sfc.app_addr + flash_addr - boot_info.sfc.sfc_base_addr)

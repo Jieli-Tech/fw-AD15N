@@ -12,7 +12,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[vo_pitch]"
-#include "debug.h"
+#include "log.h"
 
 #if VO_PITCH_EN
 

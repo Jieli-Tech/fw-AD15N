@@ -29,7 +29,7 @@
 
 #define LOG_TAG_CONST       PWRA
 #define LOG_TAG             "[pwra]"
-#include "debug.h"
+#include "log.h"
 
 /***************************************power_param******************************************************/
 
@@ -53,6 +53,7 @@ const struct low_power_param power_param = {
     .osc_type       = OSC_TYPE_LRC,
     .flash_pg       = TCFG_KEEP_FLASH_POWER_GATE,
     .vdc13_cap_en   = 0,								   //根据vdc13引脚是否有外部电容来配置, 1.外挂电容 0.无外挂电容
+    .vddio_keep = 0,
 };
 
 /****************************************wakeup_param*****************************************************/

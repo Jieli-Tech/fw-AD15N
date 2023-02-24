@@ -4,7 +4,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 int vfs_get_fsize(void *pvfile, void *parm)
 {

@@ -13,7 +13,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 
 cbuffer_t cbuf_adc AT(.rec_data);

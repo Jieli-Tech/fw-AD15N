@@ -22,7 +22,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 #define MUSIC_PLAY_MAX_CHL		3
 static decode_succ_callback_t decode_succ_cb = NULL;

@@ -3,7 +3,7 @@
 #if 0
 #define LOG_TAG_CONST       SOFI
 #define LOG_TAG             "[soft isr]"
-#include "debug.h"
+#include "log.h"
 
 #define LOG_INFO
 #ifdef  LOG_INFO

@@ -13,10 +13,11 @@
 #include "MIDI_DEC_API.h"
 #include "boot.h"
 #include "decoder_msg_tab.h"
+#include "dac.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 /* midi乐谱解码最大同时发声的key数,该值影响音符的叠加,值越大需要的解码buffer越大,需要的buffer大小由need_dcbuf_size()获取 */
 extern const int MAX_DEC_PLAYER_CNT;//该值在app_config.c中定义
@@ -29,7 +30,7 @@ static MIDI_INIT_STRUCT init_info       AT(.midi_buf);
 dec_obj dec_midi_hld;
 cbuffer_t cbuf_midi                     AT(.midi_buf);
 u16 obuf_midi[DAC_DECODER_BUF_SIZE / 2] AT(.midi_buf);
-u32 midi_decode_buff[(3580 + 3) / 4]    AT(.midi_buf);
+u32 midi_decode_buff[(3808 + 3) / 4]    AT(.midi_buf);
 #define MIDI_CAL_BUF ((void *)&midi_decode_buff[0])
 
 
@@ -38,6 +39,11 @@ const struct if_decoder_io midi_dec_io0 = {
     mp_input,
     mp_output,
 };
+
+MIDI_PLAY_CTRL_MODE *get_midi_mode(void)
+{
+    return &init_info.mode_info;
+}
 
 u32 *get_midi_switch_info(void)
 {
@@ -115,15 +121,15 @@ u32 midi_decode_api(void *p_file, void **ppdec, void *p_dp_buf)
         return E_MIDIFORMAT;
     }
     /******************************************************************************/
-    sr = ops->get_dec_inf(MIDI_CAL_BUF)->sr;                //获取采样率
+    sr = dac_sr_read();                //获取采样率
     dec_midi_hld.sr = sr;
     //dac_sr_api(sr);
-    log_info(">>>>>>>sr:%d \n", sr);
+    /* log_info(">>>>>>>sr:%d \n", sr); */
     /**************相对MP3的调用流程多了这个，其他一致。这个一定要配置***************/
     midi_t_parm.player_t = MAX_DEC_PLAYER_CNT;                                //设置需要合成的最多按键个数，8到32可配
     midi_t_parm.sample_rate = midi_musicsr_to_cfgsr(sr);                            //采样率设为16k
     midi_t_parm.spi_pos = (u8 *)midi_tone_tab;                    //spi_memory为音色文件数据起始地址
-    log_info_hexdump(midi_t_parm.spi_pos, 16);
+    /* log_info_hexdump(midi_t_parm.spi_pos, 16); */
     memset((u8 *)&init_info, 0x00, sizeof(init_info));
     init_info.init_info = midi_t_parm;
     midi_init_info(&init_info);

@@ -8,7 +8,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 #include "simple_encode.h"
 #include "simple_decode.h"

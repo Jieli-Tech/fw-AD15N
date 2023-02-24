@@ -7,7 +7,7 @@
 
 // #define LOG_TAG_CONST       NORM
 // #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 #define FS_DEBUG    1
 

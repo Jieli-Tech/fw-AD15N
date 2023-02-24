@@ -26,7 +26,7 @@
 #define LOG_TAG     "[flash]"
 #define LOG_ERROR_ENABLE
 #define LOG_INFO_ENABLE
-#include "debug.h"
+#include "log.h"
 
 #if(SPI_SD_IO_REUSE)		//SD SPI IO复用
 static u8 spi_busy = 0;
@@ -397,12 +397,9 @@ int _norflash_open(void *arg)
                     is4byte_address = 0;
                     return 1;
                 }
-            } else if (((temporary_flash_addr >> 16) & 0xff) == 0xef) { //W25Q128芯片
+            } else {
                 norflash_enter_4byte_addr();
                 is4byte_address = 1;
-            } else {
-                log_info("The larges-capacity flash(>16M) is not supported\n");
-                return 1;
             }
         }
 

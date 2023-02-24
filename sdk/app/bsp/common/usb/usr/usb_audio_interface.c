@@ -19,7 +19,7 @@
 
 #define LOG_TAG_CONST       USB
 #define LOG_TAG             "[UAC]"
-#include "debug.h"
+#include "log.h"
 #include "uart.h"
 
 EFFECT_OBJ *usb_src_obj = NULL;

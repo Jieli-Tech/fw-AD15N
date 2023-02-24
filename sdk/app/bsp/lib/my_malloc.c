@@ -4,7 +4,7 @@
 
 #define LOG_TAG_CONST       HEAP
 #define LOG_TAG             "[malloc]"
-#include "debug.h"
+#include "log.h"
 
 /* void *pvPortMalloc( size_t xWantedSize ) */
 /* u32 example(u32 dat) */

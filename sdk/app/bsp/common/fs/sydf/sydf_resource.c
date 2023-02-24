@@ -4,7 +4,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 #if 0
 #define  SYDF_MAX_FILE_HDL 2 //0~8
@@ -173,6 +173,11 @@ int sydf_ioctl_api(void *pfile, int cmd, int arg)
     return sydf_ioctl((SYDFILE *)pfile, cmd, arg);
 
 }
+int sydf_file_crc_api(void *pfile)
+{
+    return sydf_file_crc((SYDFILE *)pfile);
+
+}
 //REGISTER_VFS_OPERATIONS(sydfvfs_ops) = {
 const struct vfs_operations sydf_vfs_ops sec_used(.vfs_operations) = {
     .fs_type = "sydfile",
@@ -191,6 +196,7 @@ const struct vfs_operations sydf_vfs_ops sec_used(.vfs_operations) = {
     .fget_attr   = sydf_attrs_api,
     .name        = sydf_file_name_api,
     .ioctl       = sydf_ioctl_api,
+    .file_crc    = sydf_file_crc_api,
 };
 
 

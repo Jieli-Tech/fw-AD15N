@@ -19,7 +19,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 
 
@@ -199,7 +199,7 @@ void fill_dac_fill_phy(u8 *buf, u32 len)
                 p_cnt[i] = 0;
                 rptr[i] = cbuf_read_alloc(dac_mge.sound[i]->p_obuf, &olen[i]);
                 if (0 == olen[i]) {
-                    log_char('y');
+                    /* log_char('y'); */
                     rptr[i] = 0;
                 }
 

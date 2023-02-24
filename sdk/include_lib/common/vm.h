@@ -46,6 +46,14 @@ typedef enum {
     VM_INDEX_F1X,
     VM_INDEX_EXT_SONG,
     VM_INDEX_VOL,
+#if 1
+    VM_INDEX_SONG_BP,
+    VM_INDEX_ENG_BP,
+    VM_INDEX_POETRY_BP,
+    VM_INDEX_STORY_BP,
+    VM_INDEX_F1X_BP,
+    VM_INDEX_EXT_SONG_BP,
+#endif
 
     /*mbox*/
     VM_INDEX_SYSMODE,
@@ -85,6 +93,8 @@ typedef enum _FLASH_ERASER {
     PAGE_ERASER,
 } FLASH_ERASER;
 
+typedef u32(*flash_code_protect_cb_t)(u32 offset, u32 len);
+u32 flash_code_protect_callback(u32 offset, u32 len);
 extern volatile u8 vm_busy;
 //
 void spi_cache_way_switch(u8 way_num);

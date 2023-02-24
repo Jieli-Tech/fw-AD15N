@@ -1,3 +1,4 @@
+#include "pcm_eq_api.h"
 /* #include "resample_api.h" */
 #include "pcm_eq.h"
 /* #include "resample.h" */
@@ -8,8 +9,9 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
+#if PCM_EQ_EN
 
 static u32 g_work_buf[660 / 4] AT(.pcm_eq_data);
 
@@ -212,7 +214,7 @@ const int *get_pcm_eq_tab(u32 sr)
     return sr_tab;
 }
 
-
+#endif
 
 
 

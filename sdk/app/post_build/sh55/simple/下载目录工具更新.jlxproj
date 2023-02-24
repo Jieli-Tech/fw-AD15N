@@ -39,7 +39,7 @@ local product_name = "-";
 local dest_dir = cfg.dir;
 
 local req_local_pkgs = {
-	"fwadd", "isddownload", "ufwmaker",
+	"fwadd", "isddownload", "ufwmaker", "flashwp",
 };
 local check_local_prog = {pkgman2, "-b", dest_dir};
 local missing_local_pkgs = {};

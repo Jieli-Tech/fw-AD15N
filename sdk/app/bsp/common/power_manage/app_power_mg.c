@@ -8,7 +8,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 #if LVD_WARNING_FOR_LOW_POWER
 static u16 lvd_warning_voltage;//低电检测电压,一般设置为比lvd电压大200mV

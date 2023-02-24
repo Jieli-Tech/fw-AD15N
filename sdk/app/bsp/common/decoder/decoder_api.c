@@ -26,7 +26,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 extern u32 ump3_buff_api(dec_buf *p_dec_buf);;
 
@@ -281,7 +281,12 @@ void decoder_stop_phy(dec_obj *obj, DEC_STOP_WAIT wait, bool fade)
     }
     /* log_info("decode stop --\n"); */
     if (obj->sound.enable & B_DEC_RUN_EN) {
-        clear_dp_buff(obj->p_dp_buf);
+        /* clear_dp_buff(obj->p_dp_buf); */
+        if (obj == &dec_a_hld) {
+            memset((void *)obj->p_dp_buf, 0, get_a_dp_buff_size());
+        } else {
+            clear_dp_buff(obj->p_dp_buf);
+        }
     }
     /* log_info("decode stop\n"); */
     obj->sound.enable &= ~B_DEC_RUN_EN;

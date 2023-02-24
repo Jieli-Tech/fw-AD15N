@@ -11,7 +11,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 #define MIDI_VIBRATO_ENABLE 0   //亲键颤音功能
 #define MAX_MIDI_CHN        16
@@ -100,7 +100,7 @@ static int app_midi_keyboard_init(void *param)
         }
     }
     midi_ctrl_callback_init(music_midi_keyboard_obj, midi_ctrl_melody_trigger, midi_ctrl_melody_stop_trigger);
-    music_midi_ctrl_note_on(music_midi_keyboard_obj, 60, 255, 0);
+    music_midi_ctrl_note_on(music_midi_keyboard_obj, 60, 127, 0);
     return 0;
 
 }
@@ -146,7 +146,7 @@ int app_midi_keyboard(void *param)
             log_info("Fa 4");
             key_offset = 5;
 __midikey_note_on:
-            music_midi_ctrl_note_on(music_midi_keyboard_obj, key_offset + scale * 12, 255, cur_channal);
+            music_midi_ctrl_note_on(music_midi_keyboard_obj, key_offset + scale * 12, 127, cur_channal);
 #if MIDI_VIBRATO_ENABLE
             music_midi_ctrl_vel_vibrate(music_midi_keyboard_obj, key_offset + scale * 12, 2, 9, cur_channal);
 #endif
@@ -165,7 +165,7 @@ __midikey_note_on:
         case MSG_MIDICTRL_NOTE_OFF_FA:
             key_offset = 5;
 __midikey_note_off:
-            music_midi_ctrl_note_off(music_midi_keyboard_obj, key_offset + scale * 12, cur_channal);
+            music_midi_ctrl_note_off(music_midi_keyboard_obj, key_offset + scale * 12, cur_channal, 0);
             log_info("NOTE OFF");
             break;
 

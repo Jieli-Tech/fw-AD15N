@@ -8,7 +8,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[cpu.c]"
-#include "debug.h"
+#include "log.h"
 
 
 

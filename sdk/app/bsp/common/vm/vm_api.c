@@ -3,7 +3,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 
 static u8 vm_buff[sizeof(VM_INDEX_BUFF) + LABEL_INDEX_LEN_CRC_SIZE];

@@ -10,7 +10,7 @@
 
 #define LOG_TAG_CONST       MAIN
 #define LOG_TAG             "[dev list]"
-#include "debug.h"
+#include "log.h"
 
 // *INDENT-OFF*
 //sh54: SPI1:  CLK       ,  DO        ,  DI

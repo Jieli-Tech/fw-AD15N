@@ -5,7 +5,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[bsp loop]"
-#include "debug.h"
+#include "log.h"
 
 unsigned int bsp_event;
 

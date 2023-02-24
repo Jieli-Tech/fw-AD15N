@@ -26,7 +26,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[ini_area]"
-#include "debug.h"
+#include "log.h"
 
 #define MAX_INI_AREA_NUM    1   //ini开辟的空间个数,根据需要调整
 #define INI_AREA_BASE_PATH  "/app_area_head/"
@@ -144,6 +144,58 @@ int ini_area_norflash_byte_read(struct device *device, void *buf, u32 len, u32 o
     return sfc_dev_ops.read(device, buf, len, real_offset);
 }
 
+int ini_area_norflash_byte_write(struct device *device, void *buf, u32 len, u32 offset)
+{
+    u32 real_offset;
+    struct ini_area_norflash_partition *info = (struct ini_area_norflash_partition *)device->private_data;
+
+    if (offset >= info->size) {
+        return 0;
+    }
+    if ((len + offset) > info->size) {
+        len = info->size - offset;
+    }
+    real_offset = offset + info->start_addr;
+    return sfc_dev_ops.write(device, buf, len, real_offset);
+}
+
+int ini_area_norflash_ioctl(struct device *device, u32 cmd, u32 arg)
+{
+    struct ini_area_norflash_partition *info = (struct ini_area_norflash_partition *)device->private_data;
+
+    int ret = 0;
+    u32 erase_size = 0;
+    u32 align_addr = 0;
+
+    switch (cmd) {
+    case IOCTL_ERASE_PAGE:
+        erase_size = 256;
+        align_addr = arg / erase_size * erase_size;
+        goto __ini_area_earse;
+    case IOCTL_ERASE_SECTOR:
+        erase_size = 4 * 1024;
+        align_addr = arg / erase_size * erase_size;
+        goto __ini_area_earse;
+    case IOCTL_ERASE_BLOCK:
+        erase_size = 64 * 1024;
+        align_addr = arg / erase_size * erase_size;
+__ini_area_earse:
+        if ((align_addr + erase_size) >= info->size) {
+            return -EINVAL;
+        }
+        ret = sfc_dev_ops.ioctl(device, cmd, arg + info->start_addr);
+        break;
+    case IOCTL_GET_CAPACITY:
+        *((int *)arg) = info->size;
+        break;
+    default :
+        ret = -ENOTTY;
+        break;
+    }
+
+    return ret;
+}
+
 bool ini_area_norflash_dev_online(const struct dev_node *node)
 {
     return 1;
@@ -159,9 +211,9 @@ const struct device_operations ini_area_norflash_ops = {
     .online = ini_area_norflash_dev_online,
     .open   = ini_area_norflash_dev_open,
     .read   = ini_area_norflash_byte_read,
-    .write  = NULL,
+    .write  = ini_area_norflash_byte_write,
     .bulk_read   = NULL,
     .bulk_write  = NULL,
-    .ioctl  = NULL,
+    .ioctl  = ini_area_norflash_ioctl,
     .close  = ini_area_norflash_dev_close,
 };

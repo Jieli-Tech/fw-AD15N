@@ -23,7 +23,7 @@
 
 #define LOG_TAG_CONST       MAIN
 #define LOG_TAG             "[main]"
-#include "debug.h"
+#include "log.h"
 
 extern void app(void);
 int c_main(int cfg_addr)

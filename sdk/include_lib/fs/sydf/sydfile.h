@@ -58,4 +58,9 @@ u32 sydf_fs_close(SYDFS **ppfs);
 u32 sydf_file_close(SYDFILE **ppfile);
 u32 sydf_file_name(SYDFILE *pfile, char *name, u32 len);
 int sydf_ioctl(SYDFILE *pfile, int cmd, int arg);
+
+//----exfunction
+int sydf_file_crc(SYDFILE *pfile);
+
+
 #endif

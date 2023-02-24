@@ -23,7 +23,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 #if DECODER_MIDI_KEYBOARD_EN
 int music_midi_ctrl_config(music_play_obj *hdl, u32 cmd, void *parm)
@@ -86,7 +86,7 @@ int music_midi_ctrl_note_on(music_play_obj *hdl, u8 nkey, u8 nvel, u8 chn)
     midi_ctrl_note_on(work_buf, nkey, nvel, chn);
     return 0;
 }
-int music_midi_ctrl_note_off(music_play_obj *hdl, u8 nkey, u8 chn)
+int music_midi_ctrl_note_off(music_play_obj *hdl, u8 nkey, u8 chn, u16 decay_time)
 {
     if (hdl == NULL || hdl->en != MUSIC_PLAY_INIT_OK) {
         return MUSIC_STOP;
@@ -103,7 +103,7 @@ int music_midi_ctrl_note_off(music_play_obj *hdl, u8 nkey, u8 chn)
         return -1;
     }
 
-    midi_ctrl_note_off(work_buf, nkey, chn);
+    midi_ctrl_note_off(work_buf, nkey, chn, decay_time);
     return 0;
 }
 int music_midi_ctrl_vel_vibrate(music_play_obj *hdl, u8 nkey, u8 vel_step, u8 vel_rate, u8 chn)
@@ -167,5 +167,29 @@ void midi_ctrl_callback_init(music_play_obj *hdl, u32(*melody_callback)(void *, 
 
     int switch_enable = MELODY_ENABLE | MELODY_STOP_ENABLE;
     music_midi_ctrl_config(hdl, CMD_MIDI_SET_SWITCH, &switch_enable);
+}
+
+void get_midi_ctrl_play_key(music_play_obj *hdl, u8 chn)
+{
+    if (hdl == NULL || hdl->en != MUSIC_PLAY_INIT_OK) {
+        return;
+    }
+
+    dec_obj *obj = hdl->decode_api.p_dec;
+    if (NULL == obj) {
+        return;
+    }
+
+    audio_decoder_ops *ops = (audio_decoder_ops *)obj->dec_ops;
+    void *work_buf = obj->p_dbuf;
+    if (ops == NULL || work_buf == NULL) {
+        return;
+    }
+
+    extern const int MAX_CTR_PLAYER_CNT;
+    u8 *play_key_buff = midi_ctrl_query_play_key(work_buf, chn);
+
+    log_info("query chn:%d", chn);
+    log_info_hexdump((u8 *)&play_key_buff[0], MAX_CTR_PLAYER_CNT);
 }
 #endif

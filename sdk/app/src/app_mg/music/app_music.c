@@ -10,7 +10,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 #if MUSIC_BREAK_POINT_EN
 dp_buff dbuff;

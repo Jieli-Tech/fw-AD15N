@@ -22,7 +22,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 static volatile u8 cur_app = APP_FIRST_RESERVE;
 static void *app_param = NULL;

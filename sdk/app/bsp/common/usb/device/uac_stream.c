@@ -17,7 +17,7 @@
 #define LOG_INFO_ENABLE
 /* #define LOG_DUMP_ENABLE */
 #define LOG_CLI_ENABLE
-#include "debug.h"
+#include "log.h"
 #include "uart.h"
 #include "msg.h"
 #include "dac_api.h"

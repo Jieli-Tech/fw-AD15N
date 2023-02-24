@@ -9,7 +9,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 static u8 app_active_dev = APP_DEV_INNER_FLASH;
 

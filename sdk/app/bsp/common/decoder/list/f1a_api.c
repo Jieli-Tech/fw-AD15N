@@ -21,14 +21,19 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 #define F1A_OBUF_SIZE   (DAC_DECODER_BUF_SIZE)
 #define F1A_DBUF_SIZE   (0xc64)
 dec_obj dec_f1a_hld[MAX_F1A_CHANNEL];
 
+#ifdef CPU_SH57
+const int cos_tab_split = 1300 / 4;
+/* const int wma_cos_maskrom_tab[1] = {0}; */
+#else
 const int cos_tab_split = 0;
 const int wma_cos_maskrom_tab[1] = {0};
+#endif
 
 /*************************************************************/
 /* cbuffer_t cbuf_f1a[MAX_F1A_CHANNEL] AT(.f1a_buf); */

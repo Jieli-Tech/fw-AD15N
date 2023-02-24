@@ -4,7 +4,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 
 
@@ -25,6 +25,20 @@ void vfs_init(void)
             ops->init();
         }
     }
+}
+void *vfs_type_name(void *p_vfs)
+{
+    if (NULL == p_vfs) {
+        return NULL;
+    }
+    log_info("p_vfs 0x%x", (u32)p_vfs);
+    struct imount *pvfs = p_vfs;
+    struct vfs_operations *ops = pvfs->ops;
+    log_info("ops 0x%x", (u32)ops);
+    if (NULL == ops) {
+        return NULL;
+    }
+    return (void *)ops->fs_type;
 }
 u32 vfs_mount(void **ppvfs, void *device, void *type)
 {
@@ -53,8 +67,8 @@ u32 vfs_mount(void **ppvfs, void *device, void *type)
                 pvfs->ops = ops;
                 return 0;
             } else {
-                if (NULL == ops->close_fs) {
-                    ops->close_fs(pvfs->pfs);
+                if (NULL != ops->close_fs) {
+                    ops->close_fs(&(pvfs->pfs));
                 }
             }
         }
@@ -367,6 +381,22 @@ int vfs_ioctl(void *pvfile, int cmd, int arg)
         return ops->ioctl(p_vfile->pfile, cmd, arg);
     }
     return  E_VFS_OPS;
+}
+
+int vfs_file_crc(void *pvfile)
+{
+    struct imount *p_vfile = pvfile;
+    struct vfs_operations *ops;
+    if ((void *)NULL == p_vfile) {
+        return 0;
+    }
+    ops = p_vfile->ops;
+    /* log_info("ops->ioctl : 0x%x  0x%lx!!\n",ops->ioctl, (u32)&ops->ioctl); */
+    if (((void *)NULL != ops)  && ((void *)NULL !=  ops->file_crc)) {
+        return ops->file_crc(p_vfile->pfile);
+    }
+    return  0;
+
 }
 
 #if 0

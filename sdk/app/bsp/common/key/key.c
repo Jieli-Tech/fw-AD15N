@@ -20,7 +20,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 static u16(*key_msg_filter)(u8, u8, u8) = NULL;
 

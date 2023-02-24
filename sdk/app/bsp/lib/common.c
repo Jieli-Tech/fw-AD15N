@@ -44,7 +44,7 @@ void system_enter_critical(void)
 void system_exit_critical(void)
 {
 }
-
+#ifndef CPU_SH57
 AT_RAM
 u32 cbuf_write(cbuffer_t *cbuffer, void *buf, u32 len)
 {
@@ -54,4 +54,5 @@ u32 cbuf_write(cbuffer_t *cbuffer, void *buf, u32 len)
     OS_EXIT_CRITICAL();
     return res;
 }
+#endif
 

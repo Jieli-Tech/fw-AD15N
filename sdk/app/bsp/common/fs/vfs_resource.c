@@ -2,7 +2,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 char g_file_sname[VFS_FILE_NAME_LEN];
 

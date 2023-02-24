@@ -9,7 +9,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 u32 musci_file_open_bypath(void **ppvfs, void **ppvfile, const char *path, void *device, void *type)
 {

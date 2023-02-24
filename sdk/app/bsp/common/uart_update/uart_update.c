@@ -8,7 +8,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[uart_update]"
-#include "debug.h"
+#include "log.h"
 
 #if HAS_UART_UPDATE_EN
 

@@ -297,5 +297,9 @@ SECTIONS
 	data_size =  SIZEOF(.data) + SIZEOF(.debug_data);
 
     text_size       = SIZEOF(.app_code);
+
+    _sdk_text_addr = ADDR(.app_code);
+    _sdk_text_size = text_size;
+    _sdk_data_size = data_size;
 }
 

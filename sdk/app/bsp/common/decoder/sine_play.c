@@ -5,7 +5,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[sine]"
-#include "debug.h"
+#include "log.h"
 
 //sr=96000,freq=1500 :
 /* AT_RAM */

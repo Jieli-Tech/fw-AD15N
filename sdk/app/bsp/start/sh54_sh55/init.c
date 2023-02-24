@@ -26,10 +26,11 @@
 #include "sine_play.h"
 #include "list/midi_ctrl_api.h"
 #include "efuse_trim_value.h"
+#include "flash_wp.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 
 
@@ -69,8 +70,11 @@ int flash_info_init(void)
     device = dev_open(__SFC_NANE, 0);
     dev_ioctl(device, IOCTL_GET_CAPACITY, (u32)&capacity);
     dev_ioctl(device, IOCTL_SET_VM_INFO, (u32)&boot_info);
+    dev_ioctl(device, IOCTL_SET_PROTECT_INFO, (u32)flash_code_protect_callback);
     dev_close(device);
 
+    //该函数位置必须放在flash_info_init()之后，且isd_config.ini文件中VM区域大小不可为0
+    norflash_set_write_protect(1);
     return 0;
 }
 struct vfs_attr *get_vm_attr_p(void)
@@ -78,6 +82,19 @@ struct vfs_attr *get_vm_attr_p(void)
     return &vm_attr;
 }
 
+AT_SPI_CODE/*该函数放置段不可更改*/
+u32 flash_code_protect_callback(u32 offset, u32 len)
+{
+    u32 limit_addr = vm_attr.sclust;
+    /* log_info("0x%x 0x%x", limit_addr, offset); */
+    if ((offset < limit_addr) || ((offset + len) > boot_info.flash_size)) {
+        /* 超过正常擦写区域，不进行擦写操作 */
+        return 1;
+    } else {
+        /* 进行擦写操作 */
+        return 0;
+    }
+}
 
 static struct vfs_attr eeprom_attr;
 void vm_init_api(void)

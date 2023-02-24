@@ -18,7 +18,7 @@
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
-#include "debug.h"
+#include "log.h"
 
 #ifdef USB_DEVICE_EN
 extern void simple_next(void);

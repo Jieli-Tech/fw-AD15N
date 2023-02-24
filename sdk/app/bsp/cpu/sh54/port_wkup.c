@@ -6,7 +6,7 @@
 
 /* #define LOG_TAG_CONST       WKUP */
 #define LOG_TAG             "[PORT-WKUP]"
-#include "debug.h"
+#include "log.h"
 
 /*JL_WAKEUP->CON0:
  *                0：ich2 IO-wkup

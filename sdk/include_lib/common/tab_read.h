@@ -10,7 +10,7 @@ typedef struct _rtab_obj {
     u32   cnt;
 } rtab_obj;
 
-void tab_init(rtab_obj *stab, void *tab, u16 size);
+void tab_init(rtab_obj *stab, void *tab, u32 size);
 u32 tab_read(void *buff, rtab_obj *stab, u32 len);
 
 
