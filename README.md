@@ -1,10 +1,10 @@
-# fw-AD14N-AD15N
-About Firmware for Generic MCU SDK（AD14N-AD15N series）, Support AD14N,AD15N
+# fw-AD14N-AD15N-AC104N
+About Firmware for Generic MCU SDK（AD14N-AD15N-AC104N series）, Support AD14N,AD15N,AC104N
 
 [tag download]:https://github.com/Jieli-Tech/fw-AD15N/tags
 [tag_badgen]:https://img.shields.io/github/v/tag/Jieli-Tech/fw-AD15N?style=plastic&labelColor=ffffff&color=informational&label=Tag&
 
-# fw-AD14N-AD15N_SDK   [![tag][tag_badgen]][tag download]
+# fw-AD14N-AD15N-AC104N_SDK   [![tag][tag_badgen]][tag download]
 
 中文 | [EN](./README-en.md)
 
@@ -35,7 +35,7 @@ AD14N-AD15N 系列通用MCU SDK 固件程序
 
 * 芯片简介 : [SoC 数据手册扼要](./doc)
 
-* SDK 版本信息 : [SDK 历史版本](doc/AD14N-AD15N_SDK_发布版本信息.pdf)
+* SDK 版本信息 : [SDK 历史版本](doc/AD14N-AD15N-AC104N_SDK_发布版本信息.pdf)
 
 * SDK 介绍文档 : [SDK 快速开始简介](./doc/AD14N_AD15N_AC104N_SDK手册.pdf)
 
@@ -47,9 +47,11 @@ AD14N-AD15N 系列通用MCU SDK 固件程序
 
 * 玩具类应用 : ./sdk/AD14N_app_mg.cbp ./sdk/AD15N_app_mg.cbp , 适用领域：
 
-* 示例类应用 : ./sdk/AD14N_simple.cbp ./sdk/AD15N_simple.cbp)，适用领域：
+* 示例类应用 : ./sdk/AD14N_simple.cbp ./sdk/AD15N_simple.cbp ，适用领域：
 
-* 通用MCU应用 : ./sdk/AD14N_mcu.cbp ./sdk/AD15N_mcu.cbp)，适用领域：
+* 通用MCU应用 : ./sdk/AD14N_mcu.cbp ./sdk/AD15N_mcu.cbp ，适用领域：
+
+* 小音箱应用: ./sdk/AC104N_mbox_mg ，适用领域： 
 
 即将发布：
 ------------

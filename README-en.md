@@ -1,10 +1,10 @@
-# fw-AD14N-AD15N
-About Firmware for Generic MCU SDK（AD14N-AD15N series）, Support AD14N,AD15N
+# fw-AD14N-AD15N-AC104N
+About Firmware for Generic MCU SDK（AD14N-AD15N-AC104N series）, Support AD14N,AD15N,AC104N
 
 [tag download]:https://github.com/Jieli-Tech/fw-AD15N/tags
 [tag_badgen]:https://img.shields.io/github/v/tag/Jieli-Tech/fw-AD15N?style=plastic&labelColor=ffffff&color=informational&label=Tag&
 
-# fw-AD14N-AD15N_SDK   [![tag][tag_badgen]][tag download]
+# fw-AD14N-AD15N-AC104N_SDK   [![tag][tag_badgen]][tag download]
 
 [中文](./README.md) | EN
 
@@ -37,7 +37,7 @@ Documentation
 
 * Chipset brief : [SoC datasheet](./doc)
 
-* SDK Version: [SDK History](doc/AD14N-AD15N_SDK_发布版本信息.pdf)
+* SDK Version: [SDK History](doc/AD14N-AD15N-AC104N_SDK_发布版本信息.pdf)
 
 * SDK introduction : [SDK quick start guide](./doc/AD14N_AD15N_AC104N_SDK手册.pdf)
 
@@ -53,6 +53,7 @@ Select a project to build. The following folders contains buildable projects:
 
 * APP_MCU: ./sdk/AD14N_mcu.cbp ./sdk/AD15N_mcu.cbp, usage:  
 
+* APP_MUSIC_BOX_: ./sdk/AC104N_mbox_mg , usage:  
 
 Comming Soon：
 -------------
