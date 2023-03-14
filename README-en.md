@@ -37,6 +37,8 @@ Documentation
 
 * Chipset brief : [SoC datasheet](./doc)
 
+* Product Select Guide : [SoC Select Guide](./doc/SoC_Select_Guide.md); [SoC Select Guide.pdf](./doc/杰理科技AD14&AD15系列语音MCU选型表.pdf)
+
 * SDK Version: [SDK History](doc/AD14N-AD15N-AC104N_SDK_发布版本信息.pdf)
 
 * SDK introduction : [SDK quick start guide](./doc/AD14N_AD15N_AC104N_SDK手册.pdf)
