@@ -35,7 +35,7 @@ AD14N-AD15N 系列通用MCU SDK 固件程序
 
 * 芯片简介 : [SoC 数据手册扼要](./doc)
 
-* 芯片选型号手册 : [SoC 选型手册](./doc/SoC_Select_Guide.md)；[SoC 选型手册.pdf](./doc/杰理科技AD14&AD15系列语音MCU选型表.pdf)
+* 芯片选型号手册 : [SoC 选型手册](./doc/SoC_Select_Guide.md)；[SoC 选型手册.pdf](./doc/杰理科技AD14_AD15系列语音MCU选型表.pdf)
 
 * SDK 版本信息 : [SDK 历史版本](doc/AD14N-AD15N-AC104N_SDK_发布版本信息.pdf)
 
