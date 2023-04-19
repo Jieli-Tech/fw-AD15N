@@ -45,6 +45,10 @@ Documentation
 
 * SDK architure : [SDK module architure ](./doc/architure)
 
+* Video resource: [Video resource](https://space.bilibili.com/3493277347088769/dynamic)
+
+* FAE support document: [FAE support](https://gitee.com/jieli-tech_fae/fw-jl)
+
 Build
 -------------
 Select a project to build. The following folders contains buildable projects:
