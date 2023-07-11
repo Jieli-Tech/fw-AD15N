@@ -1,11 +1,10 @@
 #include "app_config.h"
 #include "tick_timer_driver.h"
 #include "clock.h"
-#include "asm/power_interface.h"
 #include "msg.h"
 #include "bsp_loop.h"
 #include "app_power_mg.h"
-#include "vm.h"
+#include "vm_api.h"
 #include "dac_api.h"
 
 #define LOG_TAG_CONST       NORM

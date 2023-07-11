@@ -240,38 +240,38 @@ const u16 iokey_msg_mbox_fm_table[][IO_KEY_MAX_NUM] = {
 
 #if KEY_AD_EN
 #define ADKEY_FM_SHORT_UP \
-							/*00*/		NO_MSG,\
-							/*01*/		NO_MSG,\
-							/*02*/		MSG_FM_PREV_STEP,\
-							/*03*/		MSG_FM_NEXT_STEP,\
-							/*04*/		MSG_VOL_DOWN,\
-							/*05*/		MSG_VOL_UP,\
-							/*06*/		NO_MSG,\
-							/*07*/		MSG_FM_PREV_STATION,\
-							/*08*/		MSG_FM_NEXT_STATION,\
-							/*09*/		MSG_MUTE,\
+							/*00*/		MSG_MUTE,\
+							/*01*/		MSG_FM_NEXT_STATION,\
+							/*02*/		MSG_FM_PREV_STATION,\
+							/*03*/		NO_MSG,\
+							/*04*/		MSG_VOL_UP,\
+							/*05*/		MSG_VOL_DOWN,\
+							/*06*/		MSG_FM_NEXT_STEP,\
+							/*07*/		MSG_FM_PREV_STEP,\
+							/*08*/		NO_MSG,\
+							/*09*/		NO_MSG,\
 
 #define ADKEY_FM_LONG \
 							/*00*/		NO_MSG,\
-							/*01*/		NO_MSG,\
-							/*02*/		MSG_FM_PREV_STEP,\
-							/*03*/		MSG_FM_NEXT_STEP,\
-							/*04*/		NO_MSG,\
-							/*05*/		MSG_NEXT_WORKMODE,\
-							/*06*/		MSG_FM_SCAN_ALL_INIT,\
-							/*07*/		MSG_FM_SCAN_ALL_DOWN,\
-							/*08*/		MSG_FM_SCAN_ALL_UP,\
+							/*01*/		MSG_FM_SCAN_ALL_UP,\
+							/*02*/		MSG_FM_SCAN_ALL_DOWN,\
+							/*03*/		MSG_FM_SCAN_ALL_INIT,\
+							/*04*/		MSG_NEXT_WORKMODE,\
+							/*05*/		NO_MSG,\
+							/*06*/		MSG_FM_NEXT_STEP,\
+							/*07*/		MSG_FM_PREV_STEP,\
+							/*08*/		NO_MSG,\
 							/*09*/		NO_MSG,\
 
 #define ADKEY_FM_HOLD \
 							/*00*/		NO_MSG,\
 							/*01*/		NO_MSG,\
-							/*02*/		MSG_FM_PREV_STEP,\
-							/*03*/		MSG_FM_NEXT_STEP,\
+							/*02*/		NO_MSG,\
+							/*03*/		NO_MSG,\
 							/*04*/		NO_MSG,\
 							/*05*/		NO_MSG,\
-							/*06*/		NO_MSG,\
-							/*07*/		NO_MSG,\
+							/*06*/		MSG_FM_NEXT_STEP,\
+							/*07*/		MSG_FM_PREV_STEP,\
 							/*08*/		NO_MSG,\
 							/*09*/		NO_MSG,\
 

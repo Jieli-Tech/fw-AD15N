@@ -15,6 +15,7 @@
 #include "errno-base.h"
 #include "decoder_msg_tab.h"
 #include "app_config.h"
+#include "decoder_cpu.h"
 //#include "avio.h"
 //#include "bitstream.h"
 //#include "wmadata.h"
@@ -25,14 +26,16 @@
 
 #define F1A_OBUF_SIZE   (DAC_DECODER_BUF_SIZE)
 #define F1A_DBUF_SIZE   (0xc64)
+#define F1A_OUTPUT_MAX_SIZE (32 * 2)
+#define F1A_KICK_SIZE   (F1A_OBUF_SIZE - (F1A_OUTPUT_MAX_SIZE * 2))
 dec_obj dec_f1a_hld[MAX_F1A_CHANNEL];
 
-#ifdef CPU_SH57
+#if HAS_F1A_MASK_TAB
 const int cos_tab_split = 1300 / 4;
-/* const int wma_cos_maskrom_tab[1] = {0}; */
+/* const int f1a_cos_maskrom_tab[1] = {0}; */
 #else
 const int cos_tab_split = 0;
-const int wma_cos_maskrom_tab[1] = {0};
+const int f1a_cos_maskrom_tab[1] = {0};
 #endif
 
 /*************************************************************/
@@ -127,6 +130,7 @@ u32 f1a_decode_index(void *p_file, u32 index, dec_obj **p_dec, void *p_dp_buf, f
     /* log_info("B\n"); */
     p_dec_hld->p_file = p_file;
     p_dec_hld->sound.p_obuf = p_cbuf;
+    p_dec_hld->sound.para   = F1A_KICK_SIZE;
     p_dec_hld->p_dbuf = p_dbuf;
     p_dec_hld->dec_ops = ops;
     p_dec_hld->event_tab = (u8 *)&f1a_evt[index][0];

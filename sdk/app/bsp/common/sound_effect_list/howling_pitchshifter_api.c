@@ -8,6 +8,7 @@
 #define LOG_TAG             "[normal]"
 #include "log.h"
 
+#if defined(PITCHSHIFT_HOWLING_EN) && (PITCHSHIFT_HOWLING_EN)
 /* sdk需要添加这个定义，代表滤波器阶数参数: 配置范围为2<=>8，它的大小跟运算量成正相关 */
 const int FRESHIFT_SPEED_MODE_QUALITY = 2;
 u32 howling_work_buf[(1980 + 3) / 4] AT(.howling_data);
@@ -48,4 +49,5 @@ void *link_pitchshift_howling_sound(void *p_sound_out, void *p_dac_cbuf, void **
     }
     return p_curr_sound;
 }
+#endif
 

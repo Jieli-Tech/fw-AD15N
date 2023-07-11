@@ -13,7 +13,6 @@
 <Compiler>
 <Add option="-DD_MBOX_SDK=1" />
 <Add option="-DD_APP_MBOX=1" />
-<Add option="-DMAX_F1A_CHANNEL=2" />
 <Add option="-integrated-as" />
 <Add option="-g" />
 <Add option="-Oz" />
@@ -27,31 +26,33 @@
 <Add option="-DCPU_SH54=1" />
 <Add option="-DFLASH_CACHE_ENABLE=1" />
 <Add option="-DAUDIO_ADC_EN=1" />
-<Add option="-DSPEAKER_EN=1" />
-<Add option="-DVO_PITCH_EN=1" />
-<Add option="-DPCM_EQ_EN=1" />
-<Add option="-DAUX_EN=1" />
-<Add option="-DENCODER_EN=1" />
-<Add option="-DDECODER_UMP3_EN=1" />
-<Add option="-DDECODER_MP3_ST_EN=1" />
-<Add option="-DDECODER_WAV_EN=1" />
-<Add option="-DDECODER_F1A_EN=1" />
-<Add option="-DDECODER_MIDI_EN=1" />
-<Add option="-DDECODER_MIDI_KEYBOARD_EN=0" />
-<Add option="-DDECODER_A_EN=1" />
-<Add option="-DAUDIO_SPEED_EN=1" />
-<Add option="-DEXT_FLASH_EN=0" />
-<Add option="-DFM_EN=1" />
-<Add option="-DEEPROM_EN=0" />
+<Add option="-DSPEAKER_EN" />
+<Add option="-DHAS_VOICE_PITCH_EN" />
+<Add option="-DHAS_VOICE_CHANGER_EN" />
+<Add option="-DHAS_PCM_EQ_EN" />
+<Add option="-DAUX_EN" />
+<Add option="-DENCODER_EN" />
+<Add option="-DHAS_UMP3_DECODER" />
+<Add option="-DHAS_MP3_ST_DECODER" />
+<Add option="-DHAS_WAV_DECODER" />
+<Add option="-DHAS_F1A_DECODER" />
+<Add option="-DHAS_MAX_F1A_NUMBER=2" />
+<Add option="-DHAS_MIDI_DECODER" />
+<Add option="-DHAS_A_DECODER" />
+<Add option="-DHAS_SPEED_EN" />
+<Add option="-DHAS_EXT_FLASH_EN" />
+<Add option="-DHAS_FM_EN" />
 <Add option="-DHAS_USB_EN=1" />
-<Add option="-DHAS_SDMMC_EN=1" />
-<Add option="-DHAS_MIO_EN=1" />
+<Add option="-DHAS_SDMMC_EN" />
+<Add option="-DHAS_MIO_PLAYER" />
 <Add option="-DHAS_UPDATE_EN=1" />
-<Add option="-DHAS_UART_UPDATE_EN=1" />
-<Add option="-DECHO_EN=1" />
-<Add option="-DHOWLING_EN=1" />
+<Add option="-DHAS_UART_UPDATE_EN" />
+<Add option="-DHAS_ECHO_EN" />
+<Add option="-DHOWLING_EN" />
 <Add option="-DFATFS_ENABLE=1" />
 <Add option="-DSIMPLE_FATFS_ENABLE=0" />
+<Add option="-DSYS_VM_EN=1" />
+<Add option="-DHAS_MP3_ENCODER" />
 <Add option="-DNOFLOAT" />
 <Add directory="app/src" />
 <Add directory="app/bsp/lib" />
@@ -90,6 +91,7 @@
 <Add directory="app/bsp/common/norflash" />
 <Add directory="app/bsp/common/spi_soft" />
 <Add directory="app/bsp/common/reserved_area" />
+<Add directory="app/bsp/common/vm" />
 <Add directory="app/bsp/modules" />
 <Add directory="app/bsp/modules/timer" />
 <Add directory="app/src/mbox_mg" />
@@ -99,10 +101,12 @@
 <Add directory="app/bsp/common/fm/bk1080" />
 <Add directory="include_lib/agreement" />
 <Add directory="app/bsp/common/uart_update" />
+<Add directory="app/src/mbox_mg/sh54" />
 <Add directory="app/bsp/common/speaker" />
 <Add directory="include_lib/speaker" />
 <Add directory="app/bsp/common/vo_pitch" />
 <Add directory="include_lib/vo_pitch" />
+<Add directory="include_lib/vo_changer" />
 <Add directory="app/bsp/common/usb" />
 <Add directory="app/bsp/common/usb/device" />
 <Add directory="app/bsp/common/usb/host" />
@@ -110,6 +114,8 @@
 <Linker>
 <Add option="--plugin-opt=save-temps" />
 <Add option="--gc-sections" />
+<Add option="include_lib/liba/sh54/mbox_mg/old_vm_lib.a" />
+<Add option="include_lib/liba/sh54/mbox_mg/new_vm_lib.a" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/sh54/mbox_mg/cpu_lib.a" />
 <Add option="include_lib/liba/sh54/mbox_mg/address_lib.a" />
@@ -131,26 +137,29 @@
 <Add option="include_lib/liba/sh54/mbox_mg/uart_update_lib.a" />
 <Add option="include_lib/liba/sh54/mbox_mg/agreement.a" />
 <Add option="include_lib/liba/sh54/mbox_mg/encoder_mge_lib.a" />
-<Add option="include_lib/liba/ARCH/pi32_lto/lib_a_code.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_mp3_decode.a" />
-<Add option="include_lib/liba/ARCH/pi32_lto/lib_mp2_encode.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_mp3_standard_decode.a" />
-<Add option="include_lib/liba/ARCH/pi32_lto/lib_mp2standard_encode.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_wav_decode.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_f1a_decode.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_midi_decode.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_limiter.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_a_decode.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_mp2standard_encode.a" />
 <Add option="include_lib/liba/sh54/mbox_mg/periphy_lib.a" />
 <Add option="include_lib/liba/sh54/mbox_mg/file_manage_lib.a" />
 <Add option="include_lib/liba/sh54/mbox_mg/sdmmc_lib.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_vopitch_cal.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_voiceChanger_va.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_pcm_eq.a" />
 <Add option="include_lib/liba/sh54/mbox_mg/ae_pcm_eq_lib.a" />
+<Add option="include_lib/liba/sh54/mbox_mg/dual_bank_lib.a" />
 <Add option="--end-group" />
 <Add option="-Tapp/post_build/sh54/app.ld" />
 <Add option="-M=app/post_build/sh54/app.map" />
 </Linker>
 <ExtraCommands>
+<Add before="$compiler $options $includes -D__LD__ -E -P app\bsp\common\app_modules_h.c -o tmp_app2022.txt" />
+<Add before="$compiler $options $includes -D__LD__ -E -P app\src\mbox_mg\sh54\app_modules_cpu_h.c -o tmp_app2022_cpu.txt" />
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\mbox_mg\app_ld.c -o app\post_build\sh54\app.ld" />
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\mbox_mg\download_bat.c -o app\post_build\sh54\download.bat" />
 <Add before="tools\utils\fixbat.exe app\post_build\sh54\download.bat" />
@@ -173,11 +182,10 @@
 <Unit filename="app/bsp/common/decoder/list/ump3_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/list/wav_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/mio_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/decoder/mp_io.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/decoder/sine_play.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/encoder/encoder_api.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/common/encoder/list/a_encoder.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/encoder/list/mp3_encoder.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/common/encoder/list/ump3_encoder.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/fm/bk1080/BK1080.h" />
 <Unit filename="app/bsp/common/fm/bk1080/Bk1080.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/fm/fm_iic_dri.c"><Option compilerVer="CC"/></Unit>
@@ -208,11 +216,13 @@
 <Unit filename="app/bsp/common/key/key_touch.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/key/key_touch.h" />
 <Unit filename="app/bsp/common/msg/msg.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/norflash/norflash.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/norflash/norflash.h" />
 <Unit filename="app/bsp/common/power_manage/app_power_mg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/power_manage/app_power_mg.h" />
 <Unit filename="app/bsp/common/reserved_area/reserved_area.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/reserved_area/reserved_area.h" />
+<Unit filename="app/bsp/common/rtc/rtc.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sdk_cfg.h" />
 <Unit filename="app/bsp/common/sound_effect_list/echo_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sound_effect_list/howling_pitchshifter_api.c"><Option compilerVer="CC"/></Unit>
@@ -220,6 +230,7 @@
 <Unit filename="app/bsp/common/sound_effect_list/pcm_eq_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sound_effect_list/speed_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sound_effect_list/vo_pitch_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/sound_effect_list/voicechanger.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/speaker/speak_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/spi_soft/spi_soft.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/spi_soft/spi_soft.h" />
@@ -253,7 +264,10 @@
 <Unit filename="app/bsp/common/usb/usb_test.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/usb/usr/usb_audio_interface.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/usb/usr/usb_audio_interface.h" />
+<Unit filename="app/bsp/common/vm/new_vm/nvm_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/vm/old_vm/ovm_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/vm/vm_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/vm/vm_api.h" />
 <Unit filename="app/bsp/cpu/sh54/adc_drv.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/clock.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/cpu.c"><Option compilerVer="CC"/></Unit>
@@ -268,6 +282,7 @@
 <Unit filename="app/bsp/cpu/sh54/port_wkup.h" />
 <Unit filename="app/bsp/cpu/sh54/power_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/power_api.h" />
+<Unit filename="app/bsp/cpu/sh54/spi1.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/spi1.h" />
 <Unit filename="app/bsp/cpu/sh54/uart.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/uart_dev.c"><Option compilerVer="CC"/></Unit>
@@ -335,6 +350,7 @@
 <Unit filename="app/src/mbox_mg/rec/rec_key.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/src/mbox_mg/rec/rec_mode.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/src/mbox_mg/rec/rec_mode.h" />
+<Unit filename="app/src/mbox_mg/sh54/app_modules.h" />
 <Unit filename="app/src/mbox_mg/usb_device/usb_device_mode.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/src/mbox_mg/usb_device/usb_device_mode.h" />
 <Unit filename="app/src/mbox_mg/usb_device/usb_key_table.c"><Option compilerVer="CC"/></Unit>
@@ -363,6 +379,8 @@
 <Unit filename="include_lib/common/jiffies.h" />
 <Unit filename="include_lib/common/log.h" />
 <Unit filename="include_lib/common/my_malloc.h" />
+<Unit filename="include_lib/common/new_vm.h" />
+<Unit filename="include_lib/common/old_vm.h" />
 <Unit filename="include_lib/common/printf.h" />
 <Unit filename="include_lib/common/tab_read.h" />
 <Unit filename="include_lib/common/vm.h" />
@@ -375,6 +393,7 @@
 <Unit filename="include_lib/cpu/sh54/cpu.h" />
 <Unit filename="include_lib/cpu/sh54/csfr.h" />
 <Unit filename="include_lib/cpu/sh54/dac_cpu.h" />
+<Unit filename="include_lib/cpu/sh54/decoder_cpu.h" />
 <Unit filename="include_lib/cpu/sh54/efuse.h" />
 <Unit filename="include_lib/cpu/sh54/efuse_trim_value.h" />
 <Unit filename="include_lib/cpu/sh54/gpio.h" />
@@ -389,6 +408,7 @@
 <Unit filename="include_lib/decoder/MIDI_CTRL_API.h" />
 <Unit filename="include_lib/decoder/MIDI_DEC_API.h" />
 <Unit filename="include_lib/decoder/decoder_api.h" />
+<Unit filename="include_lib/decoder/decoder_mge.h" />
 <Unit filename="include_lib/decoder/decoder_msg_tab.h" />
 <Unit filename="include_lib/decoder/eq.h" />
 <Unit filename="include_lib/decoder/if_decoder_ctrl.h" />
@@ -438,6 +458,7 @@
 <Unit filename="include_lib/fs/vfs.h" />
 <Unit filename="include_lib/msg/msg.h" />
 <Unit filename="include_lib/update/update.h" />
+<Unit filename="include_lib/vo_changer/voiceChanger_av_api.h" />
 <Unit filename="include_lib/vo_pitch/midi_file0_h.h" />
 <Unit filename="include_lib/vo_pitch/vo_pitch_api.h" />
 <Unit filename="include_lib/vo_pitch/vo_pitch_phy.h" />

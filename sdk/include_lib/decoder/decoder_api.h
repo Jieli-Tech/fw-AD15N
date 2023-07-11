@@ -4,6 +4,7 @@
 #include "dac_api.h"
 #include "sound_effect_api.h"
 #include "decoder_msg_tab.h"
+#include "decoder_mge.h"
 
 
 // #define is_halfway_effect(obj)    (obj->enable & B_HALFWAY_EFFECT)
@@ -11,25 +12,12 @@
 // #define set_halfway_effect(obj)    obj->enable |= B_HALFWAY_EFFECT
 
 // #define kick_decoder()   bit_set_swi(0)
-#define kick_decoder   bit_set_swi0
+// #define kick_decoder   bit_set_swi0
 
-typedef enum {
-    MAD_ERROR_FILE_END         = 0x40,
-    MAD_ERROR_FILESYSTEM_ERR   = 0x41,              // NO USED
-    MAD_ERROR_DISK_ERR         = 0x42,              // NO USED
-    MAD_ERROR_SYNC_LIMIT       = 0x43,              // 文件错误
-    MAD_ERROR_FF_FR_FILE_END   = 0x44,              //快进结束
-    MAD_ERROR_FF_FR_END        = 0x45,              // NO USED
-    MAD_ERROR_FF_FR_FILE_START = 0x46,              //快退到头
-    MAD_ERROR_LIMIT            = 0x47,              // NO USED
-    MAD_ERROR_NODATA           = 0x48,              // NO USED
-    MAD_ERROR_PLAY_END		   = 0x50,				//MIDI CTRL DATA OUTPUT END
-    MAD_ERROR_F1X_START_ADDR   = 0x51,				//F1X起始位置错误
-} MAD_INFO ;
 
 typedef enum {
     D_TYPE_F1A_1 = 0,
-#if (MAX_F1A_CHANNEL > 1)
+#if defined(MAX_F1A_CHANNEL) && (MAX_F1A_CHANNEL > 1)
     D_TYPE_F1A_2 = 1,
 #endif
     D_TYPE_UMP3 = 2,
@@ -42,21 +30,6 @@ typedef enum {
 
 #define DEC_FUNCTION_FF_FR		BIT(0)	// 快进快退功能
 
-typedef struct _dec_obj {
-    void *p_file;
-    void *dec_ops;
-    void *p_dbuf;
-    void *p_dp_buf;
-    u8 *event_tab;
-    u32 sr;
-    sound_out_obj sound;
-    void *src_effect;
-    u32(*eq)(u32);
-    u8 loop;
-    u8 type; // DECOER_TYPE
-    u8 function;		// 解码器支持的功能
-    char ff_fr_step;	// 快进快退步长。正数-快进；负数-快退。单位-秒
-} dec_obj;
 
 typedef struct _dp_buff {
 
@@ -65,13 +38,16 @@ typedef struct _dp_buff {
     u16 len;
     union {
         u8 buff[1];
-#if DECODER_UMP3_EN
-        u8 mp3[20];
+#if defined(DECODER_UMP3_EN) && (DECODER_UMP3_EN)
+        u8 ump3[20];
 #endif
-#if DECODER_F1A_EN
+#if defined(DECODER_MP3_ST_EN) && (DECODER_MP3_ST_EN)
+        u8 mp3[0x10];
+#endif
+#if defined(DECODER_F1A_EN) && (DECODER_F1A_EN)
         u8 f1a[60];
 #endif
-#if DECODER_WAV_EN
+#if defined(DECODER_WAV_EN) && (DECODER_WAV_EN)
         u8 wav[12];
 #endif
     };
@@ -112,17 +88,17 @@ extern const u32 decoder_tab[];
 
 
 bool dac_cbuff_active(void *sound_hld);
-void dac_kick_decoder(void *sound_hld, void *pkick);
+// void dac_kick_decoder(void *sound_hld, void *pkick);
 void decoder_test_fun(void);
 u32 mp_read_2_dac(void);
 bool check_ext_api(char _xdata *fname, char const *ext, u32 len);
 
 
-void irq_decoder_ret(dec_obj *obj, u32 ret);
 
 void decoder_soft0_isr();
 void decoder_channel_set(u8 dc);
 
+u32 if_decoder_is_run(dec_obj *obj);
 u32 if_decoder_pause(dec_obj *obj);
 void decoder_pause(dec_obj *obj);
 void decoder_stop(dec_obj *obj, DEC_STOP_WAIT wait);

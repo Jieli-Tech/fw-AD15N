@@ -1,4 +1,5 @@
 #include "includes.h"
+#include "app_modules.h"
 //中断优先级
 //系统使用到的
 const int IRQ_IRTMR_IP   = 5;
@@ -69,7 +70,9 @@ const int NOTE_OFF_TRIGGER = 0;     //midi琴note_off回调 1：time传0时，�
 const u8 dev_update_use_eeprom = 0;
 //设备升级时，是否保持住io的状态
 const u8 dev_update_keep_io_status = 0;
-//ufw升级文件的vid要求： 0：vid要相同  1：vid要不一样
+//设备升级时，用到的电源引脚
+const u8 dev_update_power_io = -1;
+//ufw升级文件的vid要求： 0：vid要相同  1：vid要不一样 2：升级文件vid > 当前设备vid 3：升级文件vid < 当前设备vid
 const u8 ufw_vid_need_to_be_different = 0;
 //sd空闲后挂起的最大cnt值，单位时间是sd检测函数的时间，即sd空闲后每次检测函数cnt就加1，为0时，则每次读写完都会发挂起命令
 const u8 is_sdx_active_cnt_max = 20;
@@ -116,6 +119,9 @@ const char log_tag_const_i_LRC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(0);
 const char log_tag_const_d_LRC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(0);
 const char log_tag_const_e_LRC AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(1);
 
+const char log_tag_const_i_RST AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(1);
+const char log_tag_const_d_RST AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(1);
+const char log_tag_const_e_RST AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(1);
 
 const char log_tag_const_i_WKUP AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(0);
 const char log_tag_const_d_WKUP AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(0);

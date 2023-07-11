@@ -3,6 +3,7 @@
 #include "typedef.h"
 #include "hwi.h"
 #include "decoder_api.h"
+#include "decoder_cpu.h"
 /* #include "dev_manage.h" */
 #include "vfs.h"
 #include "circular_buf.h"
@@ -17,7 +18,9 @@
 #include "log.h"
 
 
-#define A_OBUF_SIZE DAC_DECODER_BUF_SIZE
+#define A_OBUF_SIZE         (A_DEC_OBUF_SIZE)
+#define A_OUTPUT_MAX_SIZE   (32 * 2)
+#define A_KICK_SIZE         (A_OBUF_SIZE - (A_OUTPUT_MAX_SIZE * 2))
 
 cbuffer_t cbuf_a AT(.a_data);
 u16 obuf_a[A_OBUF_SIZE / 2] AT(.a_data) ;
@@ -63,6 +66,7 @@ u32 a_decode_api(void *p_file, void **p_dec, void *p_dp_buf)
     /* debug_puts("A\n"); */
     dec_a_hld.p_file       = p_file;
     dec_a_hld.sound.p_obuf = &cbuf_a;
+    dec_a_hld.sound.para   = A_KICK_SIZE;
     dec_a_hld.p_dbuf       = A_CAL_BUF;
     dec_a_hld.dec_ops      = ops;
     dec_a_hld.event_tab    = (u8 *)&a_evt[0];

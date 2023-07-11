@@ -25,22 +25,22 @@
             "group": "build"
         }
         ,{
-            "label": "ad15n_app_mg",
+            "label": "ad15n_voice_toy",
             "type": "shell",
             "windows": {
-                "command": ".vscode/winmk.bat ad15n_app_mg"
+                "command": ".vscode/winmk.bat ad15n_voice_toy"
             },
-            "command": "make ad15n_app_mg -j`nproc`",
+            "command": "make ad15n_voice_toy -j`nproc`",
             "problemMatcher": [],
             "group": "build"
         }
         ,{
-            "label": "ad14n_simple",
+            "label": "ad17n_voice_toy",
             "type": "shell",
             "windows": {
-                "command": ".vscode/winmk.bat ad14n_simple"
+                "command": ".vscode/winmk.bat ad17n_voice_toy"
             },
-            "command": "make ad14n_simple -j`nproc`",
+            "command": "make ad17n_voice_toy -j`nproc`",
             "problemMatcher": [],
             "group": "build"
         }
@@ -55,12 +55,12 @@
             "group": "build"
         }
         ,{
-            "label": "ad14n_app_mg",
+            "label": "ad14n_voice_toy",
             "type": "shell",
             "windows": {
-                "command": ".vscode/winmk.bat ad14n_app_mg"
+                "command": ".vscode/winmk.bat ad14n_voice_toy"
             },
-            "command": "make ad14n_app_mg -j`nproc`",
+            "command": "make ad14n_voice_toy -j`nproc`",
             "problemMatcher": [],
             "group": "build"
         }
@@ -85,32 +85,32 @@
             "group": "build"
         }
         ,{
-            "label": "ad15n_simple",
+            "label": "ad17n_mcu",
             "type": "shell",
             "windows": {
-                "command": ".vscode/winmk.bat ad15n_simple"
+                "command": ".vscode/winmk.bat ad17n_mcu"
             },
-            "command": "make ad15n_simple -j`nproc`",
+            "command": "make ad17n_mcu -j`nproc`",
             "problemMatcher": [],
             "group": "build"
         }
         ,{
-            "label": "clean_ad15n_app_mg",
+            "label": "clean_ad15n_voice_toy",
             "type": "shell",
             "windows": {
-                "command": ".vscode/winmk.bat clean_ad15n_app_mg"
+                "command": ".vscode/winmk.bat clean_ad15n_voice_toy"
             },
-            "command": "make clean_ad15n_app_mg -j`nproc`",
+            "command": "make clean_ad15n_voice_toy -j`nproc`",
             "problemMatcher": [],
             "group": "build"
         }
         ,{
-            "label": "clean_ad14n_simple",
+            "label": "clean_ad17n_voice_toy",
             "type": "shell",
             "windows": {
-                "command": ".vscode/winmk.bat clean_ad14n_simple"
+                "command": ".vscode/winmk.bat clean_ad17n_voice_toy"
             },
-            "command": "make clean_ad14n_simple -j`nproc`",
+            "command": "make clean_ad17n_voice_toy -j`nproc`",
             "problemMatcher": [],
             "group": "build"
         }
@@ -125,12 +125,12 @@
             "group": "build"
         }
         ,{
-            "label": "clean_ad14n_app_mg",
+            "label": "clean_ad14n_voice_toy",
             "type": "shell",
             "windows": {
-                "command": ".vscode/winmk.bat clean_ad14n_app_mg"
+                "command": ".vscode/winmk.bat clean_ad14n_voice_toy"
             },
-            "command": "make clean_ad14n_app_mg -j`nproc`",
+            "command": "make clean_ad14n_voice_toy -j`nproc`",
             "problemMatcher": [],
             "group": "build"
         }
@@ -155,12 +155,12 @@
             "group": "build"
         }
         ,{
-            "label": "clean_ad15n_simple",
+            "label": "clean_ad17n_mcu",
             "type": "shell",
             "windows": {
-                "command": ".vscode/winmk.bat clean_ad15n_simple"
+                "command": ".vscode/winmk.bat clean_ad17n_mcu"
             },
-            "command": "make clean_ad15n_simple -j`nproc`",
+            "command": "make clean_ad17n_mcu -j`nproc`",
             "problemMatcher": [],
             "group": "build"
         }

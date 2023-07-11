@@ -56,6 +56,13 @@ u32 smpl_fat_fs_close_api(void **ppfs)
     return (u32) * ppfs;
 }
 
+/* #include "vfs.h" */
+/* u32 fat_get_attrs(void *p_f_hdl, struct vfs_attr *attr); */
+/* int smpl_fat_attrs_api(void *pfile, void *attr) */
+/* { */
+/*     return fat_get_attrs(pfile, (struct vfs_attr *)attr); */
+/* } */
+
 const struct vfs_operations smpl_fat_vfs_ops sec_used(.vfs_operations) = {
     .fs_type = "fat",
     /* .init        = fat_init_api, */
@@ -67,6 +74,7 @@ const struct vfs_operations smpl_fat_vfs_ops sec_used(.vfs_operations) = {
     .seek        = smpl_fat_seek_api,
     .close_fs 	 = smpl_fat_fs_close_api,
     .close_file  = smpl_fat_file_close_api,
+    /* .fget_attr   = smpl_fat_attrs_api, */
     .fget_attr   = NULL,
     .name        = NULL,
     .flen        = NULL,

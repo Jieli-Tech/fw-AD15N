@@ -38,7 +38,7 @@ enum {
     ///音乐操作相关消息
     MSG_PP,
     MSG_NEXT_FILE,
-    MSG_PRIV_FILE,
+    MSG_PREV_FILE,
     MSG_NEXT_DIR,
     MSG_A_PLAY,
     MSG_VOL_DOWN,

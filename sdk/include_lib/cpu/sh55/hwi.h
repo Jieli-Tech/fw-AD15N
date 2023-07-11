@@ -23,6 +23,7 @@
 #define IRQ_MCTMRX_IDX      20
 #define IRQ_USB_SOF_IDX     21
 #define IRQ_USB_CTRL_IDX    22
+#define IRQ_LP_TIMER0_IDX    23
 #define IRQ_ALINK0_IDX      25
 
 #define IRQ_UART0_IDX      10

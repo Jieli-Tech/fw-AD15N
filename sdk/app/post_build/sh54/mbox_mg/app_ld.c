@@ -145,6 +145,12 @@ SECTIONS
 		   . = ALIGN(4);
             *(.vp_data);
         }
+		.d_vc_data
+		{
+			. = howling_data_end;
+		   . = ALIGN(4);
+			*(.voicechanger_data);
+		}
         .d_pcm_eq_data
         {
             . = howling_data_end;

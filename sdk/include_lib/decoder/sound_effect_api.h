@@ -15,8 +15,9 @@
 #define B_DEC_KICK       BIT(8)
 
 #define B_REC_RUN        BIT(9)
+#define B_DEC_FIRST      BIT(10)
 
-#define B_LOUDSPEAKER    BIT(10)
+// #define B_LOUDSPEAKER    BIT(10)
 // #define B_HALFWAY_EFFECT BIT(9)
 
 typedef struct _sound_in_obj {

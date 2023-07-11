@@ -161,7 +161,7 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
         p_curr_sound->enable = 0;
         sound_out_obj *first_sound = p_curr_sound;
         void *cbuff_o = p_dec->sound.p_obuf;
-#if AUDIO_SPEED_EN
+#if defined(AUDIO_SPEED_EN) && (AUDIO_SPEED_EN)
         //变速变调
         if (dec_ctl & BIT_SPEED) {
             p_curr_sound->effect = speed_api(cbuff_o, p_dec->sr, (void **) &p_next_sound);
@@ -200,11 +200,11 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
                 //log_info(" -loop save succ!\n");
                 p_dec->p_dp_buf = check_dp(dbuff);
             } else {
-                log_info(" -loop save fail!\n");
+                /* log_info(" -loop save fail!\n"); */
             }
         }
 
-        p_dec->sound.enable |= B_DEC_ENABLE | B_DEC_KICK;
+        p_dec->sound.enable |= B_DEC_ENABLE | B_DEC_KICK | B_DEC_FIRST;
         kick_decoder();
         log_info("decode succ \n");
     } else {
@@ -259,11 +259,22 @@ void decoder_soft_hook(void)
 
 void decoder_pause(dec_obj *obj)
 {
+    if (!if_decoder_is_run(obj)) {
+        return;
+    }
     obj->sound.enable ^= B_DEC_PAUSE;
     if (0 == (obj->sound.enable & B_DEC_PAUSE)) {
         obj->sound.enable |= B_DEC_KICK;
         kick_decoder();
     }
+}
+
+u32 if_decoder_is_run(dec_obj *obj)
+{
+    if (NULL == obj) {
+        return 0;
+    }
+    return (obj->sound.enable & B_DEC_RUN_EN);
 }
 
 u32 if_decoder_pause(dec_obj *obj)
@@ -321,7 +332,7 @@ void decoder_stop_now(dec_obj *obj)
 
 void decoder_ff(dec_obj *obj, u8 step)
 {
-    if (!(obj->function & DEC_FUNCTION_FF_FR)) {
+    if ((!if_decoder_is_run(obj)) || (!(obj->function & DEC_FUNCTION_FF_FR))) {
         // 不支持快进快退
         return ;
     }
@@ -335,7 +346,7 @@ void decoder_ff(dec_obj *obj, u8 step)
 
 void decoder_fr(dec_obj *obj, u8 step)
 {
-    if (!(obj->function & DEC_FUNCTION_FF_FR)) {
+    if ((!if_decoder_is_run(obj)) || (!(obj->function & DEC_FUNCTION_FF_FR))) {
         // 不支持快进快退
         return ;
     }
@@ -354,6 +365,12 @@ void decoder_set_file_size(dec_obj *obj, u32 size)
     AUDIO_FLEN_PARA file_parm;
     file_parm.flen = size;
     ops->dec_confing(obj->p_dbuf, SET_FILE_TOTAL_LEN, &file_parm);
+}
+
+SEC(.audio_d.text.cache.L2)
+void kick_decoder(void)
+{
+    bit_set_swi(0);
 }
 
 

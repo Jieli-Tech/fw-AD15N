@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<CodeBlocks_project_file>
+<FileVersion major="1" minor="6" />
+<Project>
+<Option title="AD17N_mcu" />
+<Option compiler="pi32_lto_compiler" />
+<Build>
+<Target title="Release">
+<Option output="app/post_build/sh57/sdk.elf" prefix_auto="0" extension_auto="0" />
+<Option object_output="obj/Release/" />
+<Option type="1" />
+<Option compiler="pi32_lto_compiler" />
+<Compiler>
+<Add option="-DD_TOY_SDK=1" />
+<Add option="-DD_APP_TOY=1" />
+<Add option="-integrated-as" />
+<Add option="-g" />
+<Add option="-Oz" />
+<Add option="-flto" />
+<Add option="-fprefer-gnu-section" />
+<Add option="-fms-extensions" />
+<Add option="-Wno-empty-body" />
+<Add option="-Wcast-align" />
+<Add option="-Wundef" />
+<Add option="-DFPGA=0" />
+<Add option="-DCPU_SH57=1" />
+<Add option="-DFLASH_CACHE_ENABLE=0" />
+<Add option="-DAUDIO_ADC_EN=0" />
+<Add option="-DHAS_USB_EN=0" />
+<Add option="-DHAS_UPDATE_EN=0" />
+<Add option="-DFATFS_ENABLE=0" />
+<Add option="-DSIMPLE_FATFS_ENABLE=0" />
+<Add option="-DSYS_VM_EN=0" />
+<Add option="-DNOFLOAT" />
+<Add directory="app/bsp/cpu/sh57" />
+<Add directory="include_lib" />
+<Add directory="include_lib/common" />
+<Add directory="include_lib/cpu/sh57" />
+<Add directory="include_lib/cpu" />
+<Add directory="include_lib/fs" />
+<Add directory="include_lib/msg" />
+<Add directory="include_lib/fs/sydf" />
+<Add directory="include_lib/dev_mg" />
+<Add directory="include_lib/device" />
+<Add directory="include_lib/agreement" />
+<Add directory="app/post_build/sh57" />
+<Add directory="app/bsp/lib" />
+<Add directory="app/bsp/start/sh57" />
+<Add directory="app/bsp/common" />
+<Add directory="app/bsp/common/fs" />
+<Add directory="app/bsp/common/msg" />
+<Add directory="app/bsp/common/file_operate" />
+<Add directory="app/bsp/common/api_mg" />
+<Add directory="app/bsp/common/power_manage" />
+<Add directory="app/bsp/common/usb" />
+<Add directory="app/bsp/common/vm" />
+<Add directory="app/src/mcu" />
+<Add directory="app/src/mcu/sh57" />
+</Compiler>
+<Linker>
+<Add option="--plugin-opt=save-temps" />
+<Add option="--gc-sections" />
+<Add option="--start-group" />
+<Add option="include_lib/liba/sh57/mcu/cpu_lib.a" />
+<Add option="include_lib/liba/sh57/mcu/efuse_trim_value_lib.a" />
+<Add option="--end-group" />
+<Add option="-Tapp/post_build/sh57/app.ld" />
+<Add option="-M=app/post_build/sh57/app.map" />
+</Linker>
+<ExtraCommands>
+<Add before="$compiler $options $includes -D__LD__ -E -P app\bsp\common\app_modules_h.c -o tmp_app2022.txt" />
+<Add before="$compiler $options $includes -D__LD__ -E -P app\src\mcu\sh57\app_modules_cpu_h.c -o tmp_app2022_cpu.txt" />
+<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh57\mcu\app_ld.c -o app\post_build\sh57\app.ld" />
+<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh57\mcu\download_bat.c -o app\post_build\sh57\download.bat" />
+<Add before="tools\utils\fixbat.exe app\post_build\sh57\download.bat" />
+<Mode before="always" />
+<Add after="app\post_build\sh57\download.bat sdk" />
+<Mode after="always" />
+</ExtraCommands>
+</Target>
+</Build>
+<Unit filename="app/bsp/common/rtc/rtc.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh57/clock.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh57/port_init.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh57/power_api.h" />
+<Unit filename="app/bsp/cpu/sh57/power_app.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh57/power_config.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh57/uart.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/lib/common.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/lib/printf-stdarg.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/start/sh57/init.h" />
+<Unit filename="app/src/mcu/app_config.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/src/mcu/app_config.h" />
+<Unit filename="app/src/mcu/mcu_app.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/src/mcu/mcu_app.h" />
+<Unit filename="app/src/mcu/sh57/app_modules.h" />
+<Unit filename="app/src/mcu/sh57/init.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/src/mcu/sh57/main.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="include_lib/asm_type.h" />
+<Unit filename="include_lib/audio/audio.h" />
+<Unit filename="include_lib/common/boot.h" />
+<Unit filename="include_lib/common/circular_buf.h" />
+<Unit filename="include_lib/common/common.h" />
+<Unit filename="include_lib/common/config.h" />
+<Unit filename="include_lib/common/errno-base.h" />
+<Unit filename="include_lib/common/fcvt.h" />
+<Unit filename="include_lib/common/includes.h" />
+<Unit filename="include_lib/common/jiffies.h" />
+<Unit filename="include_lib/common/log.h" />
+<Unit filename="include_lib/common/printf.h" />
+<Unit filename="include_lib/common/wdt.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power/p33_access.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power/p33_api.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power/p33_sfr.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power/power_api.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power/power_app.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power/power_port.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power/power_reset.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power/power_wakeup.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power/rtc.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power_interface.h" />
+<Unit filename="include_lib/cpu/sh57/clock.h" />
+<Unit filename="include_lib/cpu/sh57/cpu.h" />
+<Unit filename="include_lib/cpu/sh57/csfr.h" />
+<Unit filename="include_lib/cpu/sh57/efuse.h" />
+<Unit filename="include_lib/cpu/sh57/gpio.h" />
+<Unit filename="include_lib/cpu/sh57/hwi.h" />
+<Unit filename="include_lib/cpu/sh57/io_imap.h" />
+<Unit filename="include_lib/cpu/sh57/io_omap.h" />
+<Unit filename="include_lib/cpu/sh57/irq.h" />
+<Unit filename="include_lib/cpu/sh57/maskrom.h" />
+<Unit filename="include_lib/cpu/sh57/sfr.h" />
+<Unit filename="include_lib/cpu/sh57/sh57.h" />
+<Unit filename="include_lib/cpu/sh57/typedef.h" />
+<Unit filename="include_lib/cpu/sh57/uart.h" />
+<Unit filename="include_lib/msg/msg.h" />
+</Project>
+</CodeBlocks_project_file>

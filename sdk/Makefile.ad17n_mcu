@@ -1,0 +1,312 @@
+
+# make 编译并下载
+# make VERBOSE=1 显示编译详细过程
+# make clean 清除编译临时文件
+#
+# 注意： Linux 下编译方式：
+#     1. 从 http://pkgman.jieliapp.com/doc/all 处找到下载链接
+#     2. 下载后，解压到 /opt/jieli 目录下，保证
+#       /opt/jieli/common/bin/clang 存在（注意目录层次）
+#     3. 确认 ulimit -n 的结果足够大（建议大于8096），否则链接可能会因为打开文件太多而失败
+#       可以通过 ulimit -n 8096 来设置一个较大的值
+#
+
+# 工具路径设置
+ifeq ($(OS), Windows_NT)
+# Windows 下工具链位置
+TOOL_DIR := C:/JL/pi32/bin
+CC    := clang.exe
+CXX   := clang.exe
+LD    := lto-wrapper.exe
+AR    := llvm-ar.exe
+MKDIR := mkdir_win -p
+RM    := rm -rf
+
+SYS_LIB_DIR := C:/JL/pi32/libc
+SYS_INC_DIR := C:/JL/pi32/include/libc
+EXT_CFLAGS  := # Windows 下不需要 -D__SHELL__
+export PATH:=$(TOOL_DIR);$(PATH)
+
+## 后处理脚本
+FIXBAT          := tools\utils\fixbat.exe # 用于处理 utf8->gbk 编码问题
+POST_SCRIPT     := app\post_build\sh57\download.bat
+RUN_POST_SCRIPT := $(POST_SCRIPT)
+else
+# Linux 下工具链位置
+TOOL_DIR := /opt/jieli/pi32/bin
+CC    := clang
+CXX   := clang
+LD    := lto-wrapper
+AR    := lto-ar
+MKDIR := mkdir -p
+RM    := rm -rf
+export OBJDUMP := $(TOOL_DIR)/objdump
+export OBJCOPY := $(TOOL_DIR)/objcopy
+export OBJSIZEDUMP := $(TOOL_DIR)/objsizedump
+
+SYS_LIB_DIR := $(TOOL_DIR)/../lib
+SYS_INC_DIR := $(TOOL_DIR)/../include
+EXT_CFLAGS  := -D__SHELL__ # Linux 下需要这个保证正确处理 download.c
+export PATH:=$(TOOL_DIR):$(PATH)
+
+## 后处理脚本
+FIXBAT          := touch # Linux下不需要处理 bat 编码问题
+POST_SCRIPT     := app/post_build/sh57/download.sh
+RUN_POST_SCRIPT := bash $(POST_SCRIPT)
+endif
+
+CC  := $(TOOL_DIR)/$(CC)
+CXX := $(TOOL_DIR)/$(CXX)
+LD  := $(TOOL_DIR)/$(LD)
+AR  := $(TOOL_DIR)/$(AR)
+# 输出文件设置
+OUT_ELF   := app/post_build/sh57/sdk.elf
+OBJ_FILE  := $(OUT_ELF).objs.txt
+# 编译路径设置
+BUILD_DIR := ad17n_mcu_objs
+
+# 编译参数设置
+CFLAGS := \
+	-target pi32 \
+	-integrated-as \
+	-fno-builtin \
+	-mllvm -pi32-memreg-opt \
+	-mllvm -pi32-mem-offset-adj-opt \
+	-mllvm -pi32-const-spill \
+	-mllvm -pi32-enable-jz \
+	-mllvm -pi32-tailcall-opt \
+	-mllvm -inline-threshold=5 \
+	-mllvm -pi32-enable-itblock=1 \
+	-Oz \
+	-flto \
+	-integrated-as \
+	-g \
+	-Oz \
+	-flto \
+	-fprefer-gnu-section \
+	-fms-extensions \
+	-Wno-empty-body \
+	-Wcast-align \
+	-Wundef \
+
+
+# C++额外的编译参数
+CXXFLAGS :=
+
+
+# 宏定义
+DEFINES := \
+	-DD_TOY_SDK=1 \
+	-DD_APP_TOY=1 \
+	-DFPGA=0 \
+	-DCPU_SH57=1 \
+	-DFLASH_CACHE_ENABLE=0 \
+	-DAUDIO_ADC_EN=0 \
+	-DHAS_USB_EN=0 \
+	-DHAS_UPDATE_EN=0 \
+	-DFATFS_ENABLE=0 \
+	-DSIMPLE_FATFS_ENABLE=0 \
+	-DSYS_VM_EN=0 \
+	-DNOFLOAT \
+
+
+DEFINES += $(EXT_CFLAGS) # 额外的一些定义
+
+# 头文件搜索路径
+INCLUDES := \
+	-Iapp/bsp/cpu/sh57 \
+	-Iinclude_lib \
+	-Iinclude_lib/common \
+	-Iinclude_lib/cpu/sh57 \
+	-Iinclude_lib/cpu \
+	-Iinclude_lib/fs \
+	-Iinclude_lib/msg \
+	-Iinclude_lib/fs/sydf \
+	-Iinclude_lib/dev_mg \
+	-Iinclude_lib/device \
+	-Iinclude_lib/agreement \
+	-Iapp/post_build/sh57 \
+	-Iapp/bsp/lib \
+	-Iapp/bsp/start/sh57 \
+	-Iapp/bsp/common \
+	-Iapp/bsp/common/fs \
+	-Iapp/bsp/common/msg \
+	-Iapp/bsp/common/file_operate \
+	-Iapp/bsp/common/api_mg \
+	-Iapp/bsp/common/power_manage \
+	-Iapp/bsp/common/usb \
+	-Iapp/bsp/common/vm \
+	-Iapp/src/mcu \
+	-Iapp/src/mcu/sh57 \
+	-I$(SYS_INC_DIR) \
+
+
+# 需要编译的 .c 文件
+c_SRC_FILES := \
+	app/bsp/common/rtc/rtc.c \
+	app/bsp/cpu/sh57/clock.c \
+	app/bsp/cpu/sh57/port_init.c \
+	app/bsp/cpu/sh57/power_app.c \
+	app/bsp/cpu/sh57/power_config.c \
+	app/bsp/cpu/sh57/uart.c \
+	app/bsp/lib/common.c \
+	app/bsp/lib/printf-stdarg.c \
+	app/src/mcu/app_config.c \
+	app/src/mcu/mcu_app.c \
+	app/src/mcu/sh57/init.c \
+	app/src/mcu/sh57/main.c \
+
+
+# 需要编译的 .S 文件
+S_SRC_FILES :=
+
+
+# 需要编译的 .s 文件
+s_SRC_FILES :=
+
+
+# 需要编译的 .cpp 文件
+cpp_SRC_FILES :=
+
+
+# 需要编译的 .cc 文件
+cc_SRC_FILES :=
+
+
+# 需要编译的 .cxx 文件
+cxx_SRC_FILES :=
+
+
+# 链接参数
+LFLAGS := \
+	--plugin-opt=save-temps \
+	--gc-sections \
+	--start-group \
+	include_lib/liba/sh57/mcu/cpu_lib.a \
+	include_lib/liba/sh57/mcu/efuse_trim_value_lib.a \
+	--end-group \
+	-Tapp/post_build/sh57/app.ld \
+	-M=app/post_build/sh57/app.map \
+	--plugin-opt=-pi32-memreg-opt \
+	--plugin-opt=-pi32-mem-offset-adj-opt \
+	--plugin-opt=-pi32-const-spill \
+	--plugin-opt=-pi32-enable-jz \
+	--plugin-opt=-pi32-tailcall-opt \
+	--plugin-opt=-inline-threshold=5 \
+	--plugin-opt=-pi32-enable-itblock=1 \
+
+
+LIBPATHS := \
+	-L$(SYS_LIB_DIR) \
+
+
+LIBS := \
+	C:/JL/pi32/lib/libc.a \
+	C:/JL/pi32/lib/libm.a \
+	C:/JL/pi32/lib/libcompiler-rt.a \
+
+
+
+c_OBJS    := $(c_SRC_FILES:%.c=%.c.o)
+S_OBJS    := $(S_SRC_FILES:%.S=%.S.o)
+s_OBJS    := $(s_SRC_FILES:%.s=%.s.o)
+cpp_OBJS  := $(cpp_SRC_FILES:%.cpp=%.cpp.o)
+cxx_OBJS  := $(cxx_SRC_FILES:%.cxx=%.cxx.o)
+cc_OBJS   := $(cc_SRC_FILES:%.cc=%.cc.o)
+
+OBJS      := $(c_OBJS) $(S_OBJS) $(s_OBJS) $(cpp_OBJS) $(cxx_OBJS) $(cc_OBJS)
+DEP_FILES := $(OBJS:%.o=%.d)
+
+
+OBJS      := $(addprefix $(BUILD_DIR)/, $(OBJS))
+DEP_FILES := $(addprefix $(BUILD_DIR)/, $(DEP_FILES))
+
+
+VERBOSE ?= 0
+ifeq ($(VERBOSE), 1)
+QUITE :=
+else
+QUITE := @
+endif
+
+# 一些旧的 make 不支持 file 函数，需要 make 的时候指定 LINK_AT=0 make
+LINK_AT ?= 1
+
+# 表示下面的不是一个文件的名字，无论是否存在 all, clean, pre_build 这样的文件
+# 还是要执行命令
+# see: https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html
+.PHONY: all clean pre_build
+
+# 不要使用 make 预设置的规则
+# see: https://www.gnu.org/software/make/manual/html_node/Suffix-Rules.html
+.SUFFIXES:
+
+all: pre_build $(OUT_ELF)
+	$(info +POST-BUILD)
+	$(QUITE) $(RUN_POST_SCRIPT) sdk
+
+pre_build:
+	$(info +PRE-BUILD)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/bsp/common/app_modules_h.c -o tmp_app2022.txt
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/src/mcu/sh57/app_modules_cpu_h.c -o tmp_app2022_cpu.txt
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh57/mcu/app_ld.c -o app/post_build/sh57/app.ld
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh57/mcu/download_bat.c -o $(POST_SCRIPT)
+	$(QUITE) $(FIXBAT) $(POST_SCRIPT)
+
+clean:
+	$(QUITE) $(RM) $(OUT_ELF)
+	$(QUITE) $(RM) $(BUILD_DIR)
+
+
+
+ifeq ($(LINK_AT), 1)
+$(OUT_ELF): $(OBJS)
+	$(info +LINK $@)
+	$(shell $(MKDIR) $(@D))
+	$(file >$(OBJ_FILE), $(OBJS))
+	$(QUITE) $(LD) -o $(OUT_ELF) @$(OBJ_FILE) $(LFLAGS) $(LIBPATHS) $(LIBS)
+else
+$(OUT_ELF): $(OBJS)
+	$(info +LINK $@)
+	$(shell $(MKDIR) $(@D))
+	$(QUITE) $(LD) -o $(OUT_ELF) $(OBJS) $(LFLAGS) $(LIBPATHS) $(LIBS)
+endif
+
+
+$(BUILD_DIR)/%.c.o : %.c
+	$(info +CC $<)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.S.o : %.S
+	$(info +AS $<)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.s.o : %.s
+	$(info +AS $<)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.cpp.o : %.cpp
+	$(info +CXX $<)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.cxx.o : %.cxx
+	$(info +CXX $<)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.cc.o : %.cc
+	$(info +CXX $<)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+-include $(DEP_FILES)

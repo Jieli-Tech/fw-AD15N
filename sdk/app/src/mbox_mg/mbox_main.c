@@ -7,7 +7,7 @@
 #include "common/ui/ui_api.h"
 #include "common/mbox_common.h"
 #include "mbox_main.h"
-#include "vm.h"
+#include "vm_api.h"
 #include "line_in/line_in_mode.h"
 #include "fm/fm_radio.h"
 #include "usb_device/usb_device_mode.h"
@@ -78,7 +78,7 @@ void app_timer_loop(void)
     }
 
     if (0 == (cnt % 500)) {
-        uac_1s_sync();
+        /* uac_1s_sync(); */
     }
 #endif
 

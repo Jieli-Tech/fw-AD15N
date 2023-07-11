@@ -76,5 +76,6 @@
 #define SR_DEFAULT  32000
 
 
+#define dac_sp_handle(n)
 
 #endif

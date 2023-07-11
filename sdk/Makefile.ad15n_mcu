@@ -18,7 +18,7 @@ TOOL_DIR := C:/JL/pi32/bin
 CC    := clang.exe
 CXX   := clang.exe
 LD    := lto-wrapper.exe
-AR    := lto-ar.exe
+AR    := llvm-ar.exe
 MKDIR := mkdir_win -p
 RM    := rm -rf
 
@@ -35,7 +35,7 @@ else
 # Linux 下工具链位置
 TOOL_DIR := /opt/jieli/pi32/bin
 CC    := clang
-CXX   := clang++
+CXX   := clang
 LD    := lto-wrapper
 AR    := lto-ar
 MKDIR := mkdir -p
@@ -102,31 +102,11 @@ DEFINES := \
 	-DCPU_SH55=1 \
 	-DFLASH_CACHE_ENABLE=0 \
 	-DAUDIO_ADC_EN=0 \
-	-DSPEAKER_EN=0 \
-	-DVO_PITCH_EN=0 \
-	-DPCM_EQ_EN=0 \
-	-DAUX_EN=0 \
-	-DENCODER_EN=0 \
-	-DDECODER_UMP3_EN=0 \
-	-DDECODER_MP3_ST_EN=0 \
-	-DDECODER_WAV_EN=0 \
-	-DDECODER_F1A_EN=0 \
-	-DDECODER_MIDI_EN=0 \
-	-DDECODER_MIDI_KEYBOARD_EN=0 \
-	-DDECODER_A_EN=0 \
-	-DAUDIO_SPEED_EN=0 \
-	-DEXT_FLASH_EN=0 \
-	-DFM_EN=0 \
-	-DEEPROM_EN=0 \
 	-DHAS_USB_EN=0 \
-	-DHAS_SDMMC_EN=0 \
-	-DHAS_MIO_EN=0 \
 	-DHAS_UPDATE_EN=0 \
-	-DHAS_UART_UPDATE_EN=0 \
-	-DECHO_EN=0 \
-	-DHOWLING_EN=0 \
 	-DFATFS_ENABLE=0 \
 	-DSIMPLE_FATFS_ENABLE=0 \
+	-DSYS_VM_EN=0 \
 	-DNOFLOAT \
 
 
@@ -155,21 +135,24 @@ INCLUDES := \
 	-Iapp/bsp/common/api_mg \
 	-Iapp/bsp/common/power_manage \
 	-Iapp/bsp/common/usb \
+	-Iapp/bsp/common/vm \
 	-Iapp/src/mcu \
+	-Iapp/src/mcu/sh55 \
 	-I$(SYS_INC_DIR) \
 
 
 # 需要编译的 .c 文件
 c_SRC_FILES := \
+	app/bsp/common/rtc/rtc.c \
 	app/bsp/cpu/sh55/clock.c \
 	app/bsp/cpu/sh55/port_init.c \
 	app/bsp/cpu/sh55/power_api.c \
 	app/bsp/cpu/sh55/uart.c \
 	app/bsp/lib/common.c \
 	app/src/mcu/app_config.c \
-	app/src/mcu/init.c \
-	app/src/mcu/main.c \
 	app/src/mcu/mcu_app.c \
+	app/src/mcu/sh55/init.c \
+	app/src/mcu/sh55/main.c \
 
 
 # 需要编译的 .S 文件
@@ -262,6 +245,8 @@ all: pre_build $(OUT_ELF)
 
 pre_build:
 	$(info +PRE-BUILD)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/bsp/common/app_modules_h.c -o tmp_app2022.txt
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/src/mcu/sh55/app_modules_cpu_h.c -o tmp_app2022_cpu.txt
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh55/mcu/app_ld.c -o app/post_build/sh55/app.ld
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh55/mcu/download_bat.c -o $(POST_SCRIPT)
 	$(QUITE) $(FIXBAT) $(POST_SCRIPT)
@@ -288,38 +273,38 @@ endif
 
 $(BUILD_DIR)/%.c.o : %.c
 	$(info +CC $<)
-	@$(MKDIR) $(@D)
-	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 $(BUILD_DIR)/%.S.o : %.S
 	$(info +AS $<)
-	@$(MKDIR) $(@D)
-	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 $(BUILD_DIR)/%.s.o : %.s
 	$(info +AS $<)
-	@$(MKDIR) $(@D)
-	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 $(BUILD_DIR)/%.cpp.o : %.cpp
 	$(info +CXX $<)
-	@$(MKDIR) $(@D)
-	@$(CXX) $(CFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
 	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 $(BUILD_DIR)/%.cxx.o : %.cxx
 	$(info +CXX $<)
-	@$(MKDIR) $(@D)
-	@$(CXX) $(CFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
 	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 $(BUILD_DIR)/%.cc.o : %.cc
 	$(info +CXX $<)
-	@$(MKDIR) $(@D)
-	@$(CXX) $(CFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
 	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 -include $(DEP_FILES)

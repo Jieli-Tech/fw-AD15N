@@ -17,7 +17,7 @@
 #include "common/ui/ui_api.h"
 #include "music/music_play.h"
 #include "fm/fm_iic_dri.h"
-#include "vm.h"
+#include "vm_api.h"
 #include "fm_radio.h"
 #include "audio.h"
 #include "dac.h"

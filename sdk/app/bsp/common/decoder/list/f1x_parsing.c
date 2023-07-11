@@ -67,7 +67,7 @@ u32 set_play_file(void *priv, u32 *startpos, u32 *endpos)
 }
 
 //struct
-EX_PlayFile_STRUCT f1x_io[MAX_F1A_CHANNEL] = {
+const EX_PlayFile_STRUCT f1x_io[MAX_F1A_CHANNEL] = {
     {
         &g_f1x_ctl[0],      //input跟output函数的第一个参数，解码器不做处理，直接回传，可以为NULL
         set_play_file,
@@ -167,7 +167,7 @@ void *f1x_play_api(void *pfile, u8 *loop_tab, u32 size, u8 index, u32 addr)
         }
     }
     /* log_info("f1x parsing succ\n"); */
-    return &f1x_io[index];
+    return (void *)&f1x_io[index];
 }
 
 

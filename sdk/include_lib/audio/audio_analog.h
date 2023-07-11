@@ -23,6 +23,10 @@ void apa_analog_open(void);
 void apa_analog_close(void);
 void rdac_analog_open(void);
 void rdac_analog_close(void);
+void set_apap_output_status(char val);
+void set_apan_output_status(char val);
+void single_apa_startup_mute_cb(void);
+void apa_hardware_mute(u8 mute);
 
 u32 adc_analog_open(ADC_MODE mode, u32 ch);
 void adc_analog_close(void);

@@ -5,14 +5,14 @@
 #include "msg.h"
 /* #include "bsp_loop.h" */
 /* #include "app_power_mg.h" */
-#include "vm.h"
+#include "vm_api.h"
 #include "dac_api.h"
 /* #include "adc_drv.h" */
 #include "key.h"
 #if KEY_IR_EN
 #include "irflt.h"
 #endif
-#if TFG_SD_EN
+#if defined(TFG_SD_EN) && (TFG_SD_EN)
 #include "sdmmc/sd_host_api.h"
 #endif
 
@@ -30,7 +30,7 @@ void modules_tick_timer(u32 cnt)
     }
 
     if (0 == (cnt % 100)) { //200ms
-#if TFG_SD_EN
+#if defined(TFG_SD_EN) && (TFG_SD_EN)
         sd0_dev_detect(NULL);
 #endif
     }

@@ -16,10 +16,14 @@
 #include "errno-base.h"
 #include "sine_play.h"
 #include "src_api.h"
-#if VO_PITCH_EN
+#include "app_modules.h"
+#if defined(VO_PITCH_EN) && (VO_PITCH_EN)
 #include "vo_pitch_api.h"
 #endif
-#if PCM_EQ_EN
+#if defined(VO_CHANGER_EN) && (VO_CHANGER_EN)
+#include "voiceChanger_av_api.h"
+#endif
+#if defined(PCM_EQ_EN) && (PCM_EQ_EN)
 #include "pcm_eq_api.h"
 #endif
 #include "echo_api.h"
@@ -46,7 +50,7 @@ typedef struct __audio_adc_speaker {
     EFFECT_OBJ    *p_vp;            // p_curr_sound->effect;
 } __aa_speaker;
 
-__aa_speaker aa_speaker ;//AT(.aux_data);
+__aa_speaker aa_speaker AT(.speaker_data);
 
 
 AT(.audio_a.text.cache.L2)
@@ -116,19 +120,21 @@ void audio_adc_speaker_start(void)
 
 
 #if  HOWLING_EN     //陷波抑制啸叫
-    /* p_curr_sound = link_notch_howling_sound(p_curr_sound, &cbuf_ads_o, 0, adc_sr); */
+    p_curr_sound = link_notch_howling_sound(p_curr_sound, &cbuf_ads_o, 0, adc_sr);
 #endif
 #if  HOWLING_EN     //移频抑制啸叫
     p_curr_sound = link_pitchshift_howling_sound(p_curr_sound, &cbuf_ads_o, 0, adc_sr);
 #endif
-
+    /*voice_toy工程 混响、voice_pitch、voice_changer、eq资源复用，只能开其中一个，或者自行调整ld文件 */
 #if ECHO_EN         //混响
-    /* p_curr_sound = link_echo_sound(p_curr_sound, &cbuf_ads_o, 0, adc_sr); */
+    p_curr_sound = link_echo_sound(p_curr_sound, &cbuf_ads_o, 0, adc_sr);
 #endif
 #if VO_PITCH_EN     //多种音效集合库：机器人、rap、两种变速变调；
-    /* p_curr_sound = link_voice_pitch_sound(p_curr_sound, &cbuf_ads_o, (void **)&aa_speaker.p_vp, VP_CMD_ROBOT); */
+    p_curr_sound = link_voice_pitch_sound(p_curr_sound, &cbuf_ads_o, (void **)&aa_speaker.p_vp, VP_CMD_ROBOT);
 #endif
-
+#if defined(VO_CHANGER_EN) && (VO_CHANGER_EN)
+    p_curr_sound = link_voice_changer_sound(p_curr_sound, &cbuf_ads_o, 0, adc_sr);
+#endif
 #if PCM_EQ_EN
     p_curr_sound = link_pcm_eq_sound(p_curr_sound, &cbuf_ads_o, 0, adc_sr, 1);
 #endif

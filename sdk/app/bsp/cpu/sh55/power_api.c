@@ -53,6 +53,11 @@ const struct low_power_param power_param = {
     .flash_pg       = TCFG_KEEP_FLASH_POWER_GATE,
     .vdc13_cap_en   = 0,									//根据vdc13引脚是否有外部电容来配置, 1.外挂电容 0.无外挂电容
     .vddio_keep = 0,
+#if VIRTUAL_RTC_EN
+    .virtual_rtc_en = 1,
+#else
+    .virtual_rtc_en = 0,
+#endif
 };
 
 /**************************************************** wk_param *********************************************************/

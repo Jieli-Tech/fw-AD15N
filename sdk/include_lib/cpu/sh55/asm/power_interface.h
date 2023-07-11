@@ -128,6 +128,7 @@ struct low_power_param {
     u8 flash_pg;
 
     u8 vdc13_cap_en;
+    u8 virtual_rtc_en;
 };
 
 struct soft_flag0_t {
@@ -363,5 +364,7 @@ extern const struct lp_target lp_target_end[];
 #define list_for_each_lp_target(p) \
     for (p = lp_target_begin; p < lp_target_end; p++)
 /*-----------------------------------------------------------*/
+
+#include "power/p33.h"
 
 #endif

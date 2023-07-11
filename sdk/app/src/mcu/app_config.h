@@ -1,5 +1,6 @@
 #ifndef __APP_CONFIG_H__
 #define __APP_CONFIG_H__
+#include "app_modules.h"
 
 #define ENABLE_THIS_MOUDLE					1
 #define DISABLE_THIS_MOUDLE					0
@@ -55,12 +56,6 @@
 /*sd 和 flash复用使能*/
 #define SPI_SD_IO_REUSE					0//SPI_FLASH与SD卡模块IO复用使能
 
-/*---------SD Configuration---------------*/
-#if HAS_SDMMC_EN
-#define TFG_SD_EN				0//ENABLE
-#else
-#define TFG_SD_EN				0//ENABLE
-#endif
 /*
  ******************注意事项******************
  *功能描述：实现spi_flash和sd卡的引脚复用
@@ -68,7 +63,7 @@
  */
 #define SPI_SD_IO_REUSE			0//SPI_FLASH与SD卡模块IO复用使能
 ///<SD卡接口选择
-#if TFG_SD_EN
+#if defined(TFG_SD_EN) && (TFG_SD_EN)
 #define SDMMCA_EN
 #endif
 

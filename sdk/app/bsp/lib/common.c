@@ -26,12 +26,12 @@ void udelay(u32 us)
     }
 }
 
-__attribute__((always_inline))
+AT(.critical_hook.text.cache.L2)
 void enter_critical_hook()
 {
     tick_timer_set_api(1);
 }
-__attribute__((always_inline))
+AT(.critical_hook.text.cache.L2)
 void exit_critical_hook()
 {
     tick_timer_set_api(0);

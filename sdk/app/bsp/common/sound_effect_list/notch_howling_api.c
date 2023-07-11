@@ -10,7 +10,7 @@
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
 #include "log.h"
-
+#if defined(NOTCH_HOWLING_EN) && (NOTCH_HOWLING_EN)
 
 void *notch_howling_api(void *obuf, u32 sr, void **ppsound)
 {
@@ -180,3 +180,4 @@ void *notch_howling_phy(void *obuf, NotchHowlingParam *parm, void **ppsound)
     /* cbuf_init(&howling_hdl->cbuf, &notch_howling_in_buf[0], sizeof(notch_howling_in_buf)); */
     return howling_obj;
 }
+#endif

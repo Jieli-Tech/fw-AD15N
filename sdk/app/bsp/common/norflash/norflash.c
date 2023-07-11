@@ -340,7 +340,7 @@ static void clock_critical_exit()
 /* CLOCK_CRITICAL_HANDLE_REG(spi_norflash, clock_critical_enter, clock_critical_exit); */
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 static u8 S25FL512_enter_4byte_addr(u32 id);
-void norflash_enter_4byte_addr()
+static void ext_norflash_enter_4byte_addr()
 {
     spi_cs_l();
     spi_write_byte(0xb7);
@@ -398,7 +398,7 @@ int _norflash_open(void *arg)
                     return 1;
                 }
             } else {
-                norflash_enter_4byte_addr();
+                ext_norflash_enter_4byte_addr();
                 is4byte_address = 1;
             }
         }

@@ -8,6 +8,7 @@
 #include "midi_file0_h.h"
 #include "dac.h"
 #include "audio_adc.h"
+#include "app_modules.h"
 
 
 #define LOG_TAG_CONST       NORM
@@ -239,7 +240,6 @@ bool vp_cmd_case(VP_CMD cmd, VOICE_PITCH_PARA_STRUCT *p_vc_parm)
 }
 
 
-#endif
 
 
 
@@ -289,5 +289,6 @@ void *vp_phy(void *obuf, VOICE_PITCH_PARA_STRUCT *pvp_parm, void **ppsound)
     return &vp_obj;
 }
 
+#endif
 
 

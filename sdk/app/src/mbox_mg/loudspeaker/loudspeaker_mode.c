@@ -24,23 +24,32 @@
 #include "sdmmc/sd_host_api.h"
 #include "adc_drv.h"
 #include "decoder_api.h"
+#include "app_modules.h"
 #include "src_api.h"
 #include "echo_api.h"
 #include "howling_api.h"
 #include "vo_pitch_api.h"
 #include "pcm_eq_api.h"
+#if VO_CHANGER_EN
+#include "voiceChanger_av_api.h"
+#endif
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
 #include "log.h"
 
 #ifdef LOUDSPEAKER_EN
-#define  LOUDSPEAKER_EFFECT ((HOWLING_EN && USER_HOWLING_CONFIG) || (ECHO_EN && USER_ECHO_CONFIG))
+#define  LOUDSPEAKER_EFFECT ((HOWLING_EN) || (ECHO_EN))
 
 
-#if HOWLING_EN
+#if (PITCHSHIFT_HOWLING_EN) && (NOTCH_HOWLING_EN)
+#if defined(PITCHSHIFT_HOWLING_EN) && (PITCHSHIFT_HOWLING_EN)
 #define  SHIFT_FREQ_HOWLING  0                   //移频啸叫抑制
+#endif
+
+#if defined(NOTCH_HOWLING_EN) && (NOTCH_HOWLING_EN)
 #define  NOTCH_HOWLING       1                   //陷波啸叫抑制
+#endif
 #define  HOWLING_SEL        NOTCH_HOWLING//SHIFT_FREQ_HOWLING//
 #endif
 
@@ -49,7 +58,7 @@ static u8 obuf_mic[512]   AT(.loudspeaker_data);  //mic输出缓冲buf
 
 #if LOUDSPEAKER_EFFECT
 static cbuffer_t cbuf_dac AT(.loudspeaker_data);
-#if (HOWLING_SEL == NOTCH_HOWLING)
+#if defined(NOTCH_HOWLING) && (HOWLING_SEL == NOTCH_HOWLING)
 static u8 obuf_dac[1024]   AT(.loudspeaker_data); //dac接收缓冲buf
 #else
 static u8 obuf_dac[512]   AT(.loudspeaker_data);  //dac接收缓冲buf
@@ -183,7 +192,8 @@ void *loudspeaker_add_effect(sound_out_obj *p_sound, u32 sr)
     sound_out_obj *p_next_sound = 0;
     p_curr_sound = p_sound;
 
-#if (HOWLING_EN && USER_HOWLING_CONFIG)
+#if HOWLING_EN
+#if defined(PITCHSHIFT_HOWLING_EN) && (PITCHSHIFT_HOWLING_EN)
 #if (HOWLING_SEL == SHIFT_FREQ_HOWLING)
 //移频啸叫抑制
     p_curr_sound = link_pitchshift_howling_sound(p_curr_sound, &cbuf_dac, 0, sr);
@@ -205,7 +215,9 @@ void *loudspeaker_add_effect(sound_out_obj *p_sound, u32 sr)
     }
 #endif
 #endif
+#endif
 
+#if defined(NOTCH_HOWLING_EN) && (NOTCH_HOWLING_EN)
 #if (HOWLING_SEL == NOTCH_HOWLING)
 //陷波啸叫抑制
     p_curr_sound = link_notch_howling_sound(p_curr_sound, &cbuf_dac, 0, sr);
@@ -232,8 +244,9 @@ void *loudspeaker_add_effect(sound_out_obj *p_sound, u32 sr)
 #endif
 #endif
 #endif
+#endif
 
-#if (ECHO_EN && USER_ECHO_CONFIG)
+#if ECHO_EN
     //echo混响
     p_curr_sound = link_echo_sound(p_curr_sound, &cbuf_dac, 0, sr);
 #if 0
@@ -264,6 +277,10 @@ void *loudspeaker_add_effect(sound_out_obj *p_sound, u32 sr)
     /* 变音、echo与pcm_eq互斥，三者同时只可打开一个 */
 #if VO_PITCH_EN
     /* p_curr_sound = link_voice_pitch_sound(p_curr_sound, &cbuf_dac, 0, VP_CMD_ROBOT); */
+#endif
+
+#if VO_CHANGER_EN //测试用
+    /* p_curr_sound = link_voice_changer_sound(p_curr_sound, &cbuf_dac, 0, sr); */
 #endif
 
 #if PCM_EQ_EN
@@ -300,7 +317,7 @@ int loudspeaker_init(void)
     audio_adc_enable(MIC_PGA_G);
     u8 mic_gain = 7;
     SFR(JL_ADDA->ADA_CON2, 19, 5, mic_gain);//此处临时设置mic增益,后续等接口完善，再替换
-    fist_sound->enable |= (B_DEC_RUN_EN | B_LOUDSPEAKER);
+    fist_sound->enable |= B_DEC_RUN_EN;
     return 0;
 }
 
@@ -350,7 +367,7 @@ void loudspeaker_loop(void)
             /* work_mode++; */
             /* log_info("mode ++ %d\n", work_mode); */
             /* return; */
-#if (ECHO_EN && USER_ECHO_CONFIG)
+#if ECHO_EN
         case MSG_ECHO_EFF: {
             ECHO_PARM_SET parm = {0};
             parm.decayval = 60;              //decay(0~70)回声衰减比

@@ -239,43 +239,43 @@ const u16 iokey_msg_mbox_music_table[][IO_KEY_MAX_NUM] = {
 
 #if KEY_AD_EN
 #define ADKEY_MUSIC_SHORT_UP \
-							/*00*/		NO_MSG,\
-							/*01*/		NO_MSG,\
-							/*02*/		NO_MSG,\
-							/*03*/		NO_MSG,\
-							/*04*/		MSG_VOL_DOWN,\
-							/*05*/		MSG_VOL_UP,\
-							/*06*/		MSG_MUSIC_NEXT_EQ,\
-							/*07*/		MSG_MUSIC_PREV_FILE,\
-							/*08*/		MSG_MUSIC_NEXT_FILE,\
-							/*09*/		MSG_MUSIC_PP,\
+							/*00*/		MSG_MUSIC_PP,\
+							/*01*/		MSG_MUSIC_NEXT_FILE,\
+							/*02*/		MSG_MUSIC_PREV_FILE,\
+							/*03*/		MSG_MUSIC_NEXT_EQ,\
+							/*04*/		MSG_VOL_UP,\
+							/*05*/		MSG_VOL_DOWN,\
+							/*06*/		NO_MSG,\
+							/*07*/		NO_MSG,\
+							/*08*/		NO_MSG,\
+							/*09*/		NO_MSG,\
 
 #define ADKEY_MUSIC_LONG \
 							/*00*/		NO_MSG,\
-							/*01*/		NO_MSG,\
-							/*02*/		NO_MSG,\
-							/*03*/		NO_MSG,\
-							/*04*/		NO_MSG,\
-							/*05*/		MSG_NEXT_WORKMODE,\
-							/*06*/		MSG_NEXT_PLAYMODE,\
-							/*07*/		MSG_MUSIC_FR,\
-							/*08*/		MSG_MUSIC_FF,\
+							/*01*/		MSG_MUSIC_FF,\
+							/*02*/		MSG_MUSIC_FR,\
+							/*03*/		MSG_NEXT_PLAYMODE,\
+							/*04*/		MSG_NEXT_WORKMODE,\
+							/*05*/		NO_MSG,\
+							/*06*/		NO_MSG,\
+							/*07*/		NO_MSG,\
+							/*08*/		NO_MSG,\
 							/*09*/		NO_MSG,\
 
 #define ADKEY_MUSIC_HOLD \
 							/*00*/		NO_MSG,\
-							/*01*/		NO_MSG,\
-							/*02*/		NO_MSG,\
+							/*01*/		MSG_MUSIC_FF,\
+							/*02*/		MSG_MUSIC_FR,\
 							/*03*/		NO_MSG,\
 							/*04*/		NO_MSG,\
 							/*05*/		NO_MSG,\
 							/*06*/		NO_MSG,\
-							/*07*/		MSG_MUSIC_FR,\
-							/*08*/		MSG_MUSIC_FF,\
+							/*07*/		NO_MSG,\
+							/*08*/		NO_MSG,\
 							/*09*/		NO_MSG,\
 
 #define ADKEY_MUSIC_LONG_UP \
-							/*00*/		NO_MSG,\
+							/*00*/		MSG_POWER_OFF,\
 							/*01*/		NO_MSG,\
 							/*02*/		NO_MSG,\
 							/*03*/		NO_MSG,\
@@ -284,7 +284,7 @@ const u16 iokey_msg_mbox_music_table[][IO_KEY_MAX_NUM] = {
 							/*06*/		NO_MSG,\
 							/*07*/		NO_MSG,\
 							/*08*/		NO_MSG,\
-							/*09*/		MSG_POWER_OFF,\
+							/*09*/		NO_MSG,\
 
 #define ADKEY_MUSIC_DOUBLE_KICK \
 							/*00*/		NO_MSG,\

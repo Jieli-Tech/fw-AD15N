@@ -29,7 +29,7 @@ MIDI_CTRL_PARM midi_ctrl_parmt                  AT(.midi_ctrl_buf);
 dec_obj dec_midi_ctrl_hld;
 cbuffer_t cbuf_midi_ctrl                        AT(.midi_ctrl_buf);
 u16 obuf_midi_ctrl[DAC_DECODER_BUF_SIZE / 2]    AT(.midi_ctrl_buf);
-u32 midi_ctrl_decode_buff[(5616 + 3) / 4]       AT(.midi_ctrl_buf);
+u32 midi_ctrl_decode_buff[(3944) / 4]       AT(.midi_ctrl_buf);
 #define MIDI_CTRL_CAL_BUF ((void *)&midi_ctrl_decode_buff[0])
 
 
@@ -111,7 +111,7 @@ void midi_ctrl_decode_init(void)
     err = vfs_openbypath(pvfs, &pvfile, "/midi_ctrl_prog/MIDI_CTRL.mda");
     if (err != 0) {
         log_info("midi ctrl mda open fail, try old midi_cfg.bin!\n");
-        err = vfs_openbypath(pvfs, &pvfile, "/midi_cfg/midi_cfg.bin");
+        err = vfs_openbypath(pvfs, &pvfile, "/midi_cfg/00_MIDI.mda");
         if (err != 0) {
             vfs_fs_close(&pvfs);
             return;

@@ -11,9 +11,11 @@
 #define LOG_TAG             "[normal]"
 #include "log.h"
 
-#if AUDIO_SPEED_EN
+#if defined(AUDIO_SPEED_EN) && (1 == AUDIO_SPEED_EN)
 
 SPEED_PITCH_PARA_STRUCT sp_parm AT(.sp_data);
+
+const int SPITCH_PARM_PR_HResolution = 0;
 
 void *speed_api(void *obuf, u32 insample, void **ppsound)
 {
@@ -21,7 +23,11 @@ void *speed_api(void *obuf, u32 insample, void **ppsound)
 
 
     sp_parm.insample = insample;             //输入音频采样率
-    sp_parm.pitchrate = 100;           //变调比例，128:为不变调，<128:音调变高，>128:音调变低，声音更沉
+    if (SPITCH_PARM_PR_HResolution) {
+        sp_parm.pitchrate = 32768;           //变调比例，32768:为不变调，<32768:音调变高，>32768:音调变低，声音更沉
+    } else {
+        sp_parm.pitchrate = 100;           //变调比例，128:为不变调，<128:音调变高，>128:音调变低，声音更沉
+    }
     //speedout/speedin 的结果大于0.6小于1.8.变快变慢最好都不要超过2倍
     sp_parm.speedin = 80;
     sp_parm.speedout = 144;          //sp_parm.speedin：sp_parm.speedout为变速比例，例如speedin=1;speedout=2;则为变慢1倍

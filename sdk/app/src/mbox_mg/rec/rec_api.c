@@ -7,7 +7,7 @@
 #include "vfs.h"
 #include "music/device.h"
 #include "music/get_music_file.h"
-#include "vm.h"
+#include "vm_api.h"
 #include "music/break_point.h"
 #include "vfs_fat.h"
 

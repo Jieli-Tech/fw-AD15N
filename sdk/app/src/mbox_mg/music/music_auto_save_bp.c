@@ -12,7 +12,7 @@
 #include "eq.h"
 #include "music_auto_save_bp.h"
 #include "vfs.h"
-#include "vm.h"
+#include "vm_api.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -32,16 +32,19 @@ static masb_ctl_t masb_ctl;
 
 static void masb_vm_refrag(void)
 {
+#if (USE_OLD_VM == SYS_MEMORY_SELECT)
     u8 data = 0;
     vm_defrag_line_set(10);//设置vm空间整理的阀值,按照百分比计算，取值范围0~100
     vm_read(VM_INDEX_AUTO_BP, &data, 1);
     data ++;
     vm_write(VM_INDEX_AUTO_BP, &data, 1);
     vm_defrag_line_set(VM_REFRAG_LINE);//设置vm空间整理的阀值,按照百分比计算，取值范围0~100
+#endif
 }
 
 void masb_run_init(u32 music_play_total_time)
 {
+#if (USE_OLD_VM == SYS_MEMORY_SELECT)
     masb_ctl.time_cnt = 0;
     if (music_play_total_time == 0) {
         masb_ctl.save_fre = 0;
@@ -72,10 +75,12 @@ void masb_run_init(u32 music_play_total_time)
     u32 min_save_fre = (music_play_total_time / bp_max_save_times + 1);
     masb_ctl.save_fre = (min_save_fre > MIN_SAVE_FRE) ? min_save_fre : MIN_SAVE_FRE;
     log_info("music save fre:%d \n", masb_ctl.save_fre);
+#endif
 }
 
 void masb_bp_save_scan(void)
 {
+#if (USE_OLD_VM == SYS_MEMORY_SELECT)
 #define SCAN_FRE		500//ms
     if (masb_ctl.save_fre == 0) {
         return;
@@ -87,6 +92,7 @@ void masb_bp_save_scan(void)
         masb_ctl.time_cnt = 0;
         save_music_break_point(device_active, 1);
     }
+#endif
 }
 
 

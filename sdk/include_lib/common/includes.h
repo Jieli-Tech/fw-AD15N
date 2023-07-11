@@ -10,11 +10,9 @@
 
 #include "uart.h"
 #include "jiffies.h"
-#ifndef CPU_SH57
 #include "printf.h"
 #include "string.h"
 #include "gpio.h"
-#endif
 
 #endif
 

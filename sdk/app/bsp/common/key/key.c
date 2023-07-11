@@ -77,9 +77,7 @@ static void key2msg_emit(u8 key_status, u8 key_num, u8 key_type)
     if (key_msg_filter) {
         u16 msg = key_msg_filter(key_status, key_num, key_type);
         if (msg != NO_MSG) {
-#if (defined(KEY_VOICE_EN) && KEY_VOICE_EN)
             d_key_voice_kick();
-#endif
             int ret = post_msg(1, msg);
             if (ret != 0) {
                 key_printf("error !!! msg pool full \n");

@@ -1,6 +1,6 @@
 #include "mbox_common.h"
 #include "msg.h"
-#include "vm.h"
+#include "vm_api.h"
 #include "power_api.h"
 
 #define LOG_TAG_CONST       NORM

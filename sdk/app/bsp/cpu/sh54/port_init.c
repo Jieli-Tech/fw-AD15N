@@ -20,6 +20,24 @@
 #include "usb/otg.h"
 #include "usb/host/usb_host.h"
 
+void port_hd_init(void)
+{
+    u16 porta_hd0 = 0xffff;
+    u16 porta_hd1 = 0;
+    JL_PORTA->HD0 = porta_hd0;
+    JL_PORTA->HD1 = porta_hd1;
+
+    u16 portb_hd0 = 0xffff;
+    u16 portb_hd1 = 0;
+    JL_PORTB->HD0 = portb_hd0;
+    JL_PORTB->HD1 = portb_hd1;
+
+    u16 portd_hd0 = 0xffff;
+    u16 portd_hd1 = 0x10;
+    JL_PORTD->HD0 = portd_hd0;
+    JL_PORTD->HD1 = portd_hd1;
+}
+
 void port_init(void)
 {
     u32 sdtap_ch = -1;
@@ -66,6 +84,8 @@ void port_init(void)
     //For Flash Boot data port
     JL_PORTD->DIE = portd_die;
     JL_PORTD->DIEH = portd_dieh;
+
+    port_hd_init();
 
     //USB
     JL_USB->CON0 = 0;

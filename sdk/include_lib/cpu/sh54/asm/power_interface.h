@@ -377,4 +377,6 @@ extern const struct lp_target lp_target_end[];
     for (p = lp_target_begin; p < lp_target_end; p++)
 /*-----------------------------------------------------------*/
 
+#include "power/p33.h"
+
 #endif

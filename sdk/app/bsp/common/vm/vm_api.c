@@ -1,19 +1,26 @@
-#include "vm.h"
-#define LABEL_INDEX_LEN_CRC_SIZE        (4)
+#include "vm_api.h"
+#include "config.h"
 
 #define LOG_TAG_CONST       NORM
-#define LOG_TAG             "[normal]"
+#define LOG_TAG             "[vm_api]"
 #include "log.h"
 
-
-static u8 vm_buff[sizeof(VM_INDEX_BUFF) + LABEL_INDEX_LEN_CRC_SIZE];
-
-u16 vm_buff_alloc(u8 **buf)
+int syscfg_vm_init(u32 mem_addr, u32 mem_size)
 {
-    if (buf == NULL) {
-        return 0;
-    }
+    return syscfg_vm_init_api(mem_addr, mem_size);
+}
 
-    *buf = vm_buff;
-    return sizeof(vm_buff);
+int vm_read(u32 id, u8 *data_buf, u16 len)
+{
+    return vm_read_api(id, data_buf, len);
+}
+
+int vm_write(u32 id, u8 *data_buf, u16 len)
+{
+    return vm_write_api(id, data_buf, len);
+}
+
+void vm_pre_erase(void)
+{
+    vm_pre_erase_api();
 }

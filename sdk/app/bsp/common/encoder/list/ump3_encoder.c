@@ -31,7 +31,7 @@ u32 ump3_encode_api(void *p_file)
 {
     u32 buff_len, i;
     ENC_OPS *ops;
-    log_info("mp3_encode_api\n");
+    log_info("ump3_encode_api\n");
     ops = get_mp2_ops();
     buff_len = ops->need_buf();
     if (buff_len > sizeof(mp3_encode_buff)) {

@@ -303,6 +303,7 @@ FRESULT f_seek(FIL *fp, u32 offsize);
 FRESULT f_open(FIL *fp, char *path, u8 mode);
 extern FIL pfi;//文件信息结构体实体
 
+
 #endif /* FAT */
 
 

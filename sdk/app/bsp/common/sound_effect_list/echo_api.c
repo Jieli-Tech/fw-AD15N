@@ -4,6 +4,7 @@
 #include "decoder_api.h"
 #include "config.h"
 #include "sound_effect_api.h"
+#include "app_modules.h"
 
 
 #define LOG_TAG_CONST       NORM

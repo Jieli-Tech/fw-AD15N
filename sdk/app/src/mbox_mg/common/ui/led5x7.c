@@ -210,7 +210,7 @@ void LED5X7_clear(void)
     JL_PORTA->DIR |= LED_PORT_ALL;
     JL_PORTA->PU &= ~LED_PORT_ALL;
     JL_PORTA->PD &= ~LED_PORT_ALL;
-    JL_PORTA->HD0 &= ~LED_PORT_ALL;
+    JL_PORTA->HD0 |= LED_PORT_ALL;
     JL_PORTA->HD1 &= ~LED_PORT_ALL;
 }
 

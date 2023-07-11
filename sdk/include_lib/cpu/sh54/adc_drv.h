@@ -52,5 +52,5 @@ int adc_scan_once(u8 ch);
 u32 adc_value_to_voltage(u32 adc_vbg, u32 adc_vbat);
 
 u32 adc_get_voltage(u32 ch);
-
+#define	adc_sample_vbg()  (-1)
 #endif

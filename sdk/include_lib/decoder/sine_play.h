@@ -3,6 +3,7 @@
 
 #include "typedef.h"
 #include "tab_read.h"
+#include "app_config.h"
 
 
 typedef struct _sine_obj {
@@ -16,7 +17,7 @@ void sine_voice_kick(void);
 u32 sine_read(void *buff, u32 len);
 
 
-#define D_HAS_KEY_VOICE 1
+#define D_HAS_KEY_VOICE KEY_VOICE_EN
 
 #if D_HAS_KEY_VOICE
 #define d_key_voice_init  sine_voice_init

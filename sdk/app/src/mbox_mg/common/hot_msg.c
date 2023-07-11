@@ -9,7 +9,7 @@
 #include "music/play_file.h"
 #include "music/break_point.h"
 #include "dac_api.h"
-#include "vm.h"
+#include "vm_api.h"
 #include "app_power_mg.h"
 #include "audio.h"
 #include "usb/host/usb_host.h"

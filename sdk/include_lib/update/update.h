@@ -98,6 +98,10 @@ enum {
     FLASH_SIZE_ERROR,
 };
 
+u32 check_ufw_file(char *dev_name, char *up_file_path);
+u8 *user_get_ufw_vid(u8 *len);  //check ufw 文件后调用，返回vid指针
 u32 try_to_upgrade(char *dev_name, char *up_file_path);
+u32 try_to_upgrade_api(char *dev_name, char *up_file_path, bool check);
+u8 *user_get_flash_vid();  //从flash中获取vid
 
 #endif

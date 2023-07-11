@@ -1,5 +1,6 @@
 #ifndef _MBOX_CONFIG_H
 #define _MBOX_CONFIG_H
+#include "app_modules.h"
 #include "common/ui/ui_common.h"
 
 #define ENABLE								1
@@ -124,13 +125,8 @@ flash厂家联系评估写的频率是否是产品安全范围。
 /*sd 和 flash复用使能*/
 #define SPI_SD_IO_REUSE					0//SPI_FLASH与SD卡模块IO复用使能
 /*---------SD Configuration---------------*/
-#if HAS_SDMMC_EN
-#define TFG_SD_EN						1//ENABLE
-#else
-#define TFG_SD_EN						0//ENABLE
-#endif
 ///<SD卡接口选择
-#if TFG_SD_EN
+#if defined(TFG_SD_EN) && (TFG_SD_EN)
 #define SDMMCA_EN
 #endif
 
@@ -162,7 +158,7 @@ flash厂家联系评估写的频率是否是产品安全范围。
 #define  USB_DEVICE_CLASS_CONFIG             (MASSSTORAGE_CLASS|SPEAKER_CLASS|MIC_CLASS|HID_CLASS)  //配置usb从机模式支持的class
 
 #undef TCFG_OTG_MODE
-#define TCFG_OTG_MODE                       (TCFG_OTG_MODE_HOST|TCFG_OTG_MODE_SLAVE|TCFG_OTG_MODE_CHARGE|OTG_DET_DP_ONLY)
+#define TCFG_OTG_MODE                       (TCFG_OTG_MODE_HOST|TCFG_OTG_MODE_SLAVE|TCFG_OTG_MODE_CHARGE)
 #else
 #define  USB_DEVICE_CLASS_CONFIG            0
 #define TCFG_OTG_MODE                       0
@@ -175,12 +171,5 @@ flash厂家联系评估写的频率是否是产品安全范围。
 #define TCFG_OTG_MODE                       0
 #endif
 
-/*---------LOUDSPEAKER Configuration---------------*/
-#if (HOWLING_EN || ECHO_EN)
-#define LOUDSPEAKER_EN             			//支持扩音模式
-
-#define USER_HOWLING_CONFIG  				1     //啸叫抑制开关
-#define USER_ECHO_CONFIG     				1     //echo混响开关
-#endif
 
 #endif

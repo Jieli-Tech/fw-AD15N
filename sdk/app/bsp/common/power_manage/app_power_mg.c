@@ -2,9 +2,9 @@
 #include "adc_drv.h"
 #include "key.h"
 #include "msg.h"
-#include "asm/power/p33.h"
 #include "efuse.h"
 #include "clock.h"
+#include "asm/power_interface.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"

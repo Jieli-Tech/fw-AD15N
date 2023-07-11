@@ -67,11 +67,6 @@ static u8 get_iokey_value(void)
     } else if (IS_KEY2_DOWN()) {
         key_puts(" KEY2 ");
         key_num = 2;
-#ifdef CPU_SH57
-    } else if (IS_KEY3_DOWN()) {
-        key_puts(" KEY3 ");
-        key_num = 3;
-#endif
     }
 
     return key_filter(key_num);

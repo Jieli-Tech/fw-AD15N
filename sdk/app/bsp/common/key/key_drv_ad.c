@@ -38,8 +38,8 @@
 #define ADKEY1_8		((ADC10_04 + ADC10_00)/2)
 
 const u16 ad_key_table[] = {
-    ADKEY1_0, ADKEY1_1, ADKEY1_2, ADKEY1_3, ADKEY1_4,
-    ADKEY1_5, ADKEY1_6, ADKEY1_7, ADKEY1_8
+    ADKEY1_8, ADKEY1_7, ADKEY1_6, ADKEY1_5, ADKEY1_4,
+    ADKEY1_3, ADKEY1_2, ADKEY1_1, ADKEY1_0
 };
 
 /*----------------------------------------------------------------------------*/
@@ -117,7 +117,7 @@ u8 get_adkey_value(void)
     }
 
     for (key_number = 0; key_number < sizeof(ad_key_table) / sizeof(ad_key_table[0]); key_number++) {
-        if (key_value > ad_key_table[key_number]) {
+        if (key_value < ad_key_table[key_number]) {
             break;
         }
     }

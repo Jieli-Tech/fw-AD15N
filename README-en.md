@@ -1,10 +1,10 @@
 # fw-AD14N-AD15N-AC104N
-About Firmware for Generic MCU SDK（AD14N-AD15N-AC104N series）, Support AD14N,AD15N,AC104N
+About Firmware for Generic MCU SDK（AD1x-457_AC104 series）, Support AD14N,AD15N,AC104N,AD17N
 
 [tag download]:https://github.com/Jieli-Tech/fw-AD15N/tags
 [tag_badgen]:https://img.shields.io/github/v/tag/Jieli-Tech/fw-AD15N?style=plastic&labelColor=ffffff&color=informational&label=Tag&
 
-# fw-AD14N-AD15N-AC104N_SDK   [![tag][tag_badgen]][tag download]
+# fw-AD1x-457_AC104_SDK   [![tag][tag_badgen]][tag download]
 
 [中文](./README.md) | EN
 
@@ -37,13 +37,15 @@ Documentation
 
 * Chipset brief : [SoC datasheet](./doc)
 
-* Product Select Guide : [SoC Select Guide](./doc/SoC_Select_Guide.md); [SoC Select Guide.pdf](./doc/杰理科技AD14_AD15系列语音MCU选型表.pdf)
+* Product Select Guide : [SoC Select Guide](./doc/SoC_Select_Guide.md); [SoC Select Guide.pdf](./doc/杰理科技AD14_AD15_AD17系列语音MCU选型表.pdf)
 
-* SDK Version: [SDK History](doc/AD14N-AD15N-AC104N_SDK_发布版本信息.pdf)
+* SDK Version: [SDK History](doc/AD1x-457_AC104_SDK_发布版本信息.pdf)
 
-* SDK introduction : [SDK quick start guide](./doc/AD14N_AD15N_AC104N_SDK手册.pdf)
+* SDK introduction : [SDK quick start guide](./doc/AD14N_AD15N_AD17N_AC104N_SDK手册.pdf)
 
-* SDK architure : [SDK module architure ](./doc/architure)
+* SDK Online documentation : [SDK Online documentation](https://doc.zh-jieli.com/AD14/zh-cn/master/index.html)
+
+* SDK architure : [SDK module architure ](./doc/)
 
 * Video resource: [Video resource](https://space.bilibili.com/3493277347088769/dynamic)
 
@@ -53,11 +55,9 @@ Build
 -------------
 Select a project to build. The following folders contains buildable projects:
 
-* APP_TOY: ./sdk/AD14N_app_mg.cbp ./sdk/AD15N_app_mg.cbp, usage: 
+* APP_TOY: ./sdk/AD14N_voice_toy.cbp ./sdk/AD15N_voice_toy.cbp ./sdk/AD17N_voice_toy.cbp, usage: 
 
-* APP_SIMPLE: ./sdk/AD14N_simple.cbp ./sdk/AD15N_simple.cbp, usage: 
-
-* APP_MCU: ./sdk/AD14N_mcu.cbp ./sdk/AD15N_mcu.cbp, usage:  
+* APP_MCU: ./sdk/AD14N_mcu.cbp ./sdk/AD15N_mcu.cbp ./sdk/AD17N_mcu.cbp, usage:  
 
 * APP_MUSIC_BOX_: ./sdk/AC104N_mbox_mg , usage:  
 
@@ -119,5 +119,5 @@ Community
 Disclaimer
 ------------
 
-AD15N_SDK supports development with AD15 series devices.
-AD15 Series devices (which are pre-production) and Toy applications are supported for development in Release for production and deployment in end products.
+AD1x-457_AC104_SDK supports development with AD14/AD15/AC104/AD17 series devices.
+AD15/AD14/AD17 Series devices (which are pre-production) and Toy applications are supported for development in Release for production and deployment in end products.

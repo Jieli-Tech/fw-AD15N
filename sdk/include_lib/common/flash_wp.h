@@ -9,10 +9,10 @@
 #define FLASH_WP_INFO_PATH  "/dir_sys_info/wp_flash.bin"
 #define FLASH_WP_HEAD_TAG   (0x20220823)
 
-// #define FLASH_WP_UART_DEBUG
+#define FLASH_WP_UART_DEBUG
 #ifdef FLASH_WP_UART_DEBUG
-#define wp_printf         log_info
-#define wp_buf            log_info_hexdump
+#define wp_printf         log_debug
+#define wp_buf            log_debug_hexdump
 #else
 #define wp_printf(...)
 #define wp_buf(...)

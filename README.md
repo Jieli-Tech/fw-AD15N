@@ -1,10 +1,10 @@
-# fw-AD14N-AD15N-AC104N
-About Firmware for Generic MCU SDK（AD14N-AD15N-AC104N series）, Support AD14N,AD15N,AC104N
+# fw-AD14N-AD15N-AC104N-AD17N
+About Firmware for Generic MCU SDK（AD1x-457_AC104 series）, Support AD14N,AD15N,AC104N,AD17N
 
 [tag download]:https://github.com/Jieli-Tech/fw-AD15N/tags
 [tag_badgen]:https://img.shields.io/github/v/tag/Jieli-Tech/fw-AD15N?style=plastic&labelColor=ffffff&color=informational&label=Tag&
 
-# fw-AD14N-AD15N-AC104N_SDK   [![tag][tag_badgen]][tag download]
+# fw-AD1x-457_AC104_SDK   [![tag][tag_badgen]][tag download]
 
 中文 | [EN](./README-en.md)
 
@@ -35,11 +35,13 @@ AD14N-AD15N 系列通用MCU SDK 固件程序
 
 * 芯片简介 : [SoC 数据手册扼要](./doc)
 
-* 芯片选型号手册 : [SoC 选型手册](./doc/SoC_Select_Guide.md)；[SoC 选型手册.pdf](./doc/杰理科技AD14_AD15系列语音MCU选型表.pdf)
+* 芯片选型号手册 : [SoC 选型手册](./doc/SoC_Select_Guide.md)；[SoC 选型手册.pdf](./doc/杰理科技AD14_AD15_AD17系列语音MCU选型表.pdf)
 
-* SDK 版本信息 : [SDK 历史版本](doc/AD14N-AD15N-AC104N_SDK_发布版本信息.pdf)
+* SDK 版本信息 : [SDK 历史版本](doc/AD1x-457_AC104_SDK_发布版本信息.pdf)
 
-* SDK 介绍文档 : [SDK 快速开始简介](./doc/AD14N_AD15N_AC104N_SDK手册.pdf)
+* SDK 介绍文档 : [SDK 快速开始简介](./doc/AD14N_AD15N_AD17N_AC104N_SDK手册.pdf)
+
+* SDK 在线文档 : [SDK 在线文档](https://doc.zh-jieli.com/AD14/zh-cn/master/index.html)
 
 * SDK 结构文档 : [SDK 模块结构](./doc/)
 
@@ -53,11 +55,9 @@ AD14N-AD15N 系列通用MCU SDK 固件程序
 -------------
 请选择以下一个工程进行编译，下列目录包含了便于开发的工程文件：
 
-* 玩具类应用 : ./sdk/AD14N_app_mg.cbp ./sdk/AD15N_app_mg.cbp , 适用领域：
+* 玩具类应用 : ./sdk/AD14N_voice_toy.cbp ./sdk/AD15N_voice_toy.cbp ./sdk/AD17N_voice_toy.cbp, 适用领域：
 
-* 示例类应用 : ./sdk/AD14N_simple.cbp ./sdk/AD15N_simple.cbp ，适用领域：
-
-* 通用MCU应用 : ./sdk/AD14N_mcu.cbp ./sdk/AD15N_mcu.cbp ，适用领域：
+* 通用MCU应用 : ./sdk/AD14N_mcu.cbp ./sdk/AD15N_mcu.cbp ./sdk/AD17N_mcu.cbp，适用领域：
 
 * 小音箱应用: ./sdk/AC104N_mbox_mg ，适用领域： 
 
@@ -120,5 +120,5 @@ MCU信息
 免责声明
 ------------
 
-AD15N_SDK 支持AD15 系列芯片开发.
-AD15 系列芯片支持了通用MCU 常见应用，可以作为开发，评估，样品，甚至量产使用，对应SDK 版本见Release
+AD1x-457_AC104_SDK 支持AD14/AD15/AC104/AD17 系列芯片开发.
+AD15/AD14/AD17 系列芯片支持了通用MCU 常见应用，可以作为开发，评估，样品，甚至量产使用，对应SDK 版本见Release

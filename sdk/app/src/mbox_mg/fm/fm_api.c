@@ -18,7 +18,7 @@
 #include "mbox_main.h"
 #include "common/ui/ui_api.h"
 #include "clock.h"
-#include "vm.h"
+#include "vm_api.h"
 #include "common/mbox_common.h"
 
 #if	BK1080

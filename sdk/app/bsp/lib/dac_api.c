@@ -11,7 +11,9 @@
 #include "uart.h"
 #include "config.h"
 #include "audio.h"
-#include "decoder_api.h"
+/* #include "decoder_api.h" */
+#include "decoder_mge.h"
+#include "sound_effect_api.h"
 #include "audio_analog.h"
 #include "mio_api.h"
 #include "sine_play.h"
@@ -133,6 +135,19 @@ void dac_off_api(void)
 /* { */
 /* dac_sr_set(dac_sr_lookup(sr)); */
 /* } */
+SEC(.audio_d.text.cache.L2)
+bool dac_cbuff_active(void *sound_hld)
+{
+    sound_out_obj *psound = sound_hld;
+    if (psound->enable & (B_DEC_PAUSE | B_DEC_FIRST)) {
+        if (cbuf_get_data_size(psound->p_obuf) >= (cbuf_get_space(psound->p_obuf) / 2)) {
+            psound->enable &= ~B_DEC_FIRST;
+        }
+        return false;
+    } else {
+        return true;
+    }
+}
 
 AT(.audio_d.text.cache.L2)
 void fill_dac_fill_phy(u8 *buf, u32 len)
@@ -199,7 +214,7 @@ void fill_dac_fill_phy(u8 *buf, u32 len)
                 p_cnt[i] = 0;
                 rptr[i] = cbuf_read_alloc(dac_mge.sound[i]->p_obuf, &olen[i]);
                 if (0 == olen[i]) {
-                    /* log_char('y'); */
+                    log_char('y');
                     rptr[i] = 0;
                 }
 
@@ -210,6 +225,7 @@ void fill_dac_fill_phy(u8 *buf, u32 len)
             t_sp = (t_sp * dac_mge.vol_phy) / (MAX_PHY_VOL + 1);
         }
         t_sp += sp_buf[sp_cnt];
+        dac_sp_handle(t_sp);
         if (t_sp > 32767) {
             t_sp = 32767;
         } else if (t_sp < -32768) {

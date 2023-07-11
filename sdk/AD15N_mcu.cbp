@@ -26,31 +26,11 @@
 <Add option="-DCPU_SH55=1" />
 <Add option="-DFLASH_CACHE_ENABLE=0" />
 <Add option="-DAUDIO_ADC_EN=0" />
-<Add option="-DSPEAKER_EN=0" />
-<Add option="-DVO_PITCH_EN=0" />
-<Add option="-DPCM_EQ_EN=0" />
-<Add option="-DAUX_EN=0" />
-<Add option="-DENCODER_EN=0" />
-<Add option="-DDECODER_UMP3_EN=0" />
-<Add option="-DDECODER_MP3_ST_EN=0" />
-<Add option="-DDECODER_WAV_EN=0" />
-<Add option="-DDECODER_F1A_EN=0" />
-<Add option="-DDECODER_MIDI_EN=0" />
-<Add option="-DDECODER_MIDI_KEYBOARD_EN=0" />
-<Add option="-DDECODER_A_EN=0" />
-<Add option="-DAUDIO_SPEED_EN=0" />
-<Add option="-DEXT_FLASH_EN=0" />
-<Add option="-DFM_EN=0" />
-<Add option="-DEEPROM_EN=0" />
 <Add option="-DHAS_USB_EN=0" />
-<Add option="-DHAS_SDMMC_EN=0" />
-<Add option="-DHAS_MIO_EN=0" />
 <Add option="-DHAS_UPDATE_EN=0" />
-<Add option="-DHAS_UART_UPDATE_EN=0" />
-<Add option="-DECHO_EN=0" />
-<Add option="-DHOWLING_EN=0" />
 <Add option="-DFATFS_ENABLE=0" />
 <Add option="-DSIMPLE_FATFS_ENABLE=0" />
+<Add option="-DSYS_VM_EN=0" />
 <Add option="-DNOFLOAT" />
 <Add directory="app/bsp/cpu/sh55" />
 <Add directory="include_lib" />
@@ -73,7 +53,9 @@
 <Add directory="app/bsp/common/api_mg" />
 <Add directory="app/bsp/common/power_manage" />
 <Add directory="app/bsp/common/usb" />
+<Add directory="app/bsp/common/vm" />
 <Add directory="app/src/mcu" />
+<Add directory="app/src/mcu/sh55" />
 </Compiler>
 <Linker>
 <Add option="--plugin-opt=save-temps" />
@@ -86,6 +68,8 @@
 <Add option="-M=app/post_build/sh55/app.map" />
 </Linker>
 <ExtraCommands>
+<Add before="$compiler $options $includes -D__LD__ -E -P app\bsp\common\app_modules_h.c -o tmp_app2022.txt" />
+<Add before="$compiler $options $includes -D__LD__ -E -P app\src\mcu\sh55\app_modules_cpu_h.c -o tmp_app2022_cpu.txt" />
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh55\mcu\app_ld.c -o app\post_build\sh55\app.ld" />
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh55\mcu\download_bat.c -o app\post_build\sh55\download.bat" />
 <Add before="tools\utils\fixbat.exe app\post_build\sh55\download.bat" />
@@ -95,19 +79,21 @@
 </ExtraCommands>
 </Target>
 </Build>
+<Unit filename="app/bsp/common/rtc/rtc.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/clock.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/port_init.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/power_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh55/power_api.h" />
 <Unit filename="app/bsp/cpu/sh55/uart.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/lib/common.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/start/sh54_sh55/init.h" />
 <Unit filename="app/src/mcu/app_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/src/mcu/app_config.h" />
-<Unit filename="app/src/mcu/init.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/src/mcu/init.h" />
-<Unit filename="app/src/mcu/main.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/src/mcu/mcu_app.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/src/mcu/mcu_app.h" />
+<Unit filename="app/src/mcu/sh55/app_modules.h" />
+<Unit filename="app/src/mcu/sh55/init.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/src/mcu/sh55/main.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="include_lib/asm_type.h" />
 <Unit filename="include_lib/common/boot.h" />
 <Unit filename="include_lib/common/circular_buf.h" />

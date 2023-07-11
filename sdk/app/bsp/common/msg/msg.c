@@ -10,8 +10,10 @@
 #define LOG_TAG             "[msg]"
 #include "log.h"
 
-#define MSG_ENTER_CRITICAL() _OS_ENTER_CRITICAL(BIT(IRQ_TICKTMR_IDX) | BIT(IRQ_AUDIO_IDX))
-#define MSG_EXIT_CRITICAL()  _OS_EXIT_CRITICAL()
+/* #define MSG_ENTER_CRITICAL() _OS_ENTER_CRITICAL(BIT(IRQ_TICKTMR_IDX) | BIT(IRQ_AUDIO_IDX)) */
+/* #define MSG_EXIT_CRITICAL()  _OS_EXIT_CRITICAL() */
+#define MSG_ENTER_CRITICAL() OS_ENTER_CRITICAL()
+#define MSG_EXIT_CRITICAL()  OS_EXIT_CRITICAL()
 
 #define EVENT_TOTAL     (1+(sizeof(event2msg)/2 -1)/32)
 
@@ -70,6 +72,9 @@ static void event_init(void)
 
 static void clear_one_event(u32 event)
 {
+    if (event >= ARRAY_SIZE(event2msg)) {
+        return;
+    }
     CPU_SR_ALLOC();
     OS_ENTER_CRITICAL();
     event_buf[event / 32] &= ~BIT(event % 32);
@@ -157,7 +162,7 @@ int get_msg(int len, int *msg)
     }
 
     u32 rlen = cbuf_read(&msg_cbuf, (void *)(msg + 1), param_len * sizeof(int));
-    if (param_len != rlen * sizeof(int)) {
+    if ((param_len * sizeof(int)) != rlen) {
         /* OS_EXIT_CRITICAL(); */
         MSG_EXIT_CRITICAL();
         return MSG_CBUF_ERROR;
@@ -170,6 +175,9 @@ int get_msg(int len, int *msg)
 
 int post_event(int event)
 {
+    if (event >= ARRAY_SIZE(event2msg)) {
+        return MSG_EVENT_PARAM_ERROR;
+    }
     CPU_SR_ALLOC();
     /* log_info("evenr post : 0x%x\n", event); */
     OS_ENTER_CRITICAL();

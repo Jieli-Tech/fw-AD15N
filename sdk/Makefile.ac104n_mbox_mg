@@ -18,7 +18,7 @@ TOOL_DIR := C:/JL/pi32/bin
 CC    := clang.exe
 CXX   := clang.exe
 LD    := lto-wrapper.exe
-AR    := lto-ar.exe
+AR    := llvm-ar.exe
 MKDIR := mkdir_win -p
 RM    := rm -rf
 
@@ -35,7 +35,7 @@ else
 # Linux 下工具链位置
 TOOL_DIR := /opt/jieli/pi32/bin
 CC    := clang
-CXX   := clang++
+CXX   := clang
 LD    := lto-wrapper
 AR    := lto-ar
 MKDIR := mkdir -p
@@ -98,36 +98,37 @@ CXXFLAGS :=
 DEFINES := \
 	-DD_MBOX_SDK=1 \
 	-DD_APP_MBOX=1 \
-	-DMAX_F1A_CHANNEL=2 \
 	-DFPGA=0 \
 	-DCPU_SH54=1 \
 	-DFLASH_CACHE_ENABLE=1 \
 	-DAUDIO_ADC_EN=1 \
-	-DSPEAKER_EN=1 \
-	-DVO_PITCH_EN=1 \
-	-DPCM_EQ_EN=1 \
-	-DAUX_EN=1 \
-	-DENCODER_EN=1 \
-	-DDECODER_UMP3_EN=1 \
-	-DDECODER_MP3_ST_EN=1 \
-	-DDECODER_WAV_EN=1 \
-	-DDECODER_F1A_EN=1 \
-	-DDECODER_MIDI_EN=1 \
-	-DDECODER_MIDI_KEYBOARD_EN=0 \
-	-DDECODER_A_EN=1 \
-	-DAUDIO_SPEED_EN=1 \
-	-DEXT_FLASH_EN=0 \
-	-DFM_EN=1 \
-	-DEEPROM_EN=0 \
+	-DSPEAKER_EN \
+	-DHAS_VOICE_PITCH_EN \
+	-DHAS_VOICE_CHANGER_EN \
+	-DHAS_PCM_EQ_EN \
+	-DAUX_EN \
+	-DENCODER_EN \
+	-DHAS_UMP3_DECODER \
+	-DHAS_MP3_ST_DECODER \
+	-DHAS_WAV_DECODER \
+	-DHAS_F1A_DECODER \
+	-DHAS_MAX_F1A_NUMBER=2 \
+	-DHAS_MIDI_DECODER \
+	-DHAS_A_DECODER \
+	-DHAS_SPEED_EN \
+	-DHAS_EXT_FLASH_EN \
+	-DHAS_FM_EN \
 	-DHAS_USB_EN=1 \
-	-DHAS_SDMMC_EN=1 \
-	-DHAS_MIO_EN=1 \
+	-DHAS_SDMMC_EN \
+	-DHAS_MIO_PLAYER \
 	-DHAS_UPDATE_EN=1 \
-	-DHAS_UART_UPDATE_EN=1 \
-	-DECHO_EN=1 \
-	-DHOWLING_EN=1 \
+	-DHAS_UART_UPDATE_EN \
+	-DHAS_ECHO_EN \
+	-DHOWLING_EN \
 	-DFATFS_ENABLE=1 \
 	-DSIMPLE_FATFS_ENABLE=0 \
+	-DSYS_VM_EN=1 \
+	-DHAS_MP3_ENCODER \
 	-DNOFLOAT \
 
 
@@ -172,6 +173,7 @@ INCLUDES := \
 	-Iapp/bsp/common/norflash \
 	-Iapp/bsp/common/spi_soft \
 	-Iapp/bsp/common/reserved_area \
+	-Iapp/bsp/common/vm \
 	-Iapp/bsp/modules \
 	-Iapp/bsp/modules/timer \
 	-Iapp/src/mbox_mg \
@@ -181,10 +183,12 @@ INCLUDES := \
 	-Iapp/bsp/common/fm/bk1080 \
 	-Iinclude_lib/agreement \
 	-Iapp/bsp/common/uart_update \
+	-Iapp/src/mbox_mg/sh54 \
 	-Iapp/bsp/common/speaker \
 	-Iinclude_lib/speaker \
 	-Iapp/bsp/common/vo_pitch \
 	-Iinclude_lib/vo_pitch \
+	-Iinclude_lib/vo_changer \
 	-Iapp/bsp/common/usb \
 	-Iapp/bsp/common/usb/device \
 	-Iapp/bsp/common/usb/host \
@@ -206,11 +210,10 @@ c_SRC_FILES := \
 	app/bsp/common/decoder/list/ump3_api.c \
 	app/bsp/common/decoder/list/wav_api.c \
 	app/bsp/common/decoder/mio_api.c \
+	app/bsp/common/decoder/mp_io.c \
 	app/bsp/common/decoder/sine_play.c \
 	app/bsp/common/encoder/encoder_api.c \
-	app/bsp/common/encoder/list/a_encoder.c \
 	app/bsp/common/encoder/list/mp3_encoder.c \
-	app/bsp/common/encoder/list/ump3_encoder.c \
 	app/bsp/common/fm/bk1080/Bk1080.c \
 	app/bsp/common/fm/fm_iic_dri.c \
 	app/bsp/common/fm/qn8035/QN8035.c \
@@ -229,14 +232,17 @@ c_SRC_FILES := \
 	app/bsp/common/key/key_matrix.c \
 	app/bsp/common/key/key_touch.c \
 	app/bsp/common/msg/msg.c \
+	app/bsp/common/norflash/norflash.c \
 	app/bsp/common/power_manage/app_power_mg.c \
 	app/bsp/common/reserved_area/reserved_area.c \
+	app/bsp/common/rtc/rtc.c \
 	app/bsp/common/sound_effect_list/echo_api.c \
 	app/bsp/common/sound_effect_list/howling_pitchshifter_api.c \
 	app/bsp/common/sound_effect_list/notch_howling_api.c \
 	app/bsp/common/sound_effect_list/pcm_eq_api.c \
 	app/bsp/common/sound_effect_list/speed_api.c \
 	app/bsp/common/sound_effect_list/vo_pitch_api.c \
+	app/bsp/common/sound_effect_list/voicechanger.c \
 	app/bsp/common/speaker/speak_api.c \
 	app/bsp/common/spi_soft/spi_soft.c \
 	app/bsp/common/uart_update/uart_update.c \
@@ -257,6 +263,8 @@ c_SRC_FILES := \
 	app/bsp/common/usb/usb_host_config.c \
 	app/bsp/common/usb/usb_test.c \
 	app/bsp/common/usb/usr/usb_audio_interface.c \
+	app/bsp/common/vm/new_vm/nvm_api.c \
+	app/bsp/common/vm/old_vm/ovm_api.c \
 	app/bsp/common/vm/vm_api.c \
 	app/bsp/cpu/sh54/adc_drv.c \
 	app/bsp/cpu/sh54/clock.c \
@@ -268,6 +276,7 @@ c_SRC_FILES := \
 	app/bsp/cpu/sh54/port_init.c \
 	app/bsp/cpu/sh54/port_wkup.c \
 	app/bsp/cpu/sh54/power_api.c \
+	app/bsp/cpu/sh54/spi1.c \
 	app/bsp/cpu/sh54/uart.c \
 	app/bsp/cpu/sh54/uart_dev.c \
 	app/bsp/lib/adc_api.c \
@@ -338,6 +347,8 @@ cxx_SRC_FILES :=
 LFLAGS := \
 	--plugin-opt=save-temps \
 	--gc-sections \
+	include_lib/liba/sh54/mbox_mg/old_vm_lib.a \
+	include_lib/liba/sh54/mbox_mg/new_vm_lib.a \
 	--start-group \
 	include_lib/liba/sh54/mbox_mg/cpu_lib.a \
 	include_lib/liba/sh54/mbox_mg/address_lib.a \
@@ -359,21 +370,22 @@ LFLAGS := \
 	include_lib/liba/sh54/mbox_mg/uart_update_lib.a \
 	include_lib/liba/sh54/mbox_mg/agreement.a \
 	include_lib/liba/sh54/mbox_mg/encoder_mge_lib.a \
-	include_lib/liba/ARCH/pi32_lto/lib_a_code.a \
 	include_lib/liba/ARCH/pi32_lto/lib_mp3_decode.a \
-	include_lib/liba/ARCH/pi32_lto/lib_mp2_encode.a \
 	include_lib/liba/ARCH/pi32_lto/lib_mp3_standard_decode.a \
-	include_lib/liba/ARCH/pi32_lto/lib_mp2standard_encode.a \
 	include_lib/liba/ARCH/pi32_lto/lib_wav_decode.a \
 	include_lib/liba/ARCH/pi32_lto/lib_f1a_decode.a \
 	include_lib/liba/ARCH/pi32_lto/lib_midi_decode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_limiter.a \
 	include_lib/liba/ARCH/pi32_lto/lib_a_decode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_mp2standard_encode.a \
 	include_lib/liba/sh54/mbox_mg/periphy_lib.a \
 	include_lib/liba/sh54/mbox_mg/file_manage_lib.a \
 	include_lib/liba/sh54/mbox_mg/sdmmc_lib.a \
 	include_lib/liba/ARCH/pi32_lto/lib_vopitch_cal.a \
+	include_lib/liba/ARCH/pi32_lto/lib_voiceChanger_va.a \
 	include_lib/liba/ARCH/pi32_lto/lib_pcm_eq.a \
 	include_lib/liba/sh54/mbox_mg/ae_pcm_eq_lib.a \
+	include_lib/liba/sh54/mbox_mg/dual_bank_lib.a \
 	--end-group \
 	-Tapp/post_build/sh54/app.ld \
 	-M=app/post_build/sh54/app.map \
@@ -437,6 +449,8 @@ all: pre_build $(OUT_ELF)
 
 pre_build:
 	$(info +PRE-BUILD)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/bsp/common/app_modules_h.c -o tmp_app2022.txt
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/src/mbox_mg/sh54/app_modules_cpu_h.c -o tmp_app2022_cpu.txt
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh54/mbox_mg/app_ld.c -o app/post_build/sh54/app.ld
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh54/mbox_mg/download_bat.c -o $(POST_SCRIPT)
 	$(QUITE) $(FIXBAT) $(POST_SCRIPT)
@@ -463,38 +477,38 @@ endif
 
 $(BUILD_DIR)/%.c.o : %.c
 	$(info +CC $<)
-	@$(MKDIR) $(@D)
-	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 $(BUILD_DIR)/%.S.o : %.S
 	$(info +AS $<)
-	@$(MKDIR) $(@D)
-	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 $(BUILD_DIR)/%.s.o : %.s
 	$(info +AS $<)
-	@$(MKDIR) $(@D)
-	@$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 $(BUILD_DIR)/%.cpp.o : %.cpp
 	$(info +CXX $<)
-	@$(MKDIR) $(@D)
-	@$(CXX) $(CFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
 	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 $(BUILD_DIR)/%.cxx.o : %.cxx
 	$(info +CXX $<)
-	@$(MKDIR) $(@D)
-	@$(CXX) $(CFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
 	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 $(BUILD_DIR)/%.cc.o : %.cc
 	$(info +CXX $<)
-	@$(MKDIR) $(@D)
-	@$(CXX) $(CFLAGS) $(CXXFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
 	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 -include $(DEP_FILES)

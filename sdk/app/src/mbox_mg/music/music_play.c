@@ -11,7 +11,7 @@
 #include "common/hot_msg.h"
 #include "mbox_main.h"
 #include "decoder_api.h"
-#include "vm.h"
+#include "vm_api.h"
 #include "key.h"
 #include "eq.h"
 #include "music_auto_save_bp.h"

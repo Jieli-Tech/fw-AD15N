@@ -2,6 +2,7 @@
 #include "bsp_loop.h"
 #include "msg.h"
 #include "errno-base.h"
+#include "app_config.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[bsp loop]"

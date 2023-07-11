@@ -1,0 +1,507 @@
+
+# make 编译并下载
+# make VERBOSE=1 显示编译详细过程
+# make clean 清除编译临时文件
+#
+# 注意： Linux 下编译方式：
+#     1. 从 http://pkgman.jieliapp.com/doc/all 处找到下载链接
+#     2. 下载后，解压到 /opt/jieli 目录下，保证
+#       /opt/jieli/common/bin/clang 存在（注意目录层次）
+#     3. 确认 ulimit -n 的结果足够大（建议大于8096），否则链接可能会因为打开文件太多而失败
+#       可以通过 ulimit -n 8096 来设置一个较大的值
+#
+
+# 工具路径设置
+ifeq ($(OS), Windows_NT)
+# Windows 下工具链位置
+TOOL_DIR := C:/JL/pi32/bin
+CC    := clang.exe
+CXX   := clang.exe
+LD    := lto-wrapper.exe
+AR    := llvm-ar.exe
+MKDIR := mkdir_win -p
+RM    := rm -rf
+
+SYS_LIB_DIR := C:/JL/pi32/libc
+SYS_INC_DIR := C:/JL/pi32/include/libc
+EXT_CFLAGS  := # Windows 下不需要 -D__SHELL__
+export PATH:=$(TOOL_DIR);$(PATH)
+
+## 后处理脚本
+FIXBAT          := tools\utils\fixbat.exe # 用于处理 utf8->gbk 编码问题
+POST_SCRIPT     := app\post_build\sh54\download.bat
+RUN_POST_SCRIPT := $(POST_SCRIPT)
+else
+# Linux 下工具链位置
+TOOL_DIR := /opt/jieli/pi32/bin
+CC    := clang
+CXX   := clang
+LD    := lto-wrapper
+AR    := lto-ar
+MKDIR := mkdir -p
+RM    := rm -rf
+export OBJDUMP := $(TOOL_DIR)/objdump
+export OBJCOPY := $(TOOL_DIR)/objcopy
+export OBJSIZEDUMP := $(TOOL_DIR)/objsizedump
+
+SYS_LIB_DIR := $(TOOL_DIR)/../lib
+SYS_INC_DIR := $(TOOL_DIR)/../include
+EXT_CFLAGS  := -D__SHELL__ # Linux 下需要这个保证正确处理 download.c
+export PATH:=$(TOOL_DIR):$(PATH)
+
+## 后处理脚本
+FIXBAT          := touch # Linux下不需要处理 bat 编码问题
+POST_SCRIPT     := app/post_build/sh54/download.sh
+RUN_POST_SCRIPT := bash $(POST_SCRIPT)
+endif
+
+CC  := $(TOOL_DIR)/$(CC)
+CXX := $(TOOL_DIR)/$(CXX)
+LD  := $(TOOL_DIR)/$(LD)
+AR  := $(TOOL_DIR)/$(AR)
+# 输出文件设置
+OUT_ELF   := app/post_build/sh54/sdk.elf
+OBJ_FILE  := $(OUT_ELF).objs.txt
+# 编译路径设置
+BUILD_DIR := ad14n_voice_toy_objs
+
+# 编译参数设置
+CFLAGS := \
+	-target pi32 \
+	-integrated-as \
+	-fno-builtin \
+	-mllvm -pi32-memreg-opt \
+	-mllvm -pi32-mem-offset-adj-opt \
+	-mllvm -pi32-const-spill \
+	-mllvm -pi32-enable-jz \
+	-mllvm -pi32-tailcall-opt \
+	-mllvm -inline-threshold=5 \
+	-mllvm -pi32-enable-itblock=1 \
+	-Oz \
+	-flto \
+	-integrated-as \
+	-g \
+	-Oz \
+	-flto \
+	-fprefer-gnu-section \
+	-fms-extensions \
+	-Wno-empty-body \
+	-Wcast-align \
+	-Wundef \
+
+
+# C++额外的编译参数
+CXXFLAGS :=
+
+
+# 宏定义
+DEFINES := \
+	-DD_TOY_SDK=1 \
+	-DD_APP_TOY=1 \
+	-DFPGA=0 \
+	-DCPU_SH54=1 \
+	-DFLASH_CACHE_ENABLE=1 \
+	-DAUDIO_ADC_EN=1 \
+	-DSPEAKER_EN \
+	-DHAS_VOICE_PITCH_EN \
+	-DHAS_VOICE_CHANGER_EN \
+	-DHAS_PCM_EQ_EN \
+	-DAUX_EN \
+	-DENCODER_EN \
+	-DHAS_UMP3_DECODER \
+	-DHAS_F1A_DECODER \
+	-DHAS_MAX_F1A_NUMBER=2 \
+	-DHAS_MIDI_DECODER \
+	-DHAS_MIDI_KEYBOARD_DECODER \
+	-DHAS_A_DECODER \
+	-DHAS_SPEED_EN \
+	-DHAS_EXT_FLASH_EN \
+	-DHAS_USB_EN=1 \
+	-DHAS_SDMMC_EN \
+	-DHAS_MIO_PLAYER \
+	-DHAS_UPDATE_EN=1 \
+	-DHAS_UART_UPDATE_EN \
+	-DHAS_ECHO_EN \
+	-DHOWLING_EN \
+	-DFATFS_ENABLE=0 \
+	-DSIMPLE_FATFS_ENABLE=1 \
+	-DSYS_VM_EN=1 \
+	-DHAS_MP3_ENCODER \
+	-DHAS_UMP3_ENCODER \
+	-DHAS_A_ENCODER \
+	-DHAS_SIMPLE_DEC_MODE \
+	-DNOFLOAT \
+
+
+DEFINES += $(EXT_CFLAGS) # 额外的一些定义
+
+# 头文件搜索路径
+INCLUDES := \
+	-Iapp/src \
+	-Iapp/bsp/common \
+	-Iapp/bsp/common/fs \
+	-Iapp/bsp/common/iic_soft \
+	-Iapp/bsp/common/eeprom \
+	-Iapp/bsp/common/msg \
+	-Iapp/bsp/common/file_operate \
+	-Iapp/bsp/common/api_mg \
+	-Iapp/bsp/common/key \
+	-Iapp/bsp/common/power_manage \
+	-Iapp/bsp/common/norflash \
+	-Iapp/bsp/common/spi_soft \
+	-Iapp/bsp/common/reserved_area \
+	-Iapp/bsp/common/uart_update \
+	-Iapp/bsp/common/vm \
+	-Iapp/bsp/cpu/sh54 \
+	-Iapp/bsp/cpu/sh54/spi \
+	-Iapp/bsp/cpu/sh54/wdt \
+	-Iapp/bsp/cpu/sh54/audio \
+	-Iapp/bsp/lib \
+	-Iapp/bsp/modules \
+	-Iapp/bsp/modules/timer \
+	-Iapp/bsp/start/sh54_sh55 \
+	-Iapp/post_build/sh54 \
+	-Iapp/src/voice_toy \
+	-Iapp/src/voice_toy/common \
+	-Iapp/src/voice_toy/toy_music \
+	-Iapp/src/voice_toy/toy_idle \
+	-Iapp/src/voice_toy/toy_midi \
+	-Iapp/src/voice_toy/toy_speaker \
+	-Iapp/src/voice_toy/toy_linein \
+	-Iapp/src/voice_toy/toy_record \
+	-Iapp/src/voice_toy/toy_usb_slave \
+	-Iapp/src/voice_toy/toy_softoff \
+	-Iinclude_lib \
+	-Iinclude_lib/common \
+	-Iinclude_lib/cpu/sh54 \
+	-Iinclude_lib/cpu \
+	-Iinclude_lib/fs \
+	-Iinclude_lib/msg \
+	-Iinclude_lib/fs/sydf \
+	-Iinclude_lib/dev_mg \
+	-Iinclude_lib/audio \
+	-Iinclude_lib/sdmmc \
+	-Iinclude_lib/update \
+	-Iinclude_lib/decoder \
+	-Iinclude_lib/decoder/list \
+	-Iinclude_lib/encoder \
+	-Iinclude_lib/encoder/list \
+	-Iinclude_lib/device \
+	-Iinclude_lib/ex_mcu \
+	-Iinclude_lib/agreement \
+	-Iapp/src/voice_toy/sh54 \
+	-Iapp/bsp/common/speaker \
+	-Iinclude_lib/speaker \
+	-Iapp/bsp/common/vo_pitch \
+	-Iinclude_lib/vo_pitch \
+	-Iinclude_lib/vo_changer \
+	-Iapp/bsp/common/usb \
+	-Iapp/bsp/common/usb/device \
+	-Iapp/bsp/common/usb/host \
+	-I$(SYS_INC_DIR) \
+
+
+# 需要编译的 .c 文件
+c_SRC_FILES := \
+	app/bsp/common/decoder/decoder_api.c \
+	app/bsp/common/decoder/decoder_msg_tab.c \
+	app/bsp/common/decoder/decoder_point.c \
+	app/bsp/common/decoder/list/a_api.c \
+	app/bsp/common/decoder/list/f1a_api.c \
+	app/bsp/common/decoder/list/f1x_parsing.c \
+	app/bsp/common/decoder/list/midi_api.c \
+	app/bsp/common/decoder/list/midi_ctrl_api.c \
+	app/bsp/common/decoder/list/mio_phy.c \
+	app/bsp/common/decoder/list/ump3_api.c \
+	app/bsp/common/decoder/mio_api.c \
+	app/bsp/common/decoder/mp_io.c \
+	app/bsp/common/decoder/sine_play.c \
+	app/bsp/common/encoder/encoder_api.c \
+	app/bsp/common/encoder/list/a_encoder.c \
+	app/bsp/common/encoder/list/mp3_encoder.c \
+	app/bsp/common/encoder/list/ump3_encoder.c \
+	app/bsp/common/fs/nor_fs/nor_fs_resource.c \
+	app/bsp/common/fs/smpl_fat/smpl_fat_resource.c \
+	app/bsp/common/fs/sydf/sydf_resource.c \
+	app/bsp/common/fs/vfs.c \
+	app/bsp/common/fs/vfs_fat.c \
+	app/bsp/common/fs/vfs_resource.c \
+	app/bsp/common/key/key.c \
+	app/bsp/common/key/key_drv_ad.c \
+	app/bsp/common/key/key_drv_io.c \
+	app/bsp/common/key/key_ir.c \
+	app/bsp/common/msg/msg.c \
+	app/bsp/common/norflash/norflash.c \
+	app/bsp/common/power_manage/app_power_mg.c \
+	app/bsp/common/rtc/rtc.c \
+	app/bsp/common/sound_effect_list/echo_api.c \
+	app/bsp/common/sound_effect_list/howling_pitchshifter_api.c \
+	app/bsp/common/sound_effect_list/notch_howling_api.c \
+	app/bsp/common/sound_effect_list/pcm_eq_api.c \
+	app/bsp/common/sound_effect_list/speed_api.c \
+	app/bsp/common/sound_effect_list/vo_pitch_api.c \
+	app/bsp/common/sound_effect_list/voicechanger.c \
+	app/bsp/common/speaker/speak_api.c \
+	app/bsp/common/uart_update/uart_update.c \
+	app/bsp/common/usb/device/descriptor.c \
+	app/bsp/common/usb/device/hid.c \
+	app/bsp/common/usb/device/msd.c \
+	app/bsp/common/usb/device/msd_upgrade.c \
+	app/bsp/common/usb/device/task_pc.c \
+	app/bsp/common/usb/device/uac1.c \
+	app/bsp/common/usb/device/uac_stream.c \
+	app/bsp/common/usb/device/usb_device.c \
+	app/bsp/common/usb/device/user_setup.c \
+	app/bsp/common/usb/host/usb_bulk_transfer.c \
+	app/bsp/common/usb/host/usb_ctrl_transfer.c \
+	app/bsp/common/usb/host/usb_host.c \
+	app/bsp/common/usb/host/usb_storage.c \
+	app/bsp/common/usb/usb_config.c \
+	app/bsp/common/usb/usb_host_config.c \
+	app/bsp/common/usb/usb_test.c \
+	app/bsp/common/usb/usr/usb_audio_interface.c \
+	app/bsp/common/vm/new_vm/nvm_api.c \
+	app/bsp/common/vm/old_vm/ovm_api.c \
+	app/bsp/common/vm/vm_api.c \
+	app/bsp/cpu/sh54/adc_drv.c \
+	app/bsp/cpu/sh54/clock.c \
+	app/bsp/cpu/sh54/cpu.c \
+	app/bsp/cpu/sh54/dac_cpu.c \
+	app/bsp/cpu/sh54/iic_hw.c \
+	app/bsp/cpu/sh54/irflt.c \
+	app/bsp/cpu/sh54/port_init.c \
+	app/bsp/cpu/sh54/port_wkup.c \
+	app/bsp/cpu/sh54/power_api.c \
+	app/bsp/cpu/sh54/spi1.c \
+	app/bsp/cpu/sh54/uart.c \
+	app/bsp/cpu/sh54/uart_dev.c \
+	app/bsp/lib/adc_api.c \
+	app/bsp/lib/audio.c \
+	app/bsp/lib/audio_mic_capless.c \
+	app/bsp/lib/common.c \
+	app/bsp/lib/dac_api.c \
+	app/bsp/lib/my_malloc.c \
+	app/bsp/lib/tab_read.c \
+	app/bsp/modules/soft_isr/soft_isr.c \
+	app/bsp/modules/timer/tick_timer_modules.c \
+	app/bsp/modules/timer/tick_timer_sys.c \
+	app/bsp/start/sh54_sh55/bsp_loop.c \
+	app/bsp/start/sh54_sh55/device_list.c \
+	app/bsp/start/sh54_sh55/init.c \
+	app/bsp/start/sh54_sh55/main.c \
+	app/src/voice_toy/app_config.c \
+	app/src/voice_toy/common/common_msg.c \
+	app/src/voice_toy/common/device_mge.c \
+	app/src/voice_toy/common/idle_deal.c \
+	app/src/voice_toy/common/simple_play_file.c \
+	app/src/voice_toy/toy_idle/toy_idle.c \
+	app/src/voice_toy/toy_idle/toy_idle_key.c \
+	app/src/voice_toy/toy_linein/toy_linein.c \
+	app/src/voice_toy/toy_linein/toy_linein_key.c \
+	app/src/voice_toy/toy_main.c \
+	app/src/voice_toy/toy_midi/midi_config.c \
+	app/src/voice_toy/toy_midi/toy_midi.c \
+	app/src/voice_toy/toy_midi/toy_midi_ctrl.c \
+	app/src/voice_toy/toy_midi/toy_midi_ctrl_key.c \
+	app/src/voice_toy/toy_midi/toy_midi_key.c \
+	app/src/voice_toy/toy_music/toy_music.c \
+	app/src/voice_toy/toy_music/toy_music_key.c \
+	app/src/voice_toy/toy_record/enc_in_norfs.c \
+	app/src/voice_toy/toy_record/toy_record.c \
+	app/src/voice_toy/toy_record/toy_record_key.c \
+	app/src/voice_toy/toy_softoff/toy_softoff.c \
+	app/src/voice_toy/toy_speaker/toy_speaker.c \
+	app/src/voice_toy/toy_speaker/toy_speaker_key.c \
+	app/src/voice_toy/toy_usb_slave/toy_usb_slave.c \
+	app/src/voice_toy/toy_usb_slave/toy_usb_slave_key.c \
+
+
+# 需要编译的 .S 文件
+S_SRC_FILES :=
+
+
+# 需要编译的 .s 文件
+s_SRC_FILES :=
+
+
+# 需要编译的 .cpp 文件
+cpp_SRC_FILES :=
+
+
+# 需要编译的 .cc 文件
+cc_SRC_FILES :=
+
+
+# 需要编译的 .cxx 文件
+cxx_SRC_FILES :=
+
+
+# 链接参数
+LFLAGS := \
+	--plugin-opt=save-temps \
+	--gc-sections \
+	include_lib/liba/sh54/voice_toy/old_vm_lib.a \
+	include_lib/liba/sh54/voice_toy/new_vm_lib.a \
+	--start-group \
+	include_lib/liba/sh54/voice_toy/cpu_lib.a \
+	include_lib/liba/sh54/voice_toy/address_lib.a \
+	include_lib/liba/sh54/voice_toy/efuse_trim_value_lib.a \
+	include_lib/liba/sh54/voice_toy/fs_lib.a \
+	include_lib/liba/sh54/voice_toy/audio_lib.a \
+	include_lib/liba/sh54/voice_toy/src_lib.a \
+	include_lib/liba/sh54/voice_toy/decoder_mge_lib.a \
+	include_lib/liba/sh54/voice_toy/ae_resample_lib.a \
+	include_lib/liba/sh54/voice_toy/dev_mg_lib.a \
+	include_lib/liba/sh54/voice_toy/malloc_lib.a \
+	include_lib/liba/ARCH/pi32_lto/lib_echo_cal.a \
+	include_lib/liba/ARCH/pi32_lto/lib_howling_fs.a \
+	include_lib/liba/ARCH/pi32_lto/notchHowling.a \
+	include_lib/liba/sh54/voice_toy/ae_howling_lib.a \
+	include_lib/liba/ARCH/pi32_lto/lib_speed_pitch.a \
+	include_lib/liba/sh54/voice_toy/update_lib.a \
+	include_lib/liba/sh54/voice_toy/uart_update_lib.a \
+	include_lib/liba/sh54/voice_toy/agreement.a \
+	include_lib/liba/sh54/voice_toy/encoder_mge_lib.a \
+	include_lib/liba/ARCH/pi32_lto/lib_mp3_decode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_f1a_decode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_midi_decode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_limiter.a \
+	include_lib/liba/ARCH/pi32_lto/lib_a_decode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_mp2_encode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_mp2standard_encode.a \
+	include_lib/liba/ARCH/pi32_lto/lib_a_code.a \
+	include_lib/liba/sh54/voice_toy/periphy_lib.a \
+	include_lib/liba/sh54/voice_toy/file_manage_lib.a \
+	include_lib/liba/sh54/voice_toy/sdmmc_lib.a \
+	include_lib/liba/sh54/voice_toy/ex_mcu_lib.a \
+	include_lib/liba/ARCH/pi32_lto/lib_vopitch_cal.a \
+	include_lib/liba/ARCH/pi32_lto/lib_voiceChanger_va.a \
+	include_lib/liba/ARCH/pi32_lto/lib_pcm_eq.a \
+	include_lib/liba/sh54/voice_toy/ae_pcm_eq_lib.a \
+	include_lib/liba/sh54/voice_toy/dual_bank_lib.a \
+	--end-group \
+	-Tapp/post_build/sh54/app.ld \
+	-M=app/post_build/sh54/app.map \
+	--plugin-opt=-pi32-memreg-opt \
+	--plugin-opt=-pi32-mem-offset-adj-opt \
+	--plugin-opt=-pi32-const-spill \
+	--plugin-opt=-pi32-enable-jz \
+	--plugin-opt=-pi32-tailcall-opt \
+	--plugin-opt=-inline-threshold=5 \
+	--plugin-opt=-pi32-enable-itblock=1 \
+
+
+LIBPATHS := \
+	-L$(SYS_LIB_DIR) \
+
+
+LIBS := \
+	C:/JL/pi32/lib/libc.a \
+	C:/JL/pi32/lib/libm.a \
+	C:/JL/pi32/lib/libcompiler-rt.a \
+
+
+
+c_OBJS    := $(c_SRC_FILES:%.c=%.c.o)
+S_OBJS    := $(S_SRC_FILES:%.S=%.S.o)
+s_OBJS    := $(s_SRC_FILES:%.s=%.s.o)
+cpp_OBJS  := $(cpp_SRC_FILES:%.cpp=%.cpp.o)
+cxx_OBJS  := $(cxx_SRC_FILES:%.cxx=%.cxx.o)
+cc_OBJS   := $(cc_SRC_FILES:%.cc=%.cc.o)
+
+OBJS      := $(c_OBJS) $(S_OBJS) $(s_OBJS) $(cpp_OBJS) $(cxx_OBJS) $(cc_OBJS)
+DEP_FILES := $(OBJS:%.o=%.d)
+
+
+OBJS      := $(addprefix $(BUILD_DIR)/, $(OBJS))
+DEP_FILES := $(addprefix $(BUILD_DIR)/, $(DEP_FILES))
+
+
+VERBOSE ?= 0
+ifeq ($(VERBOSE), 1)
+QUITE :=
+else
+QUITE := @
+endif
+
+# 一些旧的 make 不支持 file 函数，需要 make 的时候指定 LINK_AT=0 make
+LINK_AT ?= 1
+
+# 表示下面的不是一个文件的名字，无论是否存在 all, clean, pre_build 这样的文件
+# 还是要执行命令
+# see: https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html
+.PHONY: all clean pre_build
+
+# 不要使用 make 预设置的规则
+# see: https://www.gnu.org/software/make/manual/html_node/Suffix-Rules.html
+.SUFFIXES:
+
+all: pre_build $(OUT_ELF)
+	$(info +POST-BUILD)
+	$(QUITE) $(RUN_POST_SCRIPT) sdk
+
+pre_build:
+	$(info +PRE-BUILD)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/bsp/common/app_modules_h.c -o tmp_app2022.txt
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/src/voice_toy/sh54/app_modules_cpu_h.c -o tmp_app2022_cpu.txt
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh54/voice_toy/app_ld.c -o app/post_build/sh54/app.ld
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh54/voice_toy/download_bat.c -o $(POST_SCRIPT)
+	$(QUITE) $(FIXBAT) $(POST_SCRIPT)
+
+clean:
+	$(QUITE) $(RM) $(OUT_ELF)
+	$(QUITE) $(RM) $(BUILD_DIR)
+
+
+
+ifeq ($(LINK_AT), 1)
+$(OUT_ELF): $(OBJS)
+	$(info +LINK $@)
+	$(shell $(MKDIR) $(@D))
+	$(file >$(OBJ_FILE), $(OBJS))
+	$(QUITE) $(LD) -o $(OUT_ELF) @$(OBJ_FILE) $(LFLAGS) $(LIBPATHS) $(LIBS)
+else
+$(OUT_ELF): $(OBJS)
+	$(info +LINK $@)
+	$(shell $(MKDIR) $(@D))
+	$(QUITE) $(LD) -o $(OUT_ELF) $(OBJS) $(LFLAGS) $(LIBPATHS) $(LIBS)
+endif
+
+
+$(BUILD_DIR)/%.c.o : %.c
+	$(info +CC $<)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.S.o : %.S
+	$(info +AS $<)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.s.o : %.s
+	$(info +AS $<)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.cpp.o : %.cpp
+	$(info +CXX $<)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.cxx.o : %.cxx
+	$(info +CXX $<)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+$(BUILD_DIR)/%.cc.o : %.cc
+	$(info +CXX $<)
+	$(QUITE) $(MKDIR) $(@D)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+
+-include $(DEP_FILES)

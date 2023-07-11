@@ -198,10 +198,12 @@ void sys_power_down(u32 usec)
         JL_LRCT->CON |= (3 << 1); //32 * 2^3 = 256,单位LRC周期
     }
 
+#if TCFG_UDISK_ENABLE
     if (usb_otg_online(0) == HOST_MODE) {
         usb_host_resume(0);
         usb_write_faddr(0, 8);
     }
+#endif
 
 #if TCFG_LOWPOWER_DAC_OPEN
     if (dac_state == 0) {

@@ -13,7 +13,7 @@
 #include "src_api.h"
 #include "device.h"
 #include "ioctl_cmds.h"
-#include "vm.h"
+#include "vm_api.h"
 #include "nor_fs/nor_fs.h"
 #include "key.h"
 #include "init.h"
@@ -69,6 +69,7 @@ int flash_info_init(void)
 
     device = dev_open(__SFC_NANE, 0);
     dev_ioctl(device, IOCTL_GET_CAPACITY, (u32)&capacity);
+    boot_info.flash_size = capacity;
     dev_ioctl(device, IOCTL_SET_VM_INFO, (u32)&boot_info);
     dev_ioctl(device, IOCTL_SET_PROTECT_INFO, (u32)flash_code_protect_callback);
     dev_close(device);
@@ -138,6 +139,11 @@ u8 const lib_update_version[] = "\x7c\x4f\x94\x0aUPDATE-@20210816-$9c89ae0";
 void system_init(void)
 {
     my_malloc_init();
+
+#if 0 //运行160M以上时钟，需要执行以下函数提高内核电压，否则可能导致异常
+    VDC13_VOL_SEL(VDC13_VOL_SEL_140V);
+    SYSVDD_VOL_SEL(SYSVDD_VOL_SEL_129V);
+#endif
     pll_sel(PLL_320M, PLL_DIV2, PLL_B_DIV2);
     efuse_trim_value_init();
     /* sys_clock_get(); */

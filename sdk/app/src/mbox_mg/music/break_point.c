@@ -15,7 +15,7 @@
 #include "get_music_file.h"
 #include "mbox_main.h"
 #include "device.h"
-#include "vm.h"
+#include "vm_api.h"
 #include "decoder_api.h"
 
 #define LOG_TAG_CONST       NORM

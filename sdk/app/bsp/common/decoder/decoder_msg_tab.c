@@ -4,7 +4,7 @@
 #include "decoder_msg_tab.h"
 
 
-#if DECODER_A_EN
+#if defined(DECODER_A_EN) && (DECODER_A_EN)
 const u8 a_evt[10] = {
     EVENT_A_END,
     0xff,
@@ -19,7 +19,7 @@ const u8 a_evt[10] = {
 };
 #endif
 
-#if DECODER_F1A_EN
+#if defined(DECODER_F1A_EN) && (DECODER_F1A_EN)
 const u8 f1a_evt[MAX_F1A_CHANNEL][10] = {
     {
         EVENT_F1A1_END,
@@ -50,7 +50,8 @@ const u8 f1a_evt[MAX_F1A_CHANNEL][10] = {
 };
 #endif
 
-#if (DECODER_MIDI_EN || DECODER_MIDI_KEYBOARD_EN)
+#if ((defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)) || \
+        (defined(DECODER_MIDI_KEYBOARD_EN) && (DECODER_MIDI_KEYBOARD_EN)))
 const u8 midi_evt[10] = {
     EVENT_MIDI_END,
     0xff,
@@ -65,7 +66,7 @@ const u8 midi_evt[10] = {
 };
 #endif
 
-#if DECODER_UMP3_EN
+#if defined(DECODER_UMP3_EN) && (DECODER_UMP3_EN)
 const u8 ump3_evt[10] = {
     EVENT_MP3_END,
     0xff,
@@ -80,7 +81,7 @@ const u8 ump3_evt[10] = {
 };
 #endif
 
-#if DECODER_MP3_ST_EN
+#if defined(DECODER_MP3_ST_EN) && (DECODER_MP3_ST_EN)
 const u8 mp3_st_evt[10] = {
     EVENT_MP3_END,
     0xff,
@@ -95,7 +96,7 @@ const u8 mp3_st_evt[10] = {
 };
 #endif
 
-#if DECODER_WAV_EN
+#if defined(DECODER_WAV_EN) && (DECODER_WAV_EN)
 const u8 wav_evt[10] = {
     EVENT_WAV_END,
     0xff,
