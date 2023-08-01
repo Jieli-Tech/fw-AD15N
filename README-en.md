@@ -8,7 +8,7 @@ About Firmware for Generic MCU SDK（AD1x-457_AC104 series）, Support AD14N,AD1
 
 [中文](./README.md) | EN
 
-firmware for Generic MCU SDK（AD14 AD15 series）
+firmware for Generic MCU SDK（AD14 AD15 AC104 AD17 series）
 
 This repository contains the Jieli source code, aims at helping the developers for the toy & generic MCU applications.
 It must be combined with lib.a and the repositories that use the same
@@ -37,7 +37,7 @@ Documentation
 
 * Chipset brief : [SoC datasheet](./doc)
 
-* Product Select Guide : [SoC Select Guide](./doc/SoC_Select_Guide.md); [SoC Select Guide.pdf](./doc/杰理科技AD14_AD15_AD17系列语音MCU选型表.pdf)
+* Product Select Guide : [SoC Select Guide.pdf](./doc/杰理科技AD14_AD15_AD16_AD17系列语音MCU选型表.pdf)
 
 * SDK Version: [SDK History](doc/AD1x-457_AC104_SDK_发布版本信息.pdf)
 
