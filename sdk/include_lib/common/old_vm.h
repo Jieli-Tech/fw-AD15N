@@ -3,7 +3,6 @@
 #include "typedef.h"
 #include "ioctl.h"
 #include "dev_mg/device.h"
-#include "vm.h"
 // enum {
 //     #<{(|
 //      *  用户自定义配置项 (0-64)

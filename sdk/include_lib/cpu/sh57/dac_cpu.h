@@ -45,6 +45,12 @@
 
 
 #define audio_clk_init()  SFR(JL_CLOCK->CLK_CON2,  0,  2,  APA_CLK_DEFAULT)
+#define audio_clk_close(...)
+
+#define audio_isr_init()    do { \
+                                extern void audio_isr(void); \
+                                HWI_Install(IRQ_AUDIO_IDX, (u32)audio_isr, IRQ_AUDIO_IP); \
+                            } while(0)
 
 #define SR_DEFAULT  32000
 
@@ -57,6 +63,6 @@
                                 ii = 1;                     \
                             }                               \
                             (n) += ii;                      \
-                        } while(0);
+                        } while(0)
 
 #endif

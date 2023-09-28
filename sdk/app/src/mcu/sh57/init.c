@@ -30,7 +30,5 @@ void system_init(void)
     /* efuse_trim_value_init(); */
     /* sys_clock_get(); */
 
-    //------
-    emu_init();
 }
 

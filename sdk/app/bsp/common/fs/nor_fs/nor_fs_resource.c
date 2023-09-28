@@ -4,11 +4,14 @@
 #include "errno-base.h"
 #include "vfs.h"
 #include "boot.h"
+#include "app_modules.h"
 
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
 #include "log.h"
+
+#if defined(NORFS_EN) && (NORFS_EN)
 
 static RECFILESYSTEM recfs;
 static REC_FILE recfile;
@@ -119,13 +122,4 @@ const struct vfs_operations norfs_vfs_ops sec_used(.vfs_operations) = {
     .ioctl       = norfs_ioctl_api,
 };
 
-
-
-
-
-
-
-
-
-
-
+#endif

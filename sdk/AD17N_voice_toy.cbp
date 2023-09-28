@@ -34,8 +34,8 @@
 <Add option="-DHAS_EXT_FLASH_EN" />
 <Add option="-DHAS_USB_EN=0" />
 <Add option="-DHAS_MIO_PLAYER" />
+<Add option="-DHAS_HW_SRC_MODULE=1" />
 <Add option="-DHAS_UPDATE_EN=0" />
-<Add option="-DFATFS_ENABLE=0" />
 <Add option="-DSIMPLE_FATFS_ENABLE=0" />
 <Add option="-DSYS_VM_EN=1" />
 <Add option="-DHAS_SIMPLE_DEC_MODE" />
@@ -96,12 +96,13 @@
 </Compiler>
 <Linker>
 <Add option="--plugin-opt=save-temps" />
+<Add option="--plugin-opt=-dont-used-symbol-list=malloc,free,sprintf,printf,puts,putchar,getchar" />
 <Add option="--gc-sections" />
 <Add option="include_lib/liba/sh57/voice_toy/old_vm_lib.a" />
 <Add option="include_lib/liba/sh57/voice_toy/new_vm_lib.a" />
+<Add option="include_lib/liba/sh57/voice_toy/printf_lib.a" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/sh57/voice_toy/cpu_lib.a" />
-<Add option="include_lib/liba/sh57/voice_toy/address_lib.a" />
 <Add option="include_lib/liba/sh57/voice_toy/fs_lib.a" />
 <Add option="include_lib/liba/sh57/voice_toy/audio_lib.a" />
 <Add option="include_lib/liba/sh57/voice_toy/src_lib.a" />
@@ -119,8 +120,6 @@
 <Add option="-M=app/post_build/sh57/app.map" />
 </Linker>
 <ExtraCommands>
-<Add before="$compiler $options $includes -D__LD__ -E -P app\bsp\common\app_modules_h.c -o tmp_app2022.txt" />
-<Add before="$compiler $options $includes -D__LD__ -E -P app\src\voice_toy\sh57\app_modules_cpu_h.c -o tmp_app2022_cpu.txt" />
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh57\voice_toy\app_ld.c -o app\post_build\sh57\app.ld" />
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh57\voice_toy\download_bat.c -o app\post_build\sh57\download.bat" />
 <Add before="tools\utils\fixbat.exe app\post_build\sh57\download.bat" />
@@ -195,7 +194,6 @@
 <Unit filename="app/bsp/lib/common.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/lib/dac_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/lib/my_malloc.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/lib/printf-stdarg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/lib/tab_read.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/modules/soft_isr/soft_isr.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/modules/soft_isr/soft_isr.h" />
@@ -254,6 +252,7 @@
 <Unit filename="include_lib/audio/audio_analog.h" />
 <Unit filename="include_lib/audio/dac.h" />
 <Unit filename="include_lib/audio/dac_api.h" />
+<Unit filename="include_lib/audio/resample_api.h" />
 <Unit filename="include_lib/audio/src.h" />
 <Unit filename="include_lib/common/boot.h" />
 <Unit filename="include_lib/common/circular_buf.h" />
@@ -261,7 +260,6 @@
 <Unit filename="include_lib/common/config.h" />
 <Unit filename="include_lib/common/crc16.h" />
 <Unit filename="include_lib/common/errno-base.h" />
-<Unit filename="include_lib/common/fcvt.h" />
 <Unit filename="include_lib/common/flash_wp.h" />
 <Unit filename="include_lib/common/includes.h" />
 <Unit filename="include_lib/common/jiffies.h" />
@@ -271,7 +269,7 @@
 <Unit filename="include_lib/common/old_vm.h" />
 <Unit filename="include_lib/common/printf.h" />
 <Unit filename="include_lib/common/tab_read.h" />
-<Unit filename="include_lib/common/vm.h" />
+<Unit filename="include_lib/common/vm_sfc.h" />
 <Unit filename="include_lib/common/wdt.h" />
 <Unit filename="include_lib/cpu/sh57/adc_drv.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/p33_access.h" />
@@ -281,6 +279,7 @@
 <Unit filename="include_lib/cpu/sh57/asm/power/power_app.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/power_port.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/power_reset.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power/power_trim.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/power_wakeup.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/rtc.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power_interface.h" />

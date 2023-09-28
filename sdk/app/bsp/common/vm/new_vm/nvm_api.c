@@ -28,6 +28,7 @@ void *nvm_buf_for_lib(NEW_VM_OBJ *p_nvm, u32 *p_len)
 #define NVM_CACHE_ENABLE    1
 #define NVM_CACHE_NUMBER    6
 const bool config_vm_multiple_read_en = 0;
+const bool config_vm_erasure_after_format_en = 0;
 
 #if NVM_CACHE_ENABLE
 
@@ -54,6 +55,7 @@ u32 nvm_init_api(u32 addr, u32 size)
     /* if (NULL == g_nvm_obj.device) { */
     g_nvm_obj.device = dev_open(__SFC_NANE, 0);
     if (NULL == g_nvm_obj.device) {
+        log_error("nvm init E_NVM_OPEN_DEVICE\n");
         return E_NVM_OPEN_DEVICE;
     }
     /* } */

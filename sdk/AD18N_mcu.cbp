@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<CodeBlocks_project_file>
+<FileVersion major="1" minor="6" />
+<Project>
+<Option title="AD18N_mcu" />
+<Option compiler="pi32_lto_compiler" />
+<Build>
+<Target title="Release">
+<Option output="app/post_build/ch58/sdk.elf" prefix_auto="0" extension_auto="0" />
+<Option object_output="obj/Release/" />
+<Option type="1" />
+<Option compiler="pi32_lto_compiler" />
+<Compiler>
+<Add option="-DD_TOY_SDK=1" />
+<Add option="-DD_APP_TOY=1" />
+<Add option="-integrated-as" />
+<Add option="-g" />
+<Add option="-Oz" />
+<Add option="-flto" />
+<Add option="-fprefer-gnu-section" />
+<Add option="-fms-extensions" />
+<Add option="-Wno-empty-body" />
+<Add option="-Wcast-align" />
+<Add option="-Wundef" />
+<Add option="-DFPGA=0" />
+<Add option="-DCPU_CH58=1" />
+<Add option="-DFLASH_CACHE_ENABLE=1" />
+<Add option="-DAUDIO_ADC_EN=0" />
+<Add option="-DHAS_USB_EN=0" />
+<Add option="-DHAS_UPDATE_EN=0" />
+<Add option="-DSIMPLE_FATFS_ENABLE=0" />
+<Add option="-DSYS_VM_EN=0" />
+<Add option="-DNOFLOAT" />
+<Add directory="app/bsp/cpu/ch58" />
+<Add directory="include_lib" />
+<Add directory="include_lib/common" />
+<Add directory="include_lib/cpu/ch58" />
+<Add directory="include_lib/cpu" />
+<Add directory="include_lib/fs" />
+<Add directory="include_lib/msg" />
+<Add directory="include_lib/fs/sydf" />
+<Add directory="include_lib/dev_mg" />
+<Add directory="include_lib/device" />
+<Add directory="include_lib/agreement" />
+<Add directory="app/post_build/ch58" />
+<Add directory="app/bsp/lib" />
+<Add directory="app/bsp/start/ch58" />
+<Add directory="app/bsp/common" />
+<Add directory="app/bsp/common/fs" />
+<Add directory="app/bsp/common/msg" />
+<Add directory="app/bsp/common/file_operate" />
+<Add directory="app/bsp/common/api_mg" />
+<Add directory="app/bsp/common/power_manage" />
+<Add directory="app/bsp/common/usb" />
+<Add directory="app/bsp/common/vm" />
+<Add directory="app/src/mcu" />
+<Add directory="app/src/mcu/ch58" />
+</Compiler>
+<Linker>
+<Add option="--plugin-opt=save-temps" />
+<Add option="--plugin-opt=-dont-used-symbol-list=malloc,free,sprintf,printf,puts,putchar,getchar" />
+<Add option="--gc-sections" />
+<Add option="--start-group" />
+<Add option="include_lib/liba/ch58/mcu/cpu_lib.a" />
+<Add option="include_lib/liba/ch58/mcu/efuse_trim_value_lib.a" />
+<Add option="include_lib/liba/ch58/mcu/printf_lib.a" />
+<Add option="--end-group" />
+<Add option="-Tapp/post_build/ch58/app.ld" />
+<Add option="-M=app/post_build/ch58/app.map" />
+</Linker>
+<ExtraCommands>
+<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\ch58\mcu\app_ld.c -o app\post_build\ch58\app.ld" />
+<Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\ch58\mcu\download_bat.c -o app\post_build\ch58\download.bat" />
+<Add before="tools\utils\fixbat.exe app\post_build\ch58\download.bat" />
+<Mode before="always" />
+<Add after="app\post_build\ch58\download.bat sdk" />
+<Mode after="always" />
+</ExtraCommands>
+</Target>
+</Build>
+<Unit filename="app/bsp/common/rtc/rtc.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/vm/vm_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/vm/vm_api.h" />
+<Unit filename="app/bsp/cpu/ch58/power_app.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/ch58/power_config.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/ch58/power_trim.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/ch58/uart.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/ch58/uart_types.h" />
+<Unit filename="app/bsp/cpu/ch58/uart_v2.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/ch58/uart_v2.h" />
+<Unit filename="app/bsp/lib/common.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/start/ch58/init.h" />
+<Unit filename="app/src/mcu/app_config.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/src/mcu/app_config.h" />
+<Unit filename="app/src/mcu/ch58/app_modules.h" />
+<Unit filename="app/src/mcu/ch58/init.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/src/mcu/ch58/main.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/src/mcu/mcu_app.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/src/mcu/mcu_app.h" />
+<Unit filename="include_lib/asm_type.h" />
+<Unit filename="include_lib/audio/audio.h" />
+<Unit filename="include_lib/common/boot.h" />
+<Unit filename="include_lib/common/circular_buf.h" />
+<Unit filename="include_lib/common/common.h" />
+<Unit filename="include_lib/common/config.h" />
+<Unit filename="include_lib/common/errno-base.h" />
+<Unit filename="include_lib/common/includes.h" />
+<Unit filename="include_lib/common/jiffies.h" />
+<Unit filename="include_lib/common/log.h" />
+<Unit filename="include_lib/common/printf.h" />
+<Unit filename="include_lib/common/vm_sfc.h" />
+<Unit filename="include_lib/common/wdt.h" />
+<Unit filename="include_lib/cpu/ch58/adc_drv.h" />
+<Unit filename="include_lib/cpu/ch58/asm/power/p33_access.h" />
+<Unit filename="include_lib/cpu/ch58/asm/power/p33_api.h" />
+<Unit filename="include_lib/cpu/ch58/asm/power/p33_interface.h" />
+<Unit filename="include_lib/cpu/ch58/asm/power/p33_sfr.h" />
+<Unit filename="include_lib/cpu/ch58/asm/power/pmu_flag.h" />
+<Unit filename="include_lib/cpu/ch58/asm/power/power_api.h" />
+<Unit filename="include_lib/cpu/ch58/asm/power/power_app.h" />
+<Unit filename="include_lib/cpu/ch58/asm/power/power_port.h" />
+<Unit filename="include_lib/cpu/ch58/asm/power/power_reset.h" />
+<Unit filename="include_lib/cpu/ch58/asm/power/power_wakeup.h" />
+<Unit filename="include_lib/cpu/ch58/asm/power/rtc.h" />
+<Unit filename="include_lib/cpu/ch58/asm/power_interface.h" />
+<Unit filename="include_lib/cpu/ch58/ch58.h" />
+<Unit filename="include_lib/cpu/ch58/clock.h" />
+<Unit filename="include_lib/cpu/ch58/clock_define.h" />
+<Unit filename="include_lib/cpu/ch58/cpu.h" />
+<Unit filename="include_lib/cpu/ch58/csfr.h" />
+<Unit filename="include_lib/cpu/ch58/gpio.h" />
+<Unit filename="include_lib/cpu/ch58/hwi.h" />
+<Unit filename="include_lib/cpu/ch58/io_imap.h" />
+<Unit filename="include_lib/cpu/ch58/io_omap.h" />
+<Unit filename="include_lib/cpu/ch58/irq.h" />
+<Unit filename="include_lib/cpu/ch58/maskrom.h" />
+<Unit filename="include_lib/cpu/ch58/sfr.h" />
+<Unit filename="include_lib/cpu/ch58/typedef.h" />
+<Unit filename="include_lib/cpu/ch58/uart.h" />
+<Unit filename="include_lib/dev_mg/atomic.h" />
+<Unit filename="include_lib/dev_mg/dev_manage.h" />
+<Unit filename="include_lib/dev_mg/device.h" />
+<Unit filename="include_lib/dev_mg/ioctl.h" />
+<Unit filename="include_lib/dev_mg/ioctl_cmds.h" />
+<Unit filename="include_lib/msg/msg.h" />
+</Project>
+</CodeBlocks_project_file>

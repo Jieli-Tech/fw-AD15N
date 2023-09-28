@@ -224,7 +224,9 @@ void usb_slave_sound_close(sound_out_obj *p_sound)
     unregist_dac_channel(p_sound);
     usb_src_obj = NULL;
     if (NULL != p_sound->effect) {
+#if (defined(HAS_HW_SRC_EN) || defined(HAS_SW_SRC_EN))
         src_reless(&p_sound->effect);
+#endif
     } else {
         log_info("usb slave sound effect null\n");
     }
@@ -238,7 +240,9 @@ void usb_slave_sound_open(sound_out_obj *p_sound, u32 sr)
     if (0 != sr) {
         p_curr_sound = p_sound;
         void *cbuf_o = p_curr_sound->p_obuf;
-        p_curr_sound = link_src_sound(p_curr_sound, cbuf_o, (void **)&usb_src_obj, sr, 32000);
+#if (defined(HAS_HW_SRC_EN) || defined(HAS_SW_SRC_EN))
+        p_curr_sound = link_src_sound(p_curr_sound, cbuf_o, (void **)&usb_src_obj, sr, 32000, (void *)GET_SRC_OPS());
+#endif
 #if 0
         p_curr_sound->effect = src_api(p_sound->p_obuf, sr, 32000, (void **)&p_next_sound);
         if (NULL != p_curr_sound->effect) {

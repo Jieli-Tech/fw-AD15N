@@ -70,7 +70,7 @@ static void irtmr_ir_isr(void)
     cap = bCap1 / irtmr_prd;
 
     /* ir_log("ir isr verify"); */
-    /* ir_log("cnt = %d, cap = 0x%x", cnt++, cap); */
+    /* ir_log("cnt = %d, cap = 0x%x , bCap1  0x%x , irtmr_prd 0x%x ", cnt++, cap, bCap1, irtmr_prd); */
     if (cap <= 1) {
         ir_code.wData >>= 1;
         ir_code.bState++;
@@ -122,7 +122,7 @@ static void irtmr_ir_isr(void)
    ((cnt - 1)* 分频数)/lsb_clk = 1ms
 */
 /*----------------------------------------------------------------------------*/
-#define timer_Hz  		16000000L
+#define timer_Hz  		48000000L
 
 void set_ir_clk(void)
 {
@@ -132,8 +132,8 @@ void set_ir_clk(void)
     IRTMR->CON = BIT(14);
     IRTMR->PRD = 0;
     IRTMR->CNT = 0;
-    SFR(IRTMR->CON, 10, 4, 3); //rc16m (lsb/2以下)
-    SFR(IRTMR->CON, 4, 4, 8); //pset=2
+    SFR(IRTMR->CON, 10, 4, 4); //std48m (lsb/2以下)
+    SFR(IRTMR->CON, 4, 4, 8); //256分频
     clk = timer_Hz;//clock_get_lsb_freq();
     clk /= (1000 * 256);//1ms for cnt
     prd_cnt = clk;

@@ -29,6 +29,7 @@ __attribute__((noreturn))
 int c_main(int cfg_addr)
 {
     port_hd_init();
+    all_init_isr();
     log_init(1000000);
 
     struct maskrom_argv argv = {0};

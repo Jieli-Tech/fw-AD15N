@@ -5,6 +5,7 @@
 #include "config.h"
 #include "sound_effect_api.h"
 #include "howling_api.h"
+#include "app_modules.h"
 
 
 #define LOG_TAG_CONST       NORM
@@ -16,9 +17,9 @@ void *notch_howling_api(void *obuf, u32 sr, void **ppsound)
 {
     /* 调试顺序：gain -> Q -> threshold。gain压制越多，Q越小会容易出现说话过程中声音断续的问题 */
     NotchHowlingParam nhparm    = {0};
-    nhparm.gain                 = (int)(-20.0 * (1 << 20)); //陷波器压制程度，越大放啸叫越好，但发声啸叫频点误检时音质会更差
-    nhparm.Q                    = (int)(0.3 * (1 << 24));   //陷波器带宽，越小放啸叫越好，但发声啸叫频点误检时音质会更差
-    nhparm.fade_time            = 1000;                     //启动时间与施放时间，越小启动与释放越快，可能导致杂音出现切音质变差
+    nhparm.gain                 = (int)(-10.0 * (1 << 20)); //陷波器压制程度，越大放啸叫越好，但发声啸叫频点误检时音质会更差
+    nhparm.Q                    = (int)(2.0 * (1 << 24));   //陷波器带宽，越小放啸叫越好，但发声啸叫频点误检时音质会更差
+    nhparm.fade_time            = 10;                       //启动时间与施放时间，越小启动与释放越快，可能导致杂音出现切音质变差
     nhparm.threshold            = (int)(25.0 * (1 << 15));  //频点啸叫判定阈值，越小越容易判定啸叫频点，但可能误检导致音质变差
     nhparm.SampleRate           = sr;                       //采样率
 
@@ -70,6 +71,27 @@ void notch_howing_parm_update(NotchHowlingParam *parm)
             howling_hdl->update = 1;
         }
     }
+}
+
+void get_notch_howling_freq(void)
+{
+    NH_HOWLING_HDL *howling_hdl = &notch_howling_hdl_save;
+    if (!howling_hdl) {
+        return;
+    }
+
+    HowlingFreq hfreq = {0};
+    int res = 0;
+    sound_in_obj *p_si = &howling_hdl->si;
+    NH_STRUCT_API *ops = (NH_STRUCT_API *)p_si->ops;
+    res = ops->config(p_si->p_dbuf, GET_HOWLING_FREQ, &hfreq);
+    log_info("Total:%d 1:%d 2:%d 3:%d 4:%d 5:%d\n", hfreq.num, \
+             hfreq.freq[0], \
+             hfreq.freq[1], \
+             hfreq.freq[2], \
+             hfreq.freq[3], \
+             hfreq.freq[4]);
+
 }
 
 static int notch_howing_run(void *hld, short *inbuf, int len)

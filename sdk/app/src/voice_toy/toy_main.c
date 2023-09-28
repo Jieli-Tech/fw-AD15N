@@ -17,6 +17,7 @@
 #include "toy_usb_slave.h"
 #include "toy_softoff.h"
 #include "vm_api.h"
+#include "vm_sfc.h"
 #include "usb/usr/usb_audio_interface.h"
 
 #define LOG_TAG_CONST       NORM
@@ -74,7 +75,8 @@ void app(void)
         while (1);
     }
 
-    vm_isr_response_list_register(BIT(IRQ_AUDIO_IDX) | BIT(IRQ_TICKTMR_IP));
+    vm_isr_response_index_register(IRQ_AUDIO_IDX);
+    vm_isr_response_index_register(IRQ_TICKTMR_IDX);
 
     u8 vol = 0;
     u32 res = vm_read(VM_INDEX_VOL, &vol, sizeof(vol));
@@ -93,6 +95,7 @@ void app(void)
 
     while (1) {
         clear_all_message();
+        vm_pre_erase();
         switch (work_mode) {
 #if SIMPLE_DEC_EN
         case TOY_MUSIC:

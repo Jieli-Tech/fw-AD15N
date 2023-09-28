@@ -36,5 +36,7 @@ void _OS_ENTER_CRITICAL(u32 bit_list);
 void irq_index_tab_reg(void *tab, u32 max_cnt);
 u8 irq_index_to_prio(u8 idx);
 
+#define NEW_OS_ENTER_CRITICAL(l,h)  _OS_ENTER_CRITICAL(l)
+#define NEW_OS_EXIT_CRITICAL()  	_OS_EXIT_CRITICAL()
 #endif	/*	_AD100_H	*/
 

@@ -42,7 +42,8 @@ void audio_isr(void)
 void audio_init(void)
 {
     /* log_info("audio_init"); */
-    HWI_Install(IRQ_AUDIO_IDX, (u32)audio_isr, IRQ_AUDIO_IP) ;
+    /* HWI_Install(IRQ_AUDIO_IDX, (u32)audio_isr, IRQ_AUDIO_IP) ; */
+    audio_isr_init();
     /* log_info("audio_clk_init"); */
     audio_clk_init();
     /* log_info("audio_analog_open"); */
@@ -55,6 +56,7 @@ void audio_off(void)
     audio_adc_off_api();
 #endif
     audio_analog_close();
+    audio_clk_close();
 }
 
 void audio_lookup(void)

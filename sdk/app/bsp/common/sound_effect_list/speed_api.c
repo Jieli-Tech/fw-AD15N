@@ -5,6 +5,7 @@
 #include "decoder_api.h"
 #include "config.h"
 #include "sound_effect_api.h"
+#include "app_modules.h"
 
 
 #define LOG_TAG_CONST       NORM
@@ -45,7 +46,7 @@ u32  SP_BUFLEN[752] AT(.sp_data);            //处理32k音频变速变调需要
 
 static sound_in_obj speed_si AT(.sp_data);
 
-const struct _RS_IO_CONTEXT_ sppitch_io = {
+const struct _SPEEDPITCH_IO_CONTEXT_ sppitch_io = {
     &speed_obj.sound,      //input跟output函数的第一个参数，解码器不做处理，直接回传，可以为NULL
     sound_output,
 };

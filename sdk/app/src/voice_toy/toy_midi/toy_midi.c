@@ -10,6 +10,7 @@
 #include "msg.h"
 #include "key.h"
 #include "bsp_loop.h"
+#include "vm_api.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -130,6 +131,7 @@ void toy_midi_app(void)
         case MSG_500MS:
             if ((MUSIC_PLAY != get_decoder_status(midi_pctl[0].p_dec_obj)) && \
                 (MUSIC_PLAY != get_decoder_status(midi_pctl[1].p_dec_obj))) {
+                vm_pre_erase();
                 sys_idle_deal(-2);
             }
         default:

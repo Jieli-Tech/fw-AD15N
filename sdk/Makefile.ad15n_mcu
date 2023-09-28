@@ -101,10 +101,10 @@ DEFINES := \
 	-DFPGA=0 \
 	-DCPU_SH55=1 \
 	-DFLASH_CACHE_ENABLE=0 \
+	-DMKEY_CHECK_ENABLE=1 \
 	-DAUDIO_ADC_EN=0 \
 	-DHAS_USB_EN=0 \
 	-DHAS_UPDATE_EN=0 \
-	-DFATFS_ENABLE=0 \
 	-DSIMPLE_FATFS_ENABLE=0 \
 	-DSYS_VM_EN=0 \
 	-DNOFLOAT \
@@ -144,6 +144,7 @@ INCLUDES := \
 # 需要编译的 .c 文件
 c_SRC_FILES := \
 	app/bsp/common/rtc/rtc.c \
+	app/bsp/common/vm/vm_api.c \
 	app/bsp/cpu/sh55/clock.c \
 	app/bsp/cpu/sh55/port_init.c \
 	app/bsp/cpu/sh55/power_api.c \
@@ -178,6 +179,7 @@ cxx_SRC_FILES :=
 # 链接参数
 LFLAGS := \
 	--plugin-opt=save-temps \
+	--plugin-opt=-dont-used-symbol-list=malloc,free,sprintf,printf,puts,putchar,getchar \
 	--gc-sections \
 	--start-group \
 	include_lib/liba/sh55/mcu/cpu_lib.a \
@@ -245,8 +247,6 @@ all: pre_build $(OUT_ELF)
 
 pre_build:
 	$(info +PRE-BUILD)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/bsp/common/app_modules_h.c -o tmp_app2022.txt
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/src/mcu/sh55/app_modules_cpu_h.c -o tmp_app2022_cpu.txt
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh55/mcu/app_ld.c -o app/post_build/sh55/app.ld
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh55/mcu/download_bat.c -o $(POST_SCRIPT)
 	$(QUITE) $(FIXBAT) $(POST_SCRIPT)

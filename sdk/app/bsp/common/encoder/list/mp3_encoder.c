@@ -4,9 +4,10 @@
 #include "config.h"
 #include "typedef.h"
 #include "hwi.h"
-
+#include "app_modules.h"
 #include "circular_buf.h"
 
+#if defined(ENCODER_MP3_EN) && (ENCODER_MP3_EN)
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -61,3 +62,4 @@ u32 mp3_encode_api(void *p_file)
     //debug_u32hex(enc_mp3_hdl.enable);
     return (u32)&enc_mp3_hdl;
 }
+#endif

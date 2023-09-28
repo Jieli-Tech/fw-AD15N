@@ -180,10 +180,10 @@ int ini_area_norflash_ioctl(struct device *device, u32 cmd, u32 arg)
         erase_size = 64 * 1024;
         align_addr = arg / erase_size * erase_size;
 __ini_area_earse:
-        if ((align_addr + erase_size) >= info->size) {
+        if ((align_addr + erase_size) > info->size) {
             return -EINVAL;
         }
-        ret = sfc_dev_ops.ioctl(device, cmd, arg + info->start_addr);
+        ret = sfc_dev_ops.ioctl(device, cmd, align_addr + info->start_addr);
         break;
     case IOCTL_GET_CAPACITY:
         *((int *)arg) = info->size;

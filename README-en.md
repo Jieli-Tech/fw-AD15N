@@ -1,14 +1,14 @@
-# fw-AD14N-AD15N-AC104N
-About Firmware for Generic MCU SDK（AD1x-457_AC104 series）, Support AD14N,AD15N,AC104N,AD17N
+# fw-AD14N-AD15N-AD17N-AD18N-AC104N
+About Firmware for Generic MCU SDK（AD1x-4578_AC104 series）, Support AD14N,AD15N,AC104N,AD17N
 
-[tag download]:https://github.com/Jieli-Tech/fw-AD15N/tags
+[tag download]:https://gitee.com/Jieli-Tech/fw-AD15N/tags
 [tag_badgen]:https://img.shields.io/github/v/tag/Jieli-Tech/fw-AD15N?style=plastic&labelColor=ffffff&color=informational&label=Tag&
 
-# fw-AD1x-457_AC104_SDK   [![tag][tag_badgen]][tag download]
+# fw-AD1x-4578_AC104_SDK   [![tag][tag_badgen]][tag download]
 
 [中文](./README.md) | EN
 
-firmware for Generic MCU SDK（AD14 AD15 AC104 AD17 series）
+firmware for Generic MCU SDK（AD14 AD15 AD16 AD17  AD18 series）
 
 This repository contains the Jieli source code, aims at helping the developers for the toy & generic MCU applications.
 It must be combined with lib.a and the repositories that use the same
@@ -37,11 +37,11 @@ Documentation
 
 * Chipset brief : [SoC datasheet](./doc)
 
-* Product Select Guide : [SoC Select Guide.pdf](./doc/杰理科技AD14_AD15_AD16_AD17系列语音MCU选型表.pdf)
+* Product Select Guide : [SoC Select Guide.pdf](./doc/杰理科技AD14_AD15_AD16_AD17_AD18系列语音MCU选型表.pdf)
 
-* SDK Version: [SDK History](doc/AD1x-457_AC104_SDK_发布版本信息.pdf)
+* SDK Version: [SDK History](doc/AD1x-4578_AC104_SDK_发布版本信息.pdf)
 
-* SDK introduction : [SDK quick start guide](./doc/AD14N_AD15N_AD17N_AC104N_SDK手册.pdf)
+* SDK introduction : [SDK quick start guide](./doc/AD14N_AD15N_AD17N_AD18N_AC104N_SDK手册.pdf)
 
 * SDK Online documentation : [SDK Online documentation](https://doc.zh-jieli.com/AD14/zh-cn/master/index.html)
 
@@ -55,9 +55,9 @@ Build
 -------------
 Select a project to build. The following folders contains buildable projects:
 
-* APP_TOY: ./sdk/AD14N_voice_toy.cbp ./sdk/AD15N_voice_toy.cbp ./sdk/AD17N_voice_toy.cbp, usage: 
+* APP_TOY: ./sdk/AD14N_voice_toy.cbp ./sdk/AD15N_voice_toy.cbp ./sdk/AD17N_voice_toy.cbp, ./sdk/AD18N_voice_toy.cbp, usage: 
 
-* APP_MCU: ./sdk/AD14N_mcu.cbp ./sdk/AD15N_mcu.cbp ./sdk/AD17N_mcu.cbp, usage:  
+* APP_MCU: ./sdk/AD14N_mcu.cbp ./sdk/AD15N_mcu.cbp ./sdk/AD17N_mcu.cbp, ./sdk/AD18N_mcu.cbp, usage:  
 
 * APP_MUSIC_BOX_: ./sdk/AC104N_mbox_mg , usage:  
 

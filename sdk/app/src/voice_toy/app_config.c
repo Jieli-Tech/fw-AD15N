@@ -11,6 +11,7 @@ const int IRQ_ENCODER_IP = 0;
 const int IRQ_TICKTMR_IP = 3;
 const int IRQ_USB_IP     = 2;
 const int IRQ_SD_IP      = 3;
+const int IRQ_PMU_TIMER1_IP = 0;
 //系统还未使用到的
 const int IRQ_UART0_IP   = 3;
 const int IRQ_UART1_IP   = 3;
@@ -78,8 +79,13 @@ const u8 ufw_vid_need_to_be_different = 0;
 //sd空闲后挂起的最大cnt值，单位时间是sd检测函数的时间，即sd空闲后每次检测函数cnt就加1，为0时，则每次读写完都会发挂起命令
 const u8 is_sdx_active_cnt_max = 20;
 
+//浮点打印，仅仅作用在AD17N,AD18N
+const int printf_support_float = 0;
 //内核异常打印
 const u8 config_asser = 1;
+//软件重采样quality影响运算速度,可选范围3~8,默认选8
+const u8 resample_quality  = 8;
+
 /**
  * @brief Bluetooth Controller Log
  */
@@ -129,7 +135,7 @@ const char log_tag_const_d_WKUP AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(0);
 const char log_tag_const_e_WKUP AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(1);
 
 const char log_tag_const_i_PMU AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(1);
-const char log_tag_const_d_PMU AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(1);
+const char log_tag_const_d_PMU AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(0);
 const char log_tag_const_e_PMU AT(.LOG_TAG_CONST) = CONFIG_DEBUG_LIBS(1);
 
 

@@ -79,7 +79,7 @@ static void __mask_io_cfg()
 void board_set_soft_poweroff()
 {
     u32 gpio_config[3] = {0xffff, 0xffff, 0xffff};
-#define PORT_PROTECT(gpio)	gpio_config[gpio/IO_GROUP_NUM] &= ~BIT(gpio%IO_GROUP_NUM)
+#define PORT_PROTECT(gpio)	gpio_config[(gpio)/IO_GROUP_NUM] &= ~BIT((gpio)%IO_GROUP_NUM)
 
     PORT_PROTECT(POWER_WAKEUP_IO);
 
@@ -110,6 +110,12 @@ void board_set_soft_poweroff()
 
     __mask_io_cfg();
 
+    extern const u32 pdebug_uart_lowpower;
+    extern const u32 pdebug_uart_port;
+    if (pdebug_uart_lowpower) {
+        PORT_PROTECT(pdebug_uart_port);
+    }
+
     gpio_close(JL_PORTA, gpio_config[0]);
     gpio_close(JL_PORTB, gpio_config[1]);
     gpio_close(JL_PORTD, gpio_config[2]);
@@ -119,7 +125,6 @@ void sys_power_init()
 {
     power_config_vdc13_cap(0);
     power_config_flash_pg_vddio(FLASH_POWER_GATE_VDDIO);
-    power_config_wvdd_lev(WLDO_LEVEL_085V);
     power_config_sf_vddio_keep(VDDIO_KEEP_TYPE_NORMAL);
     power_config_pd_vddio_keep(VDDIO_KEEP_TYPE_NORMAL);
 

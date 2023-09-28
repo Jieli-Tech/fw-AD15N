@@ -8,6 +8,7 @@
 #include "common/mbox_common.h"
 #include "mbox_main.h"
 #include "vm_api.h"
+#include "vm_sfc.h"
 #include "line_in/line_in_mode.h"
 #include "fm/fm_radio.h"
 #include "usb_device/usb_device_mode.h"
@@ -121,7 +122,8 @@ void mbox_main(void)
     delay_10ms(50);//等待系统稳定。
 #endif
 
-    vm_isr_response_list_register(BIT(IRQ_TICKTMR_IDX) | BIT(IRQ_AUDIO_IDX));
+    vm_isr_response_index_register(IRQ_AUDIO_IDX);
+    vm_isr_response_index_register(IRQ_TICKTMR_IDX);
     pa_unmute();
 #if LED_5X7
     LED5X7_init();
@@ -140,6 +142,7 @@ void mbox_main(void)
     while (1) {
         __builtin_pi32_idle();
         flush_all_msg();
+        vm_pre_erase();
         switch (work_mode) {
         case MUSIC_MODE:
             log_info("-Music Mode\n");

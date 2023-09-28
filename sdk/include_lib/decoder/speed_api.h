@@ -2,17 +2,10 @@
 #define __SPEED_API_H__
 #include "typedef.h"
 
-typedef struct _RS_IO_CONTEXT_ {
+typedef struct _SPEEDPITCH_IO_CONTEXT_ {
     void *priv;
     int(*output)(void *priv, void *data, int len);
-} RS_IO_CONTEXT;
-
-
-typedef struct _RS_PARA_STRUCT_ {
-    unsigned short insample;
-    unsigned short outsample;
-} RS_PARA_STRUCT;
-
+} SPEEDPITCH_IO_CONTEXT;
 
 typedef struct _SPEED_PITCH_PARA_STRUCT_ {
     unsigned short insample;
@@ -23,17 +16,9 @@ typedef struct _SPEED_PITCH_PARA_STRUCT_ {
     unsigned char pitchflag;
 } SPEED_PITCH_PARA_STRUCT;
 
-typedef struct  _RS_STUCT_API_ {
-    unsigned int(*need_buf)();
-    int (*open)(unsigned int *ptr, RS_PARA_STRUCT *rs_para, RS_IO_CONTEXT *rs_io);
-    int (*run)(unsigned int *ptr, short *inbuf, int len);
-} RS_STUCT_API;
-
-RS_STUCT_API *get_resample_context();
-
 typedef struct  _SPEEDPITCH_STUCT_API_ {
     unsigned int(*need_buf)(int srv);
-    int(*open)(unsigned int *ptr, SPEED_PITCH_PARA_STRUCT *speedpitch_para, RS_IO_CONTEXT *rs_io);
+    int(*open)(unsigned int *ptr, SPEED_PITCH_PARA_STRUCT *speedpitch_para, SPEEDPITCH_IO_CONTEXT *rs_io);
     int(*run)(unsigned int *ptr, short *inbuf, int len);
 } SPEEDPITCH_STUCT_API;
 

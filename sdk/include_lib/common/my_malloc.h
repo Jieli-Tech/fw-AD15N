@@ -61,12 +61,15 @@ typedef enum _mm_type {
     MM_FATFS,
     MM_FATFF,
     MM_FAT_TMP,
-    MM_SRC,
+    MM_SRC, //SRC_DATA
     MM_MIO,
     MM_SWIN_BUF,
     MM_VFSCAN_BUF,
     MM_SCAN_BUF,
     MM_FF_APIS_BUF,
+    MM_HW_SRC_BUF,
+    MM_SW_SRC_BUF,
+    MM_SARADC_BUF,
 } mm_type;
 
 

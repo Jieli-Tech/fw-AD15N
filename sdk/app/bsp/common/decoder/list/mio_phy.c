@@ -3,6 +3,9 @@
 #include "my_malloc.h"
 #include "vfs.h"
 #include "decoder_api.h"
+#include "app_modules.h"
+
+#if defined(HAS_MIO_EN) && (HAS_MIO_EN)
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -235,7 +238,4 @@ void mio_close(void **pp_obj)
         *pp_obj = unregist_mio_channel(*pp_obj);
     }
 }
-
-
-
-
+#endif

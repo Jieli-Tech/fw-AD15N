@@ -17,6 +17,7 @@
 
 #include "power/power_wakeup.h"
 
+#include "power/power_trim.h"
 
 #include "power/rtc.h"
 

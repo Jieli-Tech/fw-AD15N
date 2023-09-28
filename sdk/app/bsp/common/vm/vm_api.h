@@ -1,35 +1,59 @@
 #ifndef __VM_API_H__
 #define __VM_API_H__
 #include "typedef.h"
+#include "ioctl.h"
+#include "dev_mg/device.h"
 
-#define NO_VM			    0
-#define USE_NEW_VM          1
-#define USE_OLD_VM          2
-#define SYS_MEMORY_SELECT   USE_NEW_VM
 
-#if (SYS_MEMORY_SELECT == USE_NEW_VM)
-//新版vm，支持预擦除
-#include "new_vm.h"
-#define syscfg_vm_init_api(addr, size)         	nvm_init_api(addr, size)
-#define vm_read_api(id, buf, len)       		nvm_read_api(id, buf, len)
-#define vm_write_api(id, buf, len)      		nvm_write_api(id, buf, len)
-#define vm_pre_erase_api()              		nvm_erasure_next_api()
+typedef enum {
+    VM_INDEX_DEMO = 0,//用户可以使用
 
-#elif (SYS_MEMORY_SELECT == USE_OLD_VM)
-//旧版vm
-#include "old_vm.h"
-#define syscfg_vm_init_api(addr, size)			syscfg_old_vm_init(addr, size)
-#define vm_read_api(id, buf, len)				old_vm_read(id, buf, len)
-#define vm_write_api(id, buf, len)				old_vm_write(id, buf, len)
-#define vm_pre_erase_api()
+    // 系统lib使用，预留32个id，不可修改顺序
+    LIB_VM_INDEX_LP_SUM_CNT     = 1,
+    LIB_VM_INDEX_LP_LAST_CNT    = 2,
+    LIB_VM_INDEX_RTC_TIME       = 3,
+    LIB_VM_INDEX_ALM_TIME       = 4,
+    LIB_VM_PMU_VOLTAGE          = 5,
+    LIB_SYSMEM_END              = 32,
+    // 系统lib使用结束
 
-#else
+    VM_INDEX_SONG,
+    VM_INDEX_ENG,
+    VM_INDEX_POETRY,
+    VM_INDEX_STORY,
+    VM_INDEX_F1X,
+    VM_INDEX_EXT_SONG,
+    VM_INDEX_VOL,
 
-#define syscfg_vm_init_api(addr, size)			-1
-#define vm_read_api(id, buf, len)				-1
-#define vm_write_api(id, buf, len)				-1
-#define vm_pre_erase_api()
+#if 1
+    VM_INDEX_SONG_BP,
+    VM_INDEX_ENG_BP,
+    VM_INDEX_POETRY_BP,
+    VM_INDEX_STORY_BP,
+    VM_INDEX_F1X_BP,
+    VM_INDEX_EXT_SONG_BP,
 #endif
+
+    /*mbox*/
+    VM_INDEX_SYSMODE,
+    VM_INDEX_UDISK_BP,
+    VM_INDEX_UDISK_INDEX,
+    VM_INDEX_SDMMCA_BP,
+    VM_INDEX_SDMMCA_INDEX,
+    VM_INDEX_SDMMCB_BP,
+    VM_INDEX_SDMMCB_INDEX,
+    VM_INDEX_EXTFLSH_BP,
+    VM_INDEX_EXTFLSH_INDEX,
+    VM_INDEX_ACTIVE_DEV,
+    VM_INDEX_FM_FRE,
+    VM_INDEX_FM_CHAN,
+    VM_INDEX_FM_CHANNL,//VM_INDEX_FM_CHANNL和VM_INDEX_FM_CHANNL_END之间不能插入其它INDEX
+    VM_INDEX_FM_CHANNL_END = VM_INDEX_FM_CHANNL + 28,
+    /*mbox*/
+    VM_INDEX_FLASH_UPDATE,
+    VM_INDEX_AUTO_BP,
+    VM_INDEX_MAX = 128,
+} VM_INDEX;
 
 int syscfg_vm_init(u32 mem_addr, u32 mem_size);
 int vm_read(u32 id, u8 *data_buf, u16 len);

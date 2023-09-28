@@ -47,7 +47,7 @@ enum RST_REASON {
     R3_POWER_RETURN,
 
     //BIT(32)~BIT(50)预留给软复位使用
-    P33_EXCEPTION_SOFT_RST = 32,	    		//异常软件复位
+    P33_EXCEPTION_SOFT_RST = 32,	    	//异常软件复位
     P33_ASSERT_SOFT_RST,					//断言软件复位
     P33_SOFT_RST_RESERVER = 50,				//软件复位
 

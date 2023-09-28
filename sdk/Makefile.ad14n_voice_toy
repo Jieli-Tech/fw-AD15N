@@ -101,6 +101,7 @@ DEFINES := \
 	-DFPGA=0 \
 	-DCPU_SH54=1 \
 	-DFLASH_CACHE_ENABLE=1 \
+	-DMKEY_CHECK_ENABLE=1 \
 	-DAUDIO_ADC_EN=1 \
 	-DSPEAKER_EN \
 	-DHAS_VOICE_PITCH_EN \
@@ -119,11 +120,12 @@ DEFINES := \
 	-DHAS_USB_EN=1 \
 	-DHAS_SDMMC_EN \
 	-DHAS_MIO_PLAYER \
+	-DHAS_HW_SRC_MODULE=1 \
 	-DHAS_UPDATE_EN=1 \
 	-DHAS_UART_UPDATE_EN \
 	-DHAS_ECHO_EN \
 	-DHOWLING_EN \
-	-DFATFS_ENABLE=0 \
+	-DHAS_NORFS_EN \
 	-DSIMPLE_FATFS_ENABLE=1 \
 	-DSYS_VM_EN=1 \
 	-DHAS_MP3_ENCODER \
@@ -264,11 +266,14 @@ c_SRC_FILES := \
 	app/bsp/common/vm/old_vm/ovm_api.c \
 	app/bsp/common/vm/vm_api.c \
 	app/bsp/cpu/sh54/adc_drv.c \
+	app/bsp/cpu/sh54/audio_adc_cpu.c \
 	app/bsp/cpu/sh54/clock.c \
 	app/bsp/cpu/sh54/cpu.c \
 	app/bsp/cpu/sh54/dac_cpu.c \
 	app/bsp/cpu/sh54/iic_hw.c \
 	app/bsp/cpu/sh54/irflt.c \
+	app/bsp/cpu/sh54/led_spi.c \
+	app/bsp/cpu/sh54/mcpwm.c \
 	app/bsp/cpu/sh54/port_init.c \
 	app/bsp/cpu/sh54/port_wkup.c \
 	app/bsp/cpu/sh54/power_api.c \
@@ -339,12 +344,12 @@ cxx_SRC_FILES :=
 # 链接参数
 LFLAGS := \
 	--plugin-opt=save-temps \
+	--plugin-opt=-dont-used-symbol-list=malloc,free,sprintf,printf,puts,putchar,getchar \
 	--gc-sections \
 	include_lib/liba/sh54/voice_toy/old_vm_lib.a \
 	include_lib/liba/sh54/voice_toy/new_vm_lib.a \
 	--start-group \
 	include_lib/liba/sh54/voice_toy/cpu_lib.a \
-	include_lib/liba/sh54/voice_toy/address_lib.a \
 	include_lib/liba/sh54/voice_toy/efuse_trim_value_lib.a \
 	include_lib/liba/sh54/voice_toy/fs_lib.a \
 	include_lib/liba/sh54/voice_toy/audio_lib.a \
@@ -442,8 +447,6 @@ all: pre_build $(OUT_ELF)
 
 pre_build:
 	$(info +PRE-BUILD)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/bsp/common/app_modules_h.c -o tmp_app2022.txt
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/src/voice_toy/sh54/app_modules_cpu_h.c -o tmp_app2022_cpu.txt
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh54/voice_toy/app_ld.c -o app/post_build/sh54/app.ld
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh54/voice_toy/download_bat.c -o $(POST_SCRIPT)
 	$(QUITE) $(FIXBAT) $(POST_SCRIPT)

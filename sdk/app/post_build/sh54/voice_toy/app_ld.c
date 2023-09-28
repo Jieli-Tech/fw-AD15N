@@ -99,8 +99,15 @@ SECTIONS
     /* . = ORIGIN(ram1); */
     OVERLAY : AT(0x200000)
     {
+        .d_toy_music
+        {
+            PROVIDE(toy_music_buf_start = .);
+            *(.toy_music_data);
+            PROVIDE(toy_music_buf_end = .);
+        }
         d_speed
         {
+            . = toy_music_buf_end;
             PROVIDE(speed_buf_start = .);
             . = ALIGN(4);
             *(.sp_data)

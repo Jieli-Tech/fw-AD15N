@@ -373,3 +373,19 @@ int vfs_get_folderinfo(void *pvfile, struct vfscan *fs, int *start_num, int *end
     return 0;
 }
 
+#if 0
+int vfs_set_vol(void *pvfs, u8 *name)
+{
+    struct imount *p_vfs = pvfs;
+    struct vfs_operations *ops;
+    if ((void *)NULL == p_vfs) {
+        return 0;
+    }
+    ops = p_vfs->ops;
+    if (((void *)NULL != ops)  && ((void *)NULL !=  ops->ioctl)) {
+        return ops->ioctl(p_vfs->pfs, FS_IOCTL_SET_VOL, (int)arg);
+    }
+    return 0;
+}
+#endif
+

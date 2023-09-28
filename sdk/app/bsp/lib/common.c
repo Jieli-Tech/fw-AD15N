@@ -25,6 +25,13 @@ void udelay(u32 us)
         }
     }
 }
+AT_RAM
+void mdelay(u32 ms)
+{
+    for (int i = 0; i < ms; i++) {
+        udelay(1000);
+    }
+}
 
 AT(.critical_hook.text.cache.L2)
 void enter_critical_hook()
@@ -44,7 +51,7 @@ void system_enter_critical(void)
 void system_exit_critical(void)
 {
 }
-#ifndef CPU_SH57
+#if (defined(CPU_SH54) || defined(CPU_SH55))
 AT_RAM
 u32 cbuf_write(cbuffer_t *cbuffer, void *buf, u32 len)
 {

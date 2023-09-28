@@ -10,7 +10,7 @@
 #include "log.h"
 
 #if SYS_VM_EN
-#include "vm.h"
+#include "vm_api.h"
 #define rtc_save_api(p0, p1, p2)    vm_write(p0, p1, p2)
 #define rtc_read_api(p0, p1, p2)    vm_read(p0, p1, p2)
 #else

@@ -34,5 +34,9 @@ void dac_cpu_mode(void);
 int dac_low_power(void);
 u32 dac_mode_check(u32 con);
 
+void auout_mode_init(void);
+void auout_init(u32 sr, bool delay_flag);
+void auout_sr_api(u32 sr);
+void auout_off_api(void);
 
 #endif

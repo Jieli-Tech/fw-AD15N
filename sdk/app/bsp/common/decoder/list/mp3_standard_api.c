@@ -11,6 +11,9 @@
 #include "decoder_msg_tab.h"
 #include "eq.h"
 #include "app_config.h"
+#include "app_modules.h"
+
+#if defined(DECODER_MP3_ST_EN) && (DECODER_MP3_ST_EN)
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[mp3_st]"
@@ -149,5 +152,4 @@ u32 mp3_st_buff_api(dec_buf *p_dec_buf)
     p_dec_buf->end   = (u32)&mp3_st_buf_end[0];
     return 0;
 }
-
-
+#endif

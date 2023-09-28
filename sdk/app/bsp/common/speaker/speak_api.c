@@ -26,9 +26,15 @@
 #if defined(PCM_EQ_EN) && (PCM_EQ_EN)
 #include "pcm_eq_api.h"
 #endif
+#if defined(ECHO_EN) && (ECHO_EN)
 #include "echo_api.h"
+#endif
+#if defined(NOTCH_HOWLING_EN) && (NOTCH_HOWLING_EN)
 #include "notch_howling_api.h"
+#endif
+#if defined(PITCHSHIFT_HOWLING_EN) && (PITCHSHIFT_HOWLING_EN)
 #include "howling_pitchshifter_api.h"
+#endif
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[speak_api]"
@@ -94,17 +100,17 @@ void speaker_soft1_isr()
 
 void audio_adc_speaker_start(void)
 {
-    if (aa_speaker.sound.enable & B_DEC_RUN_EN) {
-        log_info("SPEAKER START ERR !!! \n");
-        return;
-    }
+    /* if (aa_speaker.sound.enable & B_DEC_RUN_EN) { */
+    /* log_info("SPEAKER START ERR !!! \n"); */
+    /* return; */
+    /* } */
 
     log_info("SPEAKER START !!! \n");
 
     HWI_Uninstall(IRQ_SOFT1_IDX);
     HWI_Install(IRQ_SOFT1_IDX, (u32)speaker_soft1_isr, IRQ_DECODER_IP);
 
-    memset(&aa_speaker.sound, 0, sizeof(aa_speaker.sound));
+    memset(&aa_speaker, 0, sizeof(aa_speaker));
     cbuf_init(&cbuf_aas_o, &obuf_aas_o[0], sizeof(obuf_aas_o));
     aa_speaker.sound.p_obuf = &cbuf_aas_o;
     audio_adc_init_api(24000, ADC_MIC, BIT(1));
@@ -140,9 +146,11 @@ void audio_adc_speaker_start(void)
 #endif
 
 
+#if (defined(HAS_HW_SRC_EN) || defined(HAS_SW_SRC_EN))
     if (adc_sr != dac_sr) {
-        p_curr_sound = link_src_sound(p_curr_sound, &cbuf_ads_o, (void **)&aa_speaker.p_src, adc_sr, dac_sr);
+        p_curr_sound = link_src_sound(p_curr_sound, &cbuf_ads_o, (void **)&aa_speaker.p_src, adc_sr, dac_sr, (void *)GET_SRC_OPS());
     };
+#endif
     if (&aa_speaker.sound == p_curr_sound) {
         regist_audio_adc_channel(&aa_speaker.sound, (void *) NULL);
     } else {
@@ -168,11 +176,13 @@ void audio_adc_speaker_reless(void)
 
         unregist_dac_channel(aa_speaker.p_dac_sound);
 
+#if (defined(HAS_HW_SRC_EN) || defined(HAS_SW_SRC_EN))
         if (NULL != aa_speaker.p_src) {
             src_reless((void **)&aa_speaker.p_src);
         }
+#endif
 
-        memset(&aa_speaker.sound, 0, sizeof(aa_speaker.sound));
+        memset(&aa_speaker, 0, sizeof(aa_speaker));
     }
 
 }

@@ -3,9 +3,10 @@
 #include "config.h"
 #include "typedef.h"
 #include "hwi.h"
-
+#include "app_modules.h"
 #include "circular_buf.h"
 
+#if defined(ENCODER_UMP3_EN) && (ENCODER_UMP3_EN)
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -59,3 +60,4 @@ u32 ump3_encode_api(void *p_file)
     //debug_u32hex(enc_mp3_hdl.enable);
     return (u32)&enc_mp3_hdl;
 }
+#endif

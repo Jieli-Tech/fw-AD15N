@@ -1,5 +1,6 @@
 #include "uart_update.h"
 #include "app_config.h"
+#include "app_modules.h"
 #include "includes.h"
 #include "asm/power_interface.h"
 #include "asm/power/p33.h"

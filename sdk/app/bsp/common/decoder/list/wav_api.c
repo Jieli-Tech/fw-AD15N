@@ -10,6 +10,9 @@
 #include "msg.h"
 #include "decoder_msg_tab.h"
 #include "app_config.h"
+#include "app_modules.h"
+
+#if defined(DECODER_WAV_EN) && (DECODER_WAV_EN)
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[wav]"
@@ -107,5 +110,4 @@ u32 wav_buff_api(dec_buf *p_dec_buf)
     p_dec_buf->end   = (u32)&wav_buf_end[0];
     return 0;
 }
-
-
+#endif

@@ -8,7 +8,7 @@
 #define __NEW_VM_H__
 
 #include "typedef.h"
-#include "vm.h"
+// #include "vm_api.h"
 
 
 /*************************************************

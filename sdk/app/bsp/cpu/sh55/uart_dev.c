@@ -85,8 +85,12 @@ static u8 UT0_getbyte(u8 *buf, u32 timeout)
 {
     u32 _timeout, _t_sleep;
     timeout = ut_msecs_to_jiffies(timeout);
-    if (JL_UT0->CON & BIT(6)) {//DMA_MODE  无DMA
-        return 0;
+    if (JL_UT0->CON & BIT(3)) {//DMA_MODE  无DMA
+        if (!kfifo_length(&uart0.kfifo)) {
+            UT_OSSemPend(&uart0.sem_rx, timeout);
+        }
+        UT_OSSemSet(&uart0.sem_rx, 0);
+        return kfifo_get(&uart0.kfifo, buf, 1);
     } else {
         JL_UT0->CON |= BIT(12);
         _timeout = timeout + ut_get_jiffies();
@@ -112,7 +116,7 @@ static u8 UT0_getbyte(u8 *buf, u32 timeout)
 SET_INTERRUPT
 static void UT0_isr_fun(void)
 {
-    u32 rx_len = 0;
+    static u32 rx_len = 0;
     if ((JL_UT0->CON & BIT(2)) && (JL_UT0->CON & BIT(15))) {
         JL_UT0->CON |= BIT(13);
         UT_OSSemPost(&uart0.sem_tx);
@@ -122,10 +126,17 @@ static void UT0_isr_fun(void)
     }
     if ((JL_UT0->CON & BIT(3)) && (JL_UT0->CON & BIT(14))) {
         JL_UT0->CON |= BIT(12);           //清RX PND
-        uart0.kfifo.buf_in += uart0.frame_length; //每满frame_length字节则产生一次中断
+        if (uart0.kfifo.buffer) {
+            uart0.kfifo.buffer[rx_len] = JL_UT0->BUF;
+        }
+        uart0.kfifo.buf_in++; //每满frame_length字节则产生一次中断
         UT_OSSemPost(&uart0.sem_rx);
         if (uart0.isr_cbfun) {
             uart0.isr_cbfun(&uart0, UT_RX);
+        }
+        rx_len++;
+        if (uart0.kfifo.buf_size == rx_len) {
+            rx_len = 0;
         }
     }
 }
@@ -145,9 +156,12 @@ static u32 UT0_read_buf(u8 *buf, u32 len, u32 timeout)
         return 0;
     }
     timeout = ut_msecs_to_jiffies(timeout);
-    if (JL_UT0->CON & BIT(6)) {   //DMA_MODE  无DMA
-
-        return 0;
+    if (JL_UT0->CON & BIT(3)) {   //DMA_MODE  无DMA
+        if (!kfifo_length(&uart0.kfifo)) {
+            UT_OSSemPend(&uart0.sem_rx, timeout);
+        }
+        UT_OSSemSet(&uart0.sem_rx, 0);
+        return kfifo_get(&uart0.kfifo, buf, len);
     } else {
         _timeout = timeout + ut_get_jiffies();
         _t_sleep = ut_msecs_to_jiffies(10) + ut_get_jiffies();
@@ -225,6 +239,7 @@ static void UT0_open(u32 baud, u32 is_9bit, void *cbuf, u32 cbuf_size, u32 rx_cn
         uart0.frame_length = rx_cnt;
         uart0.rx_timeout = ot;
         //无DMA
+        JL_UT0->CON |= BIT(3);
     }
     if (is_9bit) {
         JL_UT0->CON |= BIT(1);
@@ -719,9 +734,10 @@ void uart01_test()
 #if 0//uart0
 
     arg.tx_pin = IO_PORTA_06;//不使用发送功能赋值0xff
-    arg.rx_pin = IO_PORTA_05;//不使接收功能赋值0xff
-    arg.rx_cbuf = NULL;  //uart0 不支持
-    arg.rx_cbuf_size = 0;//uart0 不支持
+    arg.rx_pin = IO_PORTA_07;//不使接收功能赋值0xff
+    arg.rx_cbuf = read_buf;  //uart0 不支持dma,支持byte接收,初始化后中断接收到该指针
+    arg.rx_cbuf = NULL;  //不初始化,则不开中断轮询接收
+    arg.rx_cbuf_size = sizeof(read_buf);//uart0
     arg.frame_length = 0;//uart0 不支持
     arg.rx_timeout = 0;  //uart0 不支持
     arg.isr_cbfun = NULL;//中断回调
@@ -752,7 +768,7 @@ void uart01_test()
         time_out = 900;
         rx_cnt = 2;
         while (rx_cnt) {
-            if (UT0_getbyte(&read_data[0], time_out)) {
+            if (ut->getbyte(&read_data[0], time_out)) {//中断或轮询
                 log_info("get byte: %c\n", read_data[0]);
                 rx_cnt--;
             } else {
@@ -762,7 +778,7 @@ void uart01_test()
         }
         rx_cnt = 2;
         while (rx_cnt) {
-            if (ut->read(read_data, sizeof(read_data) - 1, time_out)) {
+            if (ut->read(read_data, sizeof(read_data) - 1, time_out)) {//中断或轮询
                 log_info("get buf: %s\n", read_data);
                 for (i = 0; i < sizeof(read_data); i++) {
                     read_data[i] = 0;

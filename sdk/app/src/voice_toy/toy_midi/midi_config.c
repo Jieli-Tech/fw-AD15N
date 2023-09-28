@@ -71,7 +71,7 @@ u32 midi_melody_trigger(void *priv, u8 key, u8 vel)
 {
     return 0;
 }
-u32 midi_melody_stop_trigger(void *priv, u8 key)
+u32 midi_melody_stop_trigger(void *priv, u8 key, u8 chn)
 {
     return 0;
 }
@@ -137,6 +137,7 @@ void midi_init_info(MIDI_INIT_STRUCT *init_info)
     init_info->moledy_info.melody_trigger = midi_melody_trigger;
 
     init_info->moledy_stop_info.priv = NULL;
+    init_info->moledy_stop_info.main_chn_enable = 1;
     init_info->moledy_stop_info.melody_stop_trigger = midi_melody_stop_trigger;
 
     init_info->beat_info.priv = NULL;

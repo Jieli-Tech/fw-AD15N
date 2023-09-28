@@ -6,6 +6,9 @@
 #include "vfs.h"
 #include "circular_buf.h"
 #include "errno-base.h"
+#include "app_modules.h"
+
+#if defined(DECODER_F1A_EN) && (DECODER_F1A_EN)
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -169,11 +172,4 @@ void *f1x_play_api(void *pfile, u8 *loop_tab, u32 size, u8 index, u32 addr)
     /* log_info("f1x parsing succ\n"); */
     return (void *)&f1x_io[index];
 }
-
-
-
-
-
-
-
-
+#endif

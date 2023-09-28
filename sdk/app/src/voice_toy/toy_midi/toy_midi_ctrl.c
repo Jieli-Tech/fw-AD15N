@@ -12,6 +12,7 @@
 #include "decoder_api.h"
 #include "decoder_msg_tab.h"
 #include "Limiter.h"
+#include "vm_api.h"
 
 #if defined(DECODER_MIDI_KEYBOARD_EN) && (DECODER_MIDI_KEYBOARD_EN)
 
@@ -266,6 +267,7 @@ __midikey_channal_sel:
             goto __midi_decode_app_exit;
         case MSG_500MS:
             if (0 == midi_keyboard_idle_cnt) {
+                vm_pre_erase();
                 sys_idle_deal(-2);
             }
         default:
@@ -286,9 +288,9 @@ static u32 midi_ctrl_melody_trigger(void *priv, u8 key, u8 vel)
     return 0;
 }
 /* 音符结束回调 */
-static u32 midi_ctrl_melody_stop_trigger(void *priv, u8 key)
+static u32 midi_ctrl_melody_stop_trigger(void *priv, u8 key, u8 chn)
 {
-    log_info("OFF %d\n", key);
+    log_info("OFF %d %d\n", key, chn);
     midi_keyboard_idle_cnt--;
     if (0 == midi_keyboard_idle_cnt) {
         dec_obj *obj = (dec_obj *)priv;
@@ -297,7 +299,7 @@ static u32 midi_ctrl_melody_stop_trigger(void *priv, u8 key)
     return 0;
 }
 
-static void midi_on_off_callback_init(dec_obj *obj, u32(*melody_callback)(void *, u8, u8), u32(*melody_stop_callback)(void *, u8))
+static void midi_on_off_callback_init(dec_obj *obj, u32(*melody_callback)(void *, u8, u8), u32(*melody_stop_callback)(void *, u8, u8))
 {
     audio_decoder_ops *ops = (audio_decoder_ops *)obj->dec_ops;
 
@@ -308,6 +310,7 @@ static void midi_on_off_callback_init(dec_obj *obj, u32(*melody_callback)(void *
 
     EX_MELODY_STOP_STRUCT melody_stop_parm;
     melody_stop_parm.priv = obj;
+    melody_stop_parm.main_chn_enable = 0;
     melody_stop_parm.melody_stop_trigger = melody_stop_callback;
     ops->dec_confing(obj->p_dbuf, CMD_MIDI_STOP_MELODY_TRIGGER, &melody_stop_parm);
 

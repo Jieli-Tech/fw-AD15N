@@ -44,6 +44,7 @@ enum {
 
     FS_IOCTL_MK_DIR, //创建文件夹
     FS_IOCTL_GET_ENCFOLDER_INFO, //获取录音文件信息i
+    FS_IOCTL_SET_VOL, // 设置卷标
     FS_IOCTL_DIR_FILE_TOTAL,
     FS_IOCTL_FILE_TOTAL,
     FS_IOCTL_FS_TOTAL,

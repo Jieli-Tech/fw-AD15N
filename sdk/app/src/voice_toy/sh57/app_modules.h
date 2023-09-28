@@ -23,8 +23,11 @@
 //  MIO功能使能
 #define HAS_MIO_EN 0
 
+//  SRC变采样功能使能
+#define HAS_HW_SRC_EN 1 //  硬件SRC
+
 //  APP应用使能
-#define SIMPLE_DEC_EN 1 //  多路解码应用模式
+#define SIMPLE_DEC_EN 1 //  简单解码应用模式
 
 //  驱动使能
 
@@ -41,4 +44,6 @@
 
 //  驱动使能
 #define EXT_FLASH_EN 0 //  外挂资源flash使能
+
+//  文件系统
 #endif

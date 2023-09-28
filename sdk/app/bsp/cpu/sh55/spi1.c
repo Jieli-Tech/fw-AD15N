@@ -677,7 +677,7 @@ void spi1_slave_byte_send_receive_test()
             rx_buff[ii] = 0;
         }
 
-        local_irq_enable();//关闭所有中断
+        local_irq_disable();//关闭所有中断
         while (1) {
             tx_byte = i;
             spi_w_reg_buf(spi_regs[1], tx_byte);//send(0~255)
@@ -695,7 +695,7 @@ void spi1_slave_byte_send_receive_test()
             }
             i++;
         }
-        local_irq_disable();
+        local_irq_enable();
         log_info_hexdump(rx_buff, 256);
     }
 }

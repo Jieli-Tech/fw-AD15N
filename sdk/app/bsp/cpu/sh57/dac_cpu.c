@@ -14,6 +14,40 @@
 #define LOG_TAG             "[dac cpu]"
 #include "log.h"
 
+u16 double_dac_buf[DAC_PACKET_SIZE * 2] AT(.DAC_BUFFER);
+
+void auout_mode_init(void)
+{
+    memset(&double_dac_buf[0], 0, sizeof(double_dac_buf));
+    u32 con = dac_mode_check(DAC_DEFAULT);
+    dac_resource_init((u8 *)&double_dac_buf[0], sizeof(double_dac_buf), con, 0);
+}
+
+void auout_init(u32 sr, bool delay_flag)
+{
+    dac_phy_init(dac_sr_lookup(sr));
+    /* delay_10ms(2); */
+    /* delay(5000); */
+    if (delay_flag) {
+        udelay(1000);//约1.2ms
+    }
+    dac_cpu_mode();
+}
+
+void auout_sr_api(u32 sr)
+{
+    /* u32 dac_sr_set(u32 sr) */
+    dac_sr_set(dac_sr_lookup(sr));
+    /* dac_analog_init(); */
+}
+
+void auout_off_api(void)
+{
+    rdac_analog_close();
+    apa_analog_close();
+    dac_phy_off();
+}
+
 #define apasr_con1(n10, n0, n8)   ((n10 << 10)| (n8 << 8) | (n0 << 0))
 
 void dac_cpu_mode(void)

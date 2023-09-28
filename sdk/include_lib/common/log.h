@@ -1,5 +1,5 @@
-#ifndef _DEBUG_H_
-#define _DEBUG_H_
+#ifndef _LOG_H_
+#define _LOG_H_
 
 #include "cpu.h"
 #include "typedef.h"

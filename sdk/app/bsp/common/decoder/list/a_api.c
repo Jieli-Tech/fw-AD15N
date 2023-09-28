@@ -12,6 +12,9 @@
 #include "msg.h"
 #include "decoder_msg_tab.h"
 #include "app_config.h"
+#include "app_modules.h"
+
+#if defined(DECODER_A_EN) && (DECODER_A_EN)
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -44,6 +47,16 @@ static u32 a_dp_buff[24 / 4] AT(.a_data) ;
 u32 get_a_dp_buff_size(void)
 {
     return sizeof(a_dp_buff);
+}
+
+bool clear_a_dp_buff(void *a_obj)
+{
+    dec_obj *obj = a_obj;
+    if ((obj->type == D_TYPE_A) && (obj == &dec_a_hld)) {
+        memset((void *)obj->p_dp_buf, 0, get_a_dp_buff_size());
+        return true;
+    }
+    return false;
 }
 
 u32 a_decode_api(void *p_file, void **p_dec, void *p_dp_buf)
@@ -114,8 +127,4 @@ u32 a_buff_api(dec_buf *p_dec_buf)
     p_dec_buf->end   = (u32)&a_buf_end[0];
     return 0;
 }
-
-
-
-
-
+#endif

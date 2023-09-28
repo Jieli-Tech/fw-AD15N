@@ -177,13 +177,24 @@ dec_obj *decoder_io(void *pfile, u32 dec_ctl, dp_buff *dbuff, u8 loop)
 
         //硬件src
         p_curr_sound->enable = 0;
+#if (defined(HAS_HW_SRC_EN) || defined(HAS_SW_SRC_EN))
         if (SR_DEFAULT != p_dec->sr) {
-            p_curr_sound = link_src_sound(p_curr_sound, cbuff_o, (void **) &p_dec->src_effect, p_dec->sr, SR_DEFAULT);
+            p_curr_sound = link_src_sound(p_curr_sound,                     \
+                                          cbuff_o,                        \
+                                          (void **) &p_dec->src_effect,   \
+                                          p_dec->sr,                      \
+                                          SR_DEFAULT,                     \
+                                          (void *)GET_SRC_OPS());
         } else {
-            void *src_tmp = src_hld_malloc();
+            void *src_tmp = src_hld_malloc((void *)GET_SRC_OPS(), NULL);
             src_reless((void **)&src_tmp);
             log_info("do't need src\n");
         }
+#else
+        /* DAC采样率配置成与文件采样率一致 */
+        void dac_sr_api(u32 sr);
+        dac_sr_api(p_dec->sr);
+#endif
 #if HAS_MIO_EN
         if (0 == mio_res) {
             d_mio_open(&first_sound->mio, mio_pfile, (void *)mio_a_hook_init);
@@ -293,9 +304,7 @@ void decoder_stop_phy(dec_obj *obj, DEC_STOP_WAIT wait, bool fade)
     /* log_info("decode stop --\n"); */
     if (obj->sound.enable & B_DEC_RUN_EN) {
         /* clear_dp_buff(obj->p_dp_buf); */
-        if (obj == &dec_a_hld) {
-            memset((void *)obj->p_dp_buf, 0, get_a_dp_buff_size());
-        } else {
+        if (false == check_and_clr_a_dp_buff(obj)) {
             clear_dp_buff(obj->p_dp_buf);
         }
     }
@@ -316,9 +325,11 @@ void decoder_stop_phy(dec_obj *obj, DEC_STOP_WAIT wait, bool fade)
 
     d_mio_close(&obj->sound.mio);
     unregist_dac_channel(&obj->sound);
+#if (defined(HAS_HW_SRC_EN) || defined(HAS_SW_SRC_EN))
     if (NULL != obj->src_effect) {
         src_reless(&obj->src_effect);
     }
+#endif
 }
 void decoder_stop(dec_obj *obj, DEC_STOP_WAIT wait)
 {

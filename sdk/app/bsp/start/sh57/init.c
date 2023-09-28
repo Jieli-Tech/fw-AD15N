@@ -24,6 +24,7 @@
 #include "mio_api.h"
 #include "sine_play.h"
 #include "flash_wp.h"
+#include "asm/power_interface.h"
 /* #include "list/midi_ctrl_api.h" */
 /* #include "efuse_trim_value.h" */
 
@@ -145,9 +146,12 @@ void system_init(void)
     flash_info_init();
     vm_init_api();
 
-    dac_mode_init(16);
+    dac_mode_init(16, 0);
     dac_power_on(SR_DEFAULT, 1);
     test_audio_dac();
+
+    pmu_trim(0, 0);
+
 }
 
 

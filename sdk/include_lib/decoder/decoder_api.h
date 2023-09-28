@@ -5,6 +5,7 @@
 #include "sound_effect_api.h"
 #include "decoder_msg_tab.h"
 #include "decoder_mge.h"
+#include "app_modules.h"
 
 
 // #define is_halfway_effect(obj)    (obj->enable & B_HALFWAY_EFFECT)

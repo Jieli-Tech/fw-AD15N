@@ -3,6 +3,13 @@
 
 #include "boot.h"
 
+
+void efuse_init();
+u32 get_efuse_page1();
+u8 get_wvdd_level_trim();
+
+
+
 #if 0
 u16 get_chip_id();
 u16 get_vbat_trim();

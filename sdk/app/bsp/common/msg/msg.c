@@ -10,8 +10,6 @@
 #define LOG_TAG             "[msg]"
 #include "log.h"
 
-/* #define MSG_ENTER_CRITICAL() _OS_ENTER_CRITICAL(BIT(IRQ_TICKTMR_IDX) | BIT(IRQ_AUDIO_IDX)) */
-/* #define MSG_EXIT_CRITICAL()  _OS_EXIT_CRITICAL() */
 #define MSG_ENTER_CRITICAL() OS_ENTER_CRITICAL()
 #define MSG_EXIT_CRITICAL()  OS_EXIT_CRITICAL()
 

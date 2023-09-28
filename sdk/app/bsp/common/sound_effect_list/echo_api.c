@@ -6,6 +6,7 @@
 #include "sound_effect_api.h"
 #include "app_modules.h"
 
+#if defined(ECHO_EN) && (ECHO_EN)
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -172,7 +173,4 @@ void *echo_phy(void *obuf, ECHO_PARM *parm, void **ppsound)
 
     return echo_obj;
 }
-
-
-
-
+#endif

@@ -13,6 +13,9 @@
 #include "MIDI_DEC_API.h"
 #include "boot.h"
 #include "decoder_msg_tab.h"
+#include "app_modules.h"
+
+#if defined(DECODER_MIDI_KEYBOARD_EN) && (DECODER_MIDI_KEYBOARD_EN)
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -29,7 +32,7 @@ MIDI_CTRL_PARM midi_ctrl_parmt                  AT(.midi_ctrl_buf);
 dec_obj dec_midi_ctrl_hld;
 cbuffer_t cbuf_midi_ctrl                        AT(.midi_ctrl_buf);
 u16 obuf_midi_ctrl[DAC_DECODER_BUF_SIZE / 2]    AT(.midi_ctrl_buf);
-u32 midi_ctrl_decode_buff[(3944) / 4]       AT(.midi_ctrl_buf);
+u32 midi_ctrl_decode_buff[(3948) / 4]       AT(.midi_ctrl_buf);
 #define MIDI_CTRL_CAL_BUF ((void *)&midi_ctrl_decode_buff[0])
 
 
@@ -242,6 +245,4 @@ u32 midi_ctrl_buff_api(dec_buf *p_dec_buf)
     p_dec_buf->end   = (u32)&midi_ctrl_buf_end[0];
     return 0;
 }
-
-
-
+#endif

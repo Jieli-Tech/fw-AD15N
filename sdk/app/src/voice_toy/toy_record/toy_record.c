@@ -4,6 +4,7 @@
 #include "msg.h"
 #include "encoder_mge.h"
 #include "device_mge.h"
+#include "vm_api.h"
 
 #include "decoder_api.h"
 #include "decoder_msg_tab.h"
@@ -100,6 +101,7 @@ void toy_record_app(void)
             }
             if ((MUSIC_PLAY != get_decoder_status(p_dec_obj)) && \
                 (record_obj.enc_status == ENC_NULL)) {
+                vm_pre_erase();
                 sys_idle_deal(-2);
             } else {
             }

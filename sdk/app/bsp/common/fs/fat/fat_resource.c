@@ -13,6 +13,9 @@
 #include "fat/mbr.h"
 #include "my_malloc.h"
 #include "vfs_fat.h"
+#include "app_modules.h"
+
+#if defined(FATFS_EN) && (FATFS_EN)
 
 extern u32 __dev_read(void *p, u8 *buf, u32 addr);
 extern u32 __dev_write(void *p, u8 *buf, u32 addr);
@@ -611,3 +614,4 @@ void fat_demo(void)
 }
 #endif
 
+#endif

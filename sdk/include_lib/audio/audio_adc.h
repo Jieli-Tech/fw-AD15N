@@ -28,5 +28,8 @@ void audio_adc_phy_off(void);
 void audio_adc_enable(u32 gain);
 void audio_adc_disable(void);
 
+void auin_mode_init(void);
+u32 auin_init(u32 sr, ADC_MODE mode, u32 ch);
+void auin_off_api(void);
 
 #endif

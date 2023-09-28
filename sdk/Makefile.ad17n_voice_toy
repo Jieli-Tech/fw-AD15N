@@ -110,8 +110,8 @@ DEFINES := \
 	-DHAS_EXT_FLASH_EN \
 	-DHAS_USB_EN=0 \
 	-DHAS_MIO_PLAYER \
+	-DHAS_HW_SRC_MODULE=1 \
 	-DHAS_UPDATE_EN=0 \
-	-DFATFS_ENABLE=0 \
 	-DSIMPLE_FATFS_ENABLE=0 \
 	-DSYS_VM_EN=1 \
 	-DHAS_SIMPLE_DEC_MODE \
@@ -226,7 +226,6 @@ c_SRC_FILES := \
 	app/bsp/lib/common.c \
 	app/bsp/lib/dac_api.c \
 	app/bsp/lib/my_malloc.c \
-	app/bsp/lib/printf-stdarg.c \
 	app/bsp/lib/tab_read.c \
 	app/bsp/modules/soft_isr/soft_isr.c \
 	app/bsp/modules/timer/tick_timer_modules.c \
@@ -285,12 +284,13 @@ cxx_SRC_FILES :=
 # 链接参数
 LFLAGS := \
 	--plugin-opt=save-temps \
+	--plugin-opt=-dont-used-symbol-list=malloc,free,sprintf,printf,puts,putchar,getchar \
 	--gc-sections \
 	include_lib/liba/sh57/voice_toy/old_vm_lib.a \
 	include_lib/liba/sh57/voice_toy/new_vm_lib.a \
+	include_lib/liba/sh57/voice_toy/printf_lib.a \
 	--start-group \
 	include_lib/liba/sh57/voice_toy/cpu_lib.a \
-	include_lib/liba/sh57/voice_toy/address_lib.a \
 	include_lib/liba/sh57/voice_toy/fs_lib.a \
 	include_lib/liba/sh57/voice_toy/audio_lib.a \
 	include_lib/liba/sh57/voice_toy/src_lib.a \
@@ -366,8 +366,6 @@ all: pre_build $(OUT_ELF)
 
 pre_build:
 	$(info +PRE-BUILD)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/bsp/common/app_modules_h.c -o tmp_app2022.txt
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/src/voice_toy/sh57/app_modules_cpu_h.c -o tmp_app2022_cpu.txt
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh57/voice_toy/app_ld.c -o app/post_build/sh57/app.ld
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh57/voice_toy/download_bat.c -o $(POST_SCRIPT)
 	$(QUITE) $(FIXBAT) $(POST_SCRIPT)

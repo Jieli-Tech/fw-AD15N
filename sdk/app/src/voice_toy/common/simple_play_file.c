@@ -191,10 +191,12 @@ u32 play_one_file(play_control *ppctl)
             /* if (0 == ppctl->loop) { */
             /*     clear_dp(dp); */
             /* } */
-            vm_write(\
-                     ppctl->p_vm_tab[ppctl->dir_index],  \
-                     ppctl->pdp,                         \
-                     sizeof(dp_buff));
+            if (NULL != ppctl->p_vm_tab) {
+                vm_write(\
+                         ppctl->p_vm_tab[ppctl->dir_index],  \
+                         ppctl->pdp,                         \
+                         sizeof(dp_buff));
+            }
 #endif
         }
     }

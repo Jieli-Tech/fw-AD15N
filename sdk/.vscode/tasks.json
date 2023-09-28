@@ -55,6 +55,16 @@
             "group": "build"
         }
         ,{
+            "label": "ad18n_mcu",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat ad18n_mcu"
+            },
+            "command": "make ad18n_mcu -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
             "label": "ad14n_voice_toy",
             "type": "shell",
             "windows": {
@@ -71,6 +81,16 @@
                 "command": ".vscode/winmk.bat ac104n_mbox_mg"
             },
             "command": "make ac104n_mbox_mg -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "ad18n_voice_toy",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat ad18n_voice_toy"
+            },
+            "command": "make ad18n_voice_toy -j`nproc`",
             "problemMatcher": [],
             "group": "build"
         }
@@ -125,6 +145,16 @@
             "group": "build"
         }
         ,{
+            "label": "clean_ad18n_mcu",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat clean_ad18n_mcu"
+            },
+            "command": "make clean_ad18n_mcu -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
             "label": "clean_ad14n_voice_toy",
             "type": "shell",
             "windows": {
@@ -141,6 +171,16 @@
                 "command": ".vscode/winmk.bat clean_ac104n_mbox_mg"
             },
             "command": "make clean_ac104n_mbox_mg -j`nproc`",
+            "problemMatcher": [],
+            "group": "build"
+        }
+        ,{
+            "label": "clean_ad18n_voice_toy",
+            "type": "shell",
+            "windows": {
+                "command": ".vscode/winmk.bat clean_ad18n_voice_toy"
+            },
+            "command": "make clean_ad18n_voice_toy -j`nproc`",
             "problemMatcher": [],
             "group": "build"
         }

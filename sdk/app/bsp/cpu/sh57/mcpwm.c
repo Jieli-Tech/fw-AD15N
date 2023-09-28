@@ -4,6 +4,7 @@
 #include "mcpwm.h"
 #include "log.h"
 #include "clock.h"
+#include "app_modules.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[mcpwm]"
@@ -110,6 +111,34 @@ void mcpwm_set_duty(pwm_ch_num_type pwm_ch, u16 duty)
         }
     }
 }
+
+/*
+ * @brief 设置H引脚的占空比
+ * @parm pwm_ch_num 通道号：pwm_ch0，pwm_ch1
+ * @parm h_duty H引脚的占空比：0 ~ 10000 对应 0% ~ 100%，如果没有使能引脚，则设置的占空比无效
+ */
+void mcpwm_set_h_duty(pwm_ch_num_type pwm_ch, u16 h_duty)
+{
+    PWM_TIMER_REG *timer_reg = get_pwm_timer_reg(pwm_ch);
+    PWM_CH_REG *pwm_reg = get_pwm_ch_reg(pwm_ch);
+    if (pwm_reg && timer_reg) {
+        pwm_reg->ch_cmph = (timer_reg->tmr_pr + 1) * h_duty / 10000;
+    }
+}
+/*
+ * @brief 设置L引脚的占空比
+ * @parm pwm_ch_num 通道号：pwm_ch0，pwm_ch1
+ * @parm l_duty L引脚的占空比：0 ~ 10000 对应 0% ~ 100%，如果没有使能引脚，则设置的占空比无效
+ */
+void mcpwm_set_l_duty(pwm_ch_num_type pwm_ch, u16 l_duty)
+{
+    PWM_TIMER_REG *timer_reg = get_pwm_timer_reg(pwm_ch);
+    PWM_CH_REG *pwm_reg = get_pwm_ch_reg(pwm_ch);
+    if (pwm_reg && timer_reg) {
+        pwm_reg->ch_cmpl = (timer_reg->tmr_pr + 1) * l_duty / 10000;
+    }
+}
+
 
 /*
  * @brief 打开或者关闭一个时基
@@ -339,3 +368,110 @@ void io_ext_interrupt_test()
         wdt_clear();
     };
 }
+
+#if defined(HAS_MIO_EN) && (HAS_MIO_EN)
+/*
+ *mio最多支持4通道PWM
+ *
+ */
+struct PWM_MIO_DATA {
+    pwm_aligned_mode_type pwm_aligned_mode;           ///< PWM对齐方式选择
+    u32 frequency;                               	  ///< 初始化该通道的频率,即该通道的两个引脚H&L都是同一个频率。
+    u16 duty;                                         ///< H引脚的初始占空比，0~10000 对应 0%~100% 。每个引脚可以有不同的占空比。
+    u8 ch;	   				                          ///< 逻辑通道号，0~1选择ch0,2~3选ch1
+    u8 pin;                                           ///< 引脚，不需要则填-1
+    u8 inv_en;                                        ///< 引脚输出的波形，每个周期内，0: 先输出高电平， 1: 先输出低电平，此时占空比为低电平的占空比
+};
+struct PWM_MIO_DATA pwm_mio_data[4]; //硬件上只有两组一共4路PWM,使用时0和1、2和3，也就是同一组的PWM通道频率需要一致
+void mio_a_pwm_cpu_init(u32 chl, u32 gpio, u32 frequency)
+{
+    if (chl > 3) {
+        return;
+    }
+    memset((u8 *)&pwm_mio_data[chl], 0, sizeof(struct PWM_MIO_DATA));
+    pwm_mio_data[chl].pwm_aligned_mode = pwm_edge_aligned;         //边沿对齐
+    pwm_mio_data[chl].ch = chl;                                    //通道号
+    pwm_mio_data[chl].frequency = frequency;                       //10KHz
+    pwm_mio_data[chl].pin = gpio;                                  //任意IO
+    pwm_mio_data[chl].duty = 7500;                                 //占空比，选的引脚有值才有效
+    pwm_mio_data[chl].inv_en = 0;
+
+    u32 using_chn; //PWM硬件通道
+    PWM_CH_REG *pwm_reg;
+    //set output IO
+    if ((0 == chl) || (1 == chl)) {
+        using_chn = 0;
+        pwm_reg = get_pwm_ch_reg(using_chn);
+    } else {
+        using_chn = 1;
+        pwm_reg = get_pwm_ch_reg(using_chn);
+    }
+    if (pwm_reg == NULL) {
+        return;
+    }
+    //set mctimer frequency
+    mcpwm_set_frequency(using_chn, pwm_mio_data[chl].pwm_aligned_mode, pwm_mio_data[chl].frequency);
+
+    pwm_reg->ch_con0 = 0;
+    log_info("using_chn %d\n", using_chn);
+    if ((0 == chl) || (2 == chl)) {     		   //配置h口
+        if (pwm_mio_data[chl].inv_en) { 		   //h口每个周期，是否先输出低电平
+            pwm_reg->ch_con0 |=  BIT(4);
+        } else {
+            pwm_reg->ch_con0 &= ~BIT(4);
+        }
+        mcpwm_set_h_duty(using_chn, pwm_mio_data[chl].duty);
+        //H:
+        if (pwm_mio_data[chl].pin < IO_MAX_NUM) {
+            gpio_set_fun_output_port(pwm_mio_data[chl].pin, FO_MCPWM0_H + 4 * using_chn, 1, 1);
+            gpio_set_direction(pwm_mio_data[chl].pin, 0); //DIR output
+        }
+    } else {
+        if (pwm_mio_data[chl].inv_en) {            //l口每个周期，是否先输出低电平
+            pwm_reg->ch_con0 |=  BIT(5);
+        } else {
+            pwm_reg->ch_con0 &= ~BIT(5);
+        }
+        mcpwm_set_l_duty(using_chn, pwm_mio_data[chl].duty);
+        //L:
+        if (pwm_mio_data[chl].pin < IO_MAX_NUM) {
+            gpio_set_fun_output_port(pwm_mio_data[chl].pin, FO_MCPWM0_L + 4 * using_chn, 1, 1);
+            gpio_set_direction(pwm_mio_data[chl].pin, 0); //DIR output
+        }
+    }
+    mcpwm_open(using_chn); 	 //mcpwm enable
+
+    log_pwm_info(using_chn);
+}
+void mio_a_pwm_cpu_run(u32 chl, u32 pwm_var)
+{
+    if (chl > 3) {
+        return;
+    }
+    u8 using_chn = 0;
+    if (chl < 2) {
+        using_chn = 0;
+    } else {
+        using_chn = 1;
+    }
+    u32 duty = pwm_var * 10000 / 255;
+    /* log_info("duty is %d\n", duty); */
+    if ((0 == chl) || (2 == chl)) {
+        //H:
+        mcpwm_set_h_duty(using_chn, duty);
+    } else {
+        //L:
+        mcpwm_set_l_duty(using_chn, duty);
+    }
+}
+
+void mio_a_io_cpu_init(u32 mask, JL_PORT_TypeDef *port, u32 offset)
+{
+    log_info("mio io init -> mask : 0x%x\n", mask);
+    port->PU0 &= ~(mask << offset);
+    port->PD0 |= (mask << offset);
+    port->DIR &= ~(mask << offset);
+    port->OUT &= ~(mask << offset);
+    /* log_info("PA12 0x%x\n", JL_OMAP->PA12_OUT); */
+}
+#endif

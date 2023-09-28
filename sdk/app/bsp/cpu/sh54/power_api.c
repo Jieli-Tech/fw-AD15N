@@ -23,6 +23,7 @@
 #include "app_config.h"
 #include "maskrom.h"
 #include "dac_cpu.h"
+#include "vm_api.h"
 
 #define ENABLE								1
 #define DISABLE								0
@@ -168,6 +169,8 @@ volatile extern u32 lowpower_usec;
 /*----------------------------------------------------------------------------*/
 void sys_power_down(u32 usec)
 {
+    /* 睡眠前vm预擦除 */
+    vm_pre_erase();
     u8 temp_wdt_con = 0;
     u8 ret = 0;
     OS_ENTER_CRITICAL();
@@ -214,6 +217,8 @@ void sys_power_down(u32 usec)
 
 void sys_softoff()
 {
+    /* 关机前vm预擦除 */
+    vm_pre_erase();
     power_set_soft_poweroff();
 }
 

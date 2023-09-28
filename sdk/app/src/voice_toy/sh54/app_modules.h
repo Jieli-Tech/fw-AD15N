@@ -23,6 +23,9 @@
 //  MIDI琴格式解码
 #define DECODER_MIDI_KEYBOARD_EN 1
 
+//  mp3格式压缩
+#define ENCODER_MP3_EN 1
+
 //  ump3格式压缩
 #define ENCODER_UMP3_EN 1
 
@@ -32,12 +35,15 @@
 //  MIO功能使能
 #define HAS_MIO_EN 0
 
+//  SRC变采样功能使能
+#define HAS_HW_SRC_EN 1 //  硬件SRC
+
 //  解码SPEED功能使能
 #define AUDIO_SPEED_EN 1
 
 //  陷波/移频啸叫抑制使能
 #define NOTCH_HOWLING_EN 1
-#define PITCHSHIFT_HOWLING_EN 2
+#define PITCHSHIFT_HOWLING_EN 1
 
 //  变声功能使能
 #define VO_PITCH_EN 0
@@ -54,7 +60,7 @@
 //  APP应用使能
 #define RECORD_MODE_EN 1 //  录音应用模式
 #define LINEIN_MODE_EN 1 //  Linein应用模式
-#define SIMPLE_DEC_EN 1 //  多路解码应用模式
+#define SIMPLE_DEC_EN 1 //  简单解码应用模式
 #define LOUDSPEAKER_EN 1 //  扩音应用模式
 
 //  驱动使能
@@ -74,4 +80,7 @@
 //  驱动使能
 #define EXT_FLASH_EN 0 //  外挂资源flash使能
 #define TFG_SD_EN 0 //  SDMMC驱动使能
+
+//  文件系统
+#define NORFS_EN 1 //  NORFS文件系统使能
 #endif

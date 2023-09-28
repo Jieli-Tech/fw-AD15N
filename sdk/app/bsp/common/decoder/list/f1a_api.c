@@ -16,9 +16,12 @@
 #include "decoder_msg_tab.h"
 #include "app_config.h"
 #include "decoder_cpu.h"
+#include "app_modules.h"
 //#include "avio.h"
 //#include "bitstream.h"
 //#include "wmadata.h"
+
+#if defined(DECODER_F1A_EN) && (DECODER_F1A_EN)
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -228,3 +231,4 @@ u32 f1a_2_buff_api(dec_buf *p_dec_buf)
     p_dec_buf->end   = (u32)&f1a_2_buf_end[0];
     return 0;
 }
+#endif

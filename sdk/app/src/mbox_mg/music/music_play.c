@@ -414,6 +414,7 @@ void music_app_loop(void)
             masb_bp_save_scan();
 #endif
             if ((Music_Play_var.bPlayStatus != MAD_PLAY) && (0 !=  decode_is_enable())) {
+                vm_pre_erase();
                 idle_check_deal(0);
             }
 

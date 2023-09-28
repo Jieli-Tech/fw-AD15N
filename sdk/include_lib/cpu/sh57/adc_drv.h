@@ -3,6 +3,7 @@
 
 #include "typedef.h"
 #include "app_config.h"
+#define ADC_CH_MASK_CHANNEL_SEL (0x3f)
 #define ADC_MUX_IO           (0x1 << 4)  //普通IO
 #define ADC_MUX_AN           (0x1 << 5)  //内部模拟电源通道
 #define ADC_BUSY_IO	         (0x1 << 6)  //繁忙通道

@@ -119,7 +119,7 @@ void adc_add_sample_ch(u16 real_ch)
 {
     local_irq_disable();
     for (u8 i = 0; i < ADC_MAX_CH_NUM; i++) {
-        if ((adc_info[i].ch & 0xf) == real_ch) {
+        if ((adc_info[i].ch & ADC_CH_MASK_CHANNEL_SEL) == real_ch) {
             break;
         } else if (adc_info[i].ch == 0xff) {
             adc_info[i].ch = real_ch;
@@ -135,7 +135,7 @@ void adc_remove_sample_ch(u16 real_ch)
 {
     local_irq_disable();
     for (u8 i = 0; i < ADC_MAX_CH_NUM; i++) {
-        if ((adc_info[i].ch & 0xf) == real_ch) {
+        if ((adc_info[i].ch & ADC_CH_MASK_CHANNEL_SEL) == real_ch) {
             adc_info[i].ch = 0xff;
             adc_info[i].value = ADC_VALUE_NONE;
             break;
@@ -147,7 +147,7 @@ void adc_remove_sample_ch(u16 real_ch)
 u8 adc_add_ch_reuse(u16 real_ch, u8 busy)
 {
     for (u8 i = 0; i < ADC_MAX_CH_NUM; i++) {
-        if ((adc_info[i].ch & 0xf) == real_ch) {
+        if ((adc_info[i].ch & ADC_CH_MASK_CHANNEL_SEL) == real_ch) {
             adc_info[i].ch |= ADC_REUSE_IO;
             if (busy) {
                 adc_info[i].ch |= ADC_BUSY_IO;
@@ -163,7 +163,7 @@ u8 adc_add_ch_reuse(u16 real_ch, u8 busy)
 u8 adc_remove_ch_reuse(u16 real_ch)
 {
     for (u8 i = 0; i < ADC_MAX_CH_NUM; i++) {
-        if ((adc_info[i].ch & 0xf) == real_ch) {
+        if ((adc_info[i].ch & ADC_CH_MASK_CHANNEL_SEL) == real_ch) {
             adc_info[i].ch &= ~ADC_REUSE_IO;
             adc_info[i].ch &= ~ADC_BUSY_IO;
         }
@@ -175,6 +175,11 @@ static u8 adc_get_next_ch(u8 now_ch)
 {
     for (u8 i = now_ch + 1; i < ADC_MAX_CH_NUM; i++) {
         if (adc_info[i].ch != 0xff) {
+            if ((adc_info[i].ch & (ADC_REUSE_IO | ADC_BUSY_IO)) == (ADC_REUSE_IO | ADC_BUSY_IO)) {
+                continue;
+            } else if ((adc_info[i].ch & ADC_REUSE_IO) == ADC_REUSE_IO) { //通道复用但未被占用
+
+            }
             return i;
         }
     }
@@ -267,6 +272,11 @@ u16 adc_get_first_available_ch()
     }
     for (u8 i = 0; i < ARRAY_SIZE(adc_info); i++) {
         if (adc_info[i].ch != 0xff) {
+            if ((adc_info[i].ch & (ADC_REUSE_IO | ADC_BUSY_IO)) == (ADC_REUSE_IO | ADC_BUSY_IO)) {
+                continue;
+            } else if ((adc_info[i].ch & ADC_REUSE_IO) == ADC_REUSE_IO) { //通道复用但未被占用
+
+            }
             cur_ch = i;
             return cur_ch;
         }
@@ -295,7 +305,7 @@ void adc_scan(void)
 u16 adc_get_value(u16 real_ch)
 {
     for (u8 i = 0; i < ARRAY_SIZE(adc_info); i++) {
-        if (adc_info[i].ch == real_ch) {
+        if ((adc_info[i].ch & ADC_CH_MASK_CHANNEL_SEL) == real_ch) {
             return adc_info[i].value;
         }
     }

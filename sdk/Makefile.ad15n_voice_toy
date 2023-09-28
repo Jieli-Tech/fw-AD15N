@@ -101,6 +101,7 @@ DEFINES := \
 	-DFPGA=0 \
 	-DCPU_SH55=1 \
 	-DFLASH_CACHE_ENABLE=0 \
+	-DMKEY_CHECK_ENABLE=1 \
 	-DAUDIO_ADC_EN=0 \
 	-DHAS_F1A_DECODER \
 	-DHAS_MAX_F1A_NUMBER=1 \
@@ -111,9 +112,10 @@ DEFINES := \
 	-DHAS_USB_EN=0 \
 	-DHAS_SDMMC_EN \
 	-DHAS_MIO_PLAYER \
+	-DHAS_HW_SRC_MODULE=1 \
 	-DHAS_UPDATE_EN=0 \
 	-DHAS_UART_UPDATE_EN \
-	-DFATFS_ENABLE=0 \
+	-DHAS_NORFS_EN \
 	-DSIMPLE_FATFS_ENABLE=0 \
 	-DSYS_VM_EN=1 \
 	-DHAS_VIRTUAL_RTC_EN \
@@ -217,6 +219,8 @@ c_SRC_FILES := \
 	app/bsp/cpu/sh55/dac_cpu.c \
 	app/bsp/cpu/sh55/iic_hw.c \
 	app/bsp/cpu/sh55/irflt.c \
+	app/bsp/cpu/sh55/led_spi.c \
+	app/bsp/cpu/sh55/mcpwm.c \
 	app/bsp/cpu/sh55/port_init.c \
 	app/bsp/cpu/sh55/port_wkup.c \
 	app/bsp/cpu/sh55/power_api.c \
@@ -285,12 +289,12 @@ cxx_SRC_FILES :=
 # 链接参数
 LFLAGS := \
 	--plugin-opt=save-temps \
+	--plugin-opt=-dont-used-symbol-list=malloc,free,sprintf,printf,puts,putchar,getchar \
 	--gc-sections \
 	include_lib/liba/sh55/voice_toy/old_vm_lib.a \
 	include_lib/liba/sh55/voice_toy/new_vm_lib.a \
 	--start-group \
 	include_lib/liba/sh55/voice_toy/cpu_lib.a \
-	include_lib/liba/sh55/voice_toy/address_lib.a \
 	include_lib/liba/sh55/voice_toy/efuse_trim_value_lib.a \
 	include_lib/liba/sh55/voice_toy/fs_lib.a \
 	include_lib/liba/sh55/voice_toy/audio_lib.a \
@@ -370,8 +374,6 @@ all: pre_build $(OUT_ELF)
 
 pre_build:
 	$(info +PRE-BUILD)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/bsp/common/app_modules_h.c -o tmp_app2022.txt
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/src/voice_toy/sh55/app_modules_cpu_h.c -o tmp_app2022_cpu.txt
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh55/voice_toy/app_ld.c -o app/post_build/sh55/app.ld
 	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -D__LD__ -E -P app/post_build/sh55/voice_toy/download_bat.c -o $(POST_SCRIPT)
 	$(QUITE) $(FIXBAT) $(POST_SCRIPT)

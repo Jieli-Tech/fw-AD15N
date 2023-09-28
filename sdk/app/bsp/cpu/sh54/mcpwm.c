@@ -4,6 +4,7 @@
 #include "gpio.h"
 #include "clock.h"
 #include "mcpwm.h"
+#include "app_modules.h"
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -85,3 +86,42 @@ void test_mcpwm(void)
     mcpwm_set(3, 10000, 20); //fre 1000,20%占空比
 }
 
+/*
+ *
+ * mio功能驱动
+ */
+
+#if defined(HAS_MIO_EN) && (HAS_MIO_EN)
+
+
+void mio_a_pwm_cpu_init(u32 chl, u32 gpio, u32 frequency)
+{
+    gpio_set_pull_up(gpio, 1);
+    gpio_set_pull_down(gpio, 1);
+    SFR(JL_IOMC->IOMC3, 0, 3, 0);
+    gpio_set_direction(gpio, 0);
+    gpio_set_die(gpio, 0);
+    JL_PWM->TMR0_PR = sys_clock_get() / frequency;
+    JL_PWM->CH0_CMP = 0;
+    SFR(JL_PWM->PWMCON1, (1 + chl * 4), 3, chl);
+    JL_PWM->TMR0_CON = BIT(5);
+    JL_PWM->PWMCON0 |= BIT(8 + chl);
+    JL_PWM->PWMCON0 |= BIT(chl);
+}
+void mio_a_pwm_cpu_run(u32 chl, u32 pwm_var)
+{
+    local_irq_disable();
+    u16 tmr_pr = JL_PWM->TMR0_PR;
+    JL_PWM->CH0_CMP = (tmr_pr + 1) * pwm_var / 255;	//pwm_var范围在0-255
+    local_irq_enable();
+}
+void mio_a_io_cpu_init(u32 mask, JL_PORT_TypeDef *port, u32 offset)
+{
+    log_info("mio io init -> mask : 0x%x\n", mask);
+    port->PU &= ~(mask << offset);
+    port->PD |= (mask << offset);
+    port->DIR &= ~(mask << offset);
+    port->OUT &= ~(mask << offset);
+}
+
+#endif

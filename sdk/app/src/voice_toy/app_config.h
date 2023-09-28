@@ -34,27 +34,39 @@
 #define POWER_WAKEUP_IO				IO_PORTA_00
 
 
+/*---------Vm Mode Configuration---------------*/
+#define NO_VM					    0
+#define USE_NEW_VM     			    1
+#define USE_OLD_VM          		2
+#define SYS_MEMORY_SELECT   		USE_NEW_VM
+
 /*---------FLASH Configuration---------------*/
-#define TCFG_FLASH_SPI_TYPE_SELECT 		1//1:flash 选择硬件spi; 0:flash use soft_spi
-#define HW_SPI_WORK_MODE				SPI_MODE_BIDIR_1BIT
-#define SPI_READ_DATA_WIDTH				SPI_MODE_BIDIR_1BIT
-#define SPI_CS_PORT_SEL					IO_PORTA_05
-//port select for soft spi
-#define A_CLK_BIT           			BIT(12)// set clk
-#define A_CLK_PORT(x)       			JL_PORTA->x
-#define A_D0_BIT            			BIT(11)// set d0
-#define A_D0_PORT(x)        			JL_PORTA->x
-#define A_D1_BIT            			BIT(11)// set d1
-#define A_D1_PORT(x)        			JL_PORTA->x
-#define SOFT_SPI_WORK_MODE				SPI_MODE_UNIDIR_1BIT//只支持双向或单线
-#if TCFG_FLASH_SPI_TYPE_SELECT
-#define SPI_HW_NUM						1
+#define TCFG_FLASH_SPI_TYPE_SELECT  1//1:flash 选择硬件spi; 0:flash use soft_spi
+#define TFG_SPI_UNIDIR_MODE_EN      DISABLE//外挂flash运行1bit模式
+#define SPI_SD_IO_REUSE             DISABLE//SPI_FLASH与SD卡模块IO复用使能
+
+#if TFG_SPI_UNIDIR_MODE_EN
+#define HW_SPI_WORK_MODE            SPI_MODE_UNIDIR_1BIT
+#define SOFT_SPI_WORK_MODE          SPI_MODE_UNIDIR_1BIT//只支持双向或单线
+#define SPI_READ_DATA_WIDTH         1
 #else
-#define SPI_HW_NUM						0
+#define HW_SPI_WORK_MODE            SPI_MODE_BIDIR_1BIT
+#define SOFT_SPI_WORK_MODE          SPI_MODE_BIDIR_1BIT//只支持双向或单线
+#define SPI_READ_DATA_WIDTH         2
 #endif
 
-/*sd 和 flash复用使能*/
-#define SPI_SD_IO_REUSE					0//SPI_FLASH与SD卡模块IO复用使能
+#if TCFG_FLASH_SPI_TYPE_SELECT
+#define SPI_HW_NUM                  1
+#else
+#define SPI_HW_NUM                  0
+#endif
+//port select for soft spi
+#define A_CLK_BIT                   BIT(12)// set clk
+#define A_CLK_PORT(x)               JL_PORTA->x
+#define A_D0_BIT                    BIT(11)// set d0
+#define A_D0_PORT(x)                JL_PORTA->x
+#define A_D1_BIT                    BIT(10)// set d1
+#define A_D1_PORT(x)                JL_PORTA->x
 
 /*---------SD Configuration---------------*/
 ///<SD卡接口选择

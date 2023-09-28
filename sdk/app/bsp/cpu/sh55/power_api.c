@@ -21,6 +21,7 @@
 #include "app_config.h"
 #include "maskrom.h"
 #include "dac_cpu.h"
+#include "vm_api.h"
 
 #define ENABLE								1
 #define DISABLE								0
@@ -53,7 +54,7 @@ const struct low_power_param power_param = {
     .flash_pg       = TCFG_KEEP_FLASH_POWER_GATE,
     .vdc13_cap_en   = 0,									//根据vdc13引脚是否有外部电容来配置, 1.外挂电容 0.无外挂电容
     .vddio_keep = 0,
-#if VIRTUAL_RTC_EN
+#if defined(VIRTUAL_RTC_EN) && (VIRTUAL_RTC_EN)
     .virtual_rtc_en = 1,
 #else
     .virtual_rtc_en = 0,
@@ -171,6 +172,8 @@ volatile extern u32 lowpower_usec;
 */
 void sys_power_down(u32 usec)
 {
+    /* 睡眠前vm预擦除 */
+    vm_pre_erase();
     u8 temp_wdt_con = 0;
     u8 ret = 0;
     OS_ENTER_CRITICAL();
@@ -204,6 +207,8 @@ void sys_power_down(u32 usec)
 
 void sys_softoff()
 {
+    /* 关机前vm预擦除 */
+    vm_pre_erase();
     power_set_soft_poweroff();
 }
 

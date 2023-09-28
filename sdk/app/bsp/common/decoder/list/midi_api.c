@@ -15,6 +15,9 @@
 #include "decoder_msg_tab.h"
 #include "dac.h"
 #include "decoder_cpu.h"
+#include "app_modules.h"
+
+#if defined(DECODER_MIDI_EN) && (DECODER_MIDI_EN)
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
@@ -31,7 +34,7 @@ static MIDI_INIT_STRUCT init_info       AT(.midi_buf);
 dec_obj dec_midi_hld;
 cbuffer_t cbuf_midi                     AT(.midi_buf);
 u16 obuf_midi[MIDI_DEC_OBUF_SIZE / 2] AT(.midi_buf);
-u32 midi_decode_buff[(3816 + 3) / 4]    AT(.midi_buf);
+u32 midi_decode_buff[(3820 + 3) / 4]    AT(.midi_buf);
 #define MIDI_CAL_BUF ((void *)&midi_decode_buff[0])
 
 
@@ -183,11 +186,4 @@ u32 midi_buff_api(dec_buf *p_dec_buf)
     p_dec_buf->end   = (u32)&midi_buf_end[0];
     return 0;
 }
-
-
-
-
-
-
-
-
+#endif

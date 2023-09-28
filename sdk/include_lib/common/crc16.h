@@ -4,7 +4,7 @@
 
 // #define CRC16 	chip_crc16
 
-u16 CRC16(void *ptr, u32  len);
+u16 CRC16(const void *ptr, u32  len);
 void CrcDecode(void  *buf, u16 len);
 u16 get_appbin_crc16_value(void);
 

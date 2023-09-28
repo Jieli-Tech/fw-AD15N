@@ -85,6 +85,12 @@ SECTIONS
     /* OVERLAY : */
     OVERLAY : AT(0x200000)
     {
+        .d_toy_music
+        {
+            PROVIDE(toy_music_buf_start = .);
+            *(.toy_music_data);
+            PROVIDE(toy_music_buf_end = .);
+        }
         .d_midi_ctrl
         {
             PROVIDE(midi_ctrl_buf_start = .);
@@ -99,12 +105,14 @@ SECTIONS
         }
         .d_ump3
         {
+            . = toy_music_buf_end;
             PROVIDE(ump3_buf_start = .);
             *(.ump3_data);
             PROVIDE(ump3_buf_end = .);
         }
         .d_f1a
         {
+            . = toy_music_buf_end;
             PROVIDE(f1a_1_buf_start = .);
             *(.f1a_1_buf);
             PROVIDE(f1a_1_buf_end = .);

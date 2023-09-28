@@ -9,17 +9,19 @@
 # make ad15n_voice_toy
 # make ad17n_voice_toy
 # make ad14n_mcu
+# make ad18n_mcu
 # make ad14n_voice_toy
 # make ac104n_mbox_mg
+# make ad18n_voice_toy
 # make ad15n_mcu
 # make ad17n_mcu
 
-.PHONY: all clean ad15n_voice_toy ad17n_voice_toy ad14n_mcu ad14n_voice_toy ac104n_mbox_mg ad15n_mcu ad17n_mcu clean_ad15n_voice_toy clean_ad17n_voice_toy clean_ad14n_mcu clean_ad14n_voice_toy clean_ac104n_mbox_mg clean_ad15n_mcu clean_ad17n_mcu
+.PHONY: all clean ad15n_voice_toy ad17n_voice_toy ad14n_mcu ad18n_mcu ad14n_voice_toy ac104n_mbox_mg ad18n_voice_toy ad15n_mcu ad17n_mcu clean_ad15n_voice_toy clean_ad17n_voice_toy clean_ad14n_mcu clean_ad18n_mcu clean_ad14n_voice_toy clean_ac104n_mbox_mg clean_ad18n_voice_toy clean_ad15n_mcu clean_ad17n_mcu
 
-all: ad15n_voice_toy ad17n_voice_toy ad14n_mcu ad14n_voice_toy ac104n_mbox_mg ad15n_mcu ad17n_mcu
+all: ad15n_voice_toy ad17n_voice_toy ad14n_mcu ad18n_mcu ad14n_voice_toy ac104n_mbox_mg ad18n_voice_toy ad15n_mcu ad17n_mcu
 	@echo +ALL DONE
 
-clean: clean_ad15n_voice_toy clean_ad17n_voice_toy clean_ad14n_mcu clean_ad14n_voice_toy clean_ac104n_mbox_mg clean_ad15n_mcu clean_ad17n_mcu
+clean: clean_ad15n_voice_toy clean_ad17n_voice_toy clean_ad14n_mcu clean_ad18n_mcu clean_ad14n_voice_toy clean_ac104n_mbox_mg clean_ad18n_voice_toy clean_ad15n_mcu clean_ad17n_mcu
 	@echo +CLEAN DONE
 
 ad15n_voice_toy:
@@ -40,6 +42,12 @@ ad14n_mcu:
 clean_ad14n_mcu:
 	$(MAKE) -C . -f Makefile.ad14n_mcu clean
 
+ad18n_mcu:
+	$(MAKE) -C . -f Makefile.ad18n_mcu
+
+clean_ad18n_mcu:
+	$(MAKE) -C . -f Makefile.ad18n_mcu clean
+
 ad14n_voice_toy:
 	$(MAKE) -C . -f Makefile.ad14n_voice_toy
 
@@ -51,6 +59,12 @@ ac104n_mbox_mg:
 
 clean_ac104n_mbox_mg:
 	$(MAKE) -C . -f Makefile.ac104n_mbox_mg clean
+
+ad18n_voice_toy:
+	$(MAKE) -C . -f Makefile.ad18n_voice_toy
+
+clean_ad18n_voice_toy:
+	$(MAKE) -C . -f Makefile.ad18n_voice_toy clean
 
 ad15n_mcu:
 	$(MAKE) -C . -f Makefile.ad15n_mcu

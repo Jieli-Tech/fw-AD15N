@@ -8,6 +8,30 @@
 
 #if KEY_AD_EN
 
+#if defined(ADC_BIT_SEL) && (ADC_BIT_SEL == ADC_SEL_12_BIT)
+#if EXTERN_R_UP
+#define R_UP       220//220     //22K
+#else
+#define R_UP       100    //内部上拉为10K
+#endif
+
+#define ADC_33   (0xfffL)
+#define ADC_13   (0xfffL*1000 /(1000  + R_UP))     //100K
+#define ADC_10   (0xfffL*330  /(330   + R_UP))     //33K
+#define ADC_07   (0xfffL*150  /(150   + R_UP))     //15K
+#define ADC_04   (0xfffL*51   /(51   + R_UP))      //5.1K
+#define ADC_00   (0)
+
+#define AD_NOKEY        ((ADC_33 + ADC_13)/2)
+#define ADKEY1_5		((ADC_13 + ADC_10)/2)
+#define ADKEY1_6		((ADC_10 + ADC_07)/2)
+#define ADKEY1_7		((ADC_07 + ADC_04)/2)
+#define ADKEY1_8		((ADC_04 + ADC_00)/2)
+
+const u16 ad_key_table[] = {
+    ADKEY1_8, ADKEY1_7, ADKEY1_6, ADKEY1_5
+};
+#else //ADC_SEL_10_BIT
 #if EXTERN_R_UP
 #define R_UP       EXTERN_R_UP//220     //22K
 #else
@@ -41,7 +65,7 @@ const u16 ad_key_table[] = {
     ADKEY1_8, ADKEY1_7, ADKEY1_6, ADKEY1_5, ADKEY1_4,
     ADKEY1_3, ADKEY1_2, ADKEY1_1, ADKEY1_0
 };
-
+#endif
 /*----------------------------------------------------------------------------*/
 /**@brief   按键去抖函数，输出稳定键值
    @param   key：键值

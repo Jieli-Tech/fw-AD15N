@@ -30,8 +30,9 @@ typedef struct _DAC_MANAGE {
     sound_out_obj *sound[DAC_CHANNEL_NUMBER];
     void (*kick[DAC_CHANNEL_NUMBER])(void *);
     /* u8 vol[DAC_CHANNEL_NUMBER]; */
-    u8 ch;
+    void (*phy_vol_set)(u16);
     u16 vol_phy;
+    u8 ch;
     u8 vol;
     u8 flag;
 } DAC_MANAGE;
@@ -79,7 +80,7 @@ const u16 vol_tab[] = {
 #define MAX_PHY_VOL   vol_tab[MAX_VOL_LEVEL]
 
 DAC_MANAGE dac_mge AT(.DAC_BUFFER);
-u16 double_dac_buf[DAC_PACKET_SIZE * 2] AT(.DAC_BUFFER);
+/* u16 double_dac_buf[DAC_PACKET_SIZE * 2] AT(.DAC_BUFFER); */
 /* s16 sp_dac_buf[DAC_PACKET_SIZE] AT(.DAC_BUFFER); */
 /*----------------------------------------------------------------------------*/
 /**@brief   dac模块初始化
@@ -89,9 +90,12 @@ u16 double_dac_buf[DAC_PACKET_SIZE * 2] AT(.DAC_BUFFER);
    @note    void dac_mode_init(u16 vol)
 */
 /*----------------------------------------------------------------------------*/
-void dac_mode_init(u16 vol)
+void dac_mode_init(u16 vol, void *phy_vol_set_func)
 {
     memset(&dac_mge, 0, sizeof(dac_mge));
+    if (phy_vol_set_func) {
+        dac_mge.phy_vol_set = phy_vol_set_func;
+    }
 #if DAC_FADE_ENABLE
     dac_mge.vol = vol;
     if (dac_mge.vol > MAX_VOL_LEVEL) {
@@ -101,35 +105,23 @@ void dac_mode_init(u16 vol)
     dac_vol(0, vol);
 #endif
 
-    memset(&double_dac_buf[0], 0, sizeof(double_dac_buf));
-    u32 con = dac_mode_check(DAC_DEFAULT);
-    dac_resource_init((u8 *)&double_dac_buf[0], sizeof(double_dac_buf), con, 0);
+    auout_mode_init();
 }
 
 //1:有延时 0:没有延时, 上电开机调用需要延时至少1.2ms
 void dac_init_api(u32 sr, bool delay_flag)
 {
-    dac_phy_init(dac_sr_lookup(sr));
-    /* delay_10ms(2); */
-    /* delay(5000); */
-    if (delay_flag) {
-        udelay(1000);//约1.2ms
-    }
-    dac_cpu_mode();
+    auout_init(sr, delay_flag);
 }
 
 void dac_sr_api(u32 sr)
 {
-    /* u32 dac_sr_set(u32 sr) */
-    dac_sr_set(dac_sr_lookup(sr));
-    /* dac_analog_init(); */
+    auout_sr_api(sr);
 }
 
 void dac_off_api(void)
 {
-    rdac_analog_close();
-    apa_analog_close();
-    dac_phy_off();
+    auout_off_api();
 }
 /* void dac_sr_api(u32 sr) */
 /* { */
@@ -150,7 +142,7 @@ bool dac_cbuff_active(void *sound_hld)
 }
 
 AT(.audio_d.text.cache.L2)
-void fill_dac_fill_phy(u8 *buf, u32 len)
+u32 fill_dac_fill_phy(u8 *buf, u32 len)
 {
     u32 i, sp_cnt, active_flag;
     s32 t_sp;
@@ -220,7 +212,7 @@ void fill_dac_fill_phy(u8 *buf, u32 len)
 
             }
         }
-        if (MAX_PHY_VOL != dac_mge.vol_phy) {
+        if ((NULL == dac_mge.phy_vol_set) && (MAX_PHY_VOL != dac_mge.vol_phy)) {
             /* t_sp = (t_sp / (MAX_PHY_VOL + 1)) * dac_mge.vol_phy; */
             t_sp = (t_sp * dac_mge.vol_phy) / (MAX_PHY_VOL + 1);
         }
@@ -248,12 +240,13 @@ void fill_dac_fill_phy(u8 *buf, u32 len)
         }
         dac_kick_decoder(dac_mge.sound[i], dac_mge.kick[i]);
     }
+    return len;
 }
 
 AT(.audio_d.text.cache.L2)
-void fill_dac_fill(u8 *buf, u32 len, AUDIO_TYPE type)
+u32 fill_dac_fill(u8 *buf, u32 len, AUDIO_TYPE type)
 {
-    fill_dac_fill_phy(buf, len);
+    return fill_dac_fill_phy(buf, len);
 }
 
 u8 dac_vol(char set, u8 vol)
@@ -280,6 +273,9 @@ u8 dac_vol(char set, u8 vol)
             dac_mge.vol_phy = vol_tab[dac_mge.vol];
         }
         dac_mge.flag &= ~B_DAC_MUTE;
+    }
+    if (dac_mge.phy_vol_set) {
+        dac_mge.phy_vol_set(dac_mge.vol_phy);
     }
     log_info(" dac vol %d, 0x%x\n", dac_mge.vol, dac_mge.vol_phy);
 __dac_vol_end:

@@ -25,6 +25,7 @@
 <Add option="-DFPGA=0" />
 <Add option="-DCPU_SH54=1" />
 <Add option="-DFLASH_CACHE_ENABLE=1" />
+<Add option="-DMKEY_CHECK_ENABLE=1" />
 <Add option="-DAUDIO_ADC_EN=1" />
 <Add option="-DSPEAKER_EN" />
 <Add option="-DHAS_VOICE_PITCH_EN" />
@@ -43,11 +44,12 @@
 <Add option="-DHAS_USB_EN=1" />
 <Add option="-DHAS_SDMMC_EN" />
 <Add option="-DHAS_MIO_PLAYER" />
+<Add option="-DHAS_HW_SRC_MODULE=1" />
 <Add option="-DHAS_UPDATE_EN=1" />
 <Add option="-DHAS_UART_UPDATE_EN" />
 <Add option="-DHAS_ECHO_EN" />
 <Add option="-DHOWLING_EN" />
-<Add option="-DFATFS_ENABLE=0" />
+<Add option="-DHAS_NORFS_EN" />
 <Add option="-DSIMPLE_FATFS_ENABLE=1" />
 <Add option="-DSYS_VM_EN=1" />
 <Add option="-DHAS_MP3_ENCODER" />
@@ -119,12 +121,12 @@
 </Compiler>
 <Linker>
 <Add option="--plugin-opt=save-temps" />
+<Add option="--plugin-opt=-dont-used-symbol-list=malloc,free,sprintf,printf,puts,putchar,getchar" />
 <Add option="--gc-sections" />
 <Add option="include_lib/liba/sh54/voice_toy/old_vm_lib.a" />
 <Add option="include_lib/liba/sh54/voice_toy/new_vm_lib.a" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/sh54/voice_toy/cpu_lib.a" />
-<Add option="include_lib/liba/sh54/voice_toy/address_lib.a" />
 <Add option="include_lib/liba/sh54/voice_toy/efuse_trim_value_lib.a" />
 <Add option="include_lib/liba/sh54/voice_toy/fs_lib.a" />
 <Add option="include_lib/liba/sh54/voice_toy/audio_lib.a" />
@@ -164,8 +166,6 @@
 <Add option="-M=app/post_build/sh54/app.map" />
 </Linker>
 <ExtraCommands>
-<Add before="$compiler $options $includes -D__LD__ -E -P app\bsp\common\app_modules_h.c -o tmp_app2022.txt" />
-<Add before="$compiler $options $includes -D__LD__ -E -P app\src\voice_toy\sh54\app_modules_cpu_h.c -o tmp_app2022_cpu.txt" />
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\voice_toy\app_ld.c -o app\post_build\sh54\app.ld" />
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\voice_toy\download_bat.c -o app\post_build\sh54\download.bat" />
 <Add before="tools\utils\fixbat.exe app\post_build\sh54\download.bat" />
@@ -253,12 +253,15 @@
 <Unit filename="app/bsp/common/vm/vm_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/vm/vm_api.h" />
 <Unit filename="app/bsp/cpu/sh54/adc_drv.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh54/audio_adc_cpu.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/clock.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/cpu.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/dac_cpu.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/iic_hw.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/irflt.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/irflt.h" />
+<Unit filename="app/bsp/cpu/sh54/led_spi.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/cpu/sh54/mcpwm.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/port_init.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/port_wkup.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/port_wkup.h" />
@@ -339,6 +342,7 @@
 <Unit filename="include_lib/audio/notch_howling_api.h" />
 <Unit filename="include_lib/audio/pcm_eq.h" />
 <Unit filename="include_lib/audio/pcm_eq_api.h" />
+<Unit filename="include_lib/audio/resample_api.h" />
 <Unit filename="include_lib/audio/reverb_api.h" />
 <Unit filename="include_lib/audio/src.h" />
 <Unit filename="include_lib/common/boot.h" />
@@ -356,7 +360,7 @@
 <Unit filename="include_lib/common/old_vm.h" />
 <Unit filename="include_lib/common/printf.h" />
 <Unit filename="include_lib/common/tab_read.h" />
-<Unit filename="include_lib/common/vm.h" />
+<Unit filename="include_lib/common/vm_sfc.h" />
 <Unit filename="include_lib/common/wdt.h" />
 <Unit filename="include_lib/cpu/sh54/adc_drv.h" />
 <Unit filename="include_lib/cpu/sh54/asm/power/p33.h" />
@@ -374,6 +378,7 @@
 <Unit filename="include_lib/cpu/sh54/iic_hw.h" />
 <Unit filename="include_lib/cpu/sh54/irq.h" />
 <Unit filename="include_lib/cpu/sh54/maskrom.h" />
+<Unit filename="include_lib/cpu/sh54/mcpwm.h" />
 <Unit filename="include_lib/cpu/sh54/sfr.h" />
 <Unit filename="include_lib/cpu/sh54/typedef.h" />
 <Unit filename="include_lib/cpu/sh54/uart.h" />

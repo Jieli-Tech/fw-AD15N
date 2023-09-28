@@ -25,10 +25,10 @@
 <Add option="-DFPGA=0" />
 <Add option="-DCPU_SH54=1" />
 <Add option="-DFLASH_CACHE_ENABLE=1" />
+<Add option="-DMKEY_CHECK_ENABLE=1" />
 <Add option="-DAUDIO_ADC_EN=1" />
 <Add option="-DHAS_USB_EN=1" />
 <Add option="-DHAS_UPDATE_EN=0" />
-<Add option="-DFATFS_ENABLE=0" />
 <Add option="-DSIMPLE_FATFS_ENABLE=0" />
 <Add option="-DSYS_VM_EN=0" />
 <Add option="-DNOFLOAT" />
@@ -59,6 +59,7 @@
 </Compiler>
 <Linker>
 <Add option="--plugin-opt=save-temps" />
+<Add option="--plugin-opt=-dont-used-symbol-list=malloc,free,sprintf,printf,puts,putchar,getchar" />
 <Add option="--gc-sections" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/sh54/mcu/cpu_lib.a" />
@@ -68,8 +69,6 @@
 <Add option="-M=app/post_build/sh54/app.map" />
 </Linker>
 <ExtraCommands>
-<Add before="$compiler $options $includes -D__LD__ -E -P app\bsp\common\app_modules_h.c -o tmp_app2022.txt" />
-<Add before="$compiler $options $includes -D__LD__ -E -P app\src\mcu\sh54\app_modules_cpu_h.c -o tmp_app2022_cpu.txt" />
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\mcu\app_ld.c -o app\post_build\sh54\app.ld" />
 <Add before="$compiler $options $includes -D__LD__ -E -P app\post_build\sh54\mcu\download_bat.c -o app\post_build\sh54\download.bat" />
 <Add before="tools\utils\fixbat.exe app\post_build\sh54\download.bat" />
@@ -82,6 +81,8 @@
 <Unit filename="app/bsp/common/rtc/rtc.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/usb/usb_common_def.h" />
 <Unit filename="app/bsp/common/usb/usb_std_class_def.h" />
+<Unit filename="app/bsp/common/vm/vm_api.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/vm/vm_api.h" />
 <Unit filename="app/bsp/cpu/sh54/clock.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/port_init.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh54/power_api.c"><Option compilerVer="CC"/></Unit>
@@ -127,6 +128,7 @@
 <Unit filename="include_lib/dev_mg/atomic.h" />
 <Unit filename="include_lib/dev_mg/dev_manage.h" />
 <Unit filename="include_lib/dev_mg/device.h" />
+<Unit filename="include_lib/dev_mg/ioctl.h" />
 <Unit filename="include_lib/dev_mg/ioctl_cmds.h" />
 <Unit filename="include_lib/device/usb/ch9.h" />
 <Unit filename="include_lib/device/usb/host/usb_host.h" />

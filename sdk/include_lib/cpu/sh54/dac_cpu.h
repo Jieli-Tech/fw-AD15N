@@ -73,6 +73,13 @@
     JL_CLK->CON0 &= ~AUDIO_CLKDIV_BITS; \
     JL_CLK->CON0 |= AUDIO_CLK_PLL48M
 
+#define audio_clk_close(...)
+
+#define audio_isr_init()    do { \
+                                extern void audio_isr(void); \
+                                HWI_Install(IRQ_AUDIO_IDX, (u32)audio_isr, IRQ_AUDIO_IP); \
+                            } while(0)
+
 #define SR_DEFAULT  32000
 
 

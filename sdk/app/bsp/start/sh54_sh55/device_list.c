@@ -34,7 +34,7 @@ const struct spi_platform_data spi1_p_data = {
 //norflash
 NORFLASH_DEV_PLATFORM_DATA_BEGIN(norflash_data)
 .spi_hw_num = SPI_HW_NUM,
-.spi_cs_port = SPI_CS_PORT_SEL,
+.spi_cs_port = IO_PORTA_05,//SPI_CS_PORT_SEL,
 .spi_read_width = SPI_READ_DATA_WIDTH,
 .spi_pdata = &spi1_p_data,
 .start_addr = 0,

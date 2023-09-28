@@ -19,6 +19,7 @@
 #include "asm/power_interface.h"
 #include "power_api.h"
 #include "wdt.h"
+#include "efuse.h"
 
 /* #include "vm_api.h" */
 /* #include "power_api.h" */
@@ -35,6 +36,7 @@ __attribute__((noreturn))
 int c_main(int cfg_addr)
 {
     port_hd_init();
+    all_init_isr();
     log_init(1000000);
 
     struct maskrom_argv argv = {0};
@@ -53,6 +55,8 @@ int c_main(int cfg_addr)
     emu_init();
 
     wdt_init(WDT_8S);
+
+    efuse_init();
 
     //记录及打印复位源
     reset_source_dump();

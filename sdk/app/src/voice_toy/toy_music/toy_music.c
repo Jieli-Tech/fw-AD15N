@@ -76,7 +76,7 @@ void toy_music_app(void)
     dec_pctl[0].dev_index   = INNER_FLASH_RO;
     dec_pctl[0].findex      = 1;
     dec_pctl[0].loop        = 0;
-    dec_pctl[0].dec_type    = BIT_F1A1;
+    dec_pctl[0].dec_type    = BIT_F1A1 | BIT_UMP3;
     dec_pctl[0].pdp         = &inr_dec_dp[0];
     dec_pctl[0].p_vm_tab    = (void *)&dir_inr_vm_tab[0];
     dec_pctl[0].pdir        = (void *)&dir_inr_tab[0];
@@ -103,7 +103,15 @@ void toy_music_app(void)
     dec_pctl[1].dir_total   = sizeof(dir_tab_a) / 4;
     simple_dev_fs_mount(&dec_pctl[1]);
 
+    /* dec_pctl[2].dev_index   = INNER_FLASH_RO; */
+    /* dec_pctl[2].findex      = 1; */
+    /* dec_pctl[2].dec_type    = BIT_F1A2; */
+    /* dec_pctl[2].pdir        = (void *)&dir_inr_tab[0]; */
+    /* dec_pctl[2].dir_total   = sizeof(dir_inr_tab) / 4; */
+    /* simple_dev_fs_mount(&dec_pctl[2]); */
+
     post_msg(1, MSG_PLAY_FILE1);
+    /* post_msg(1, MSG_PLAY_FILE2); */
     /* post_msg(1, MSG_A_PLAY); */
     /* simple_play_file_bypath(&dec_pctl[0], "/dir_song/so002.f1b"); */
 
@@ -168,7 +176,18 @@ void toy_music_app(void)
             decoder_stop(dec_pctl[1].p_dec_obj, NEED_WAIT);
             break;
 
+        /* case MSG_PLAY_FILE2: */
+        /*     log_info("MSG_PLAY_F1A2\n"); */
+        /*     play_one_file(&dec_pctl[2]); */
+        /*     break; */
+        /* case MSG_F1A2_FILE_END: */
+        /* case MSG_F1A2_FILE_ERR: */
+        /*     log_info("F1A2 FILE END OR ERR\n"); */
+        /*     decoder_stop(dec_pctl[2].p_dec_obj, NEED_WAIT); */
+        /*     break; */
+
         case MSG_F1A1_LOOP:
+        case MSG_F1A2_LOOP:
         case MSG_MP3_LOOP:
         case MSG_WAV_LOOP:
         case MSG_A_LOOP:
@@ -180,6 +199,7 @@ void toy_music_app(void)
         case MSG_500MS:
             if ((MUSIC_PLAY != get_decoder_status(dec_pctl[0].p_dec_obj)) && \
                 (MUSIC_PLAY != get_decoder_status(dec_pctl[1].p_dec_obj))) {
+                vm_pre_erase();
                 sys_idle_deal(-2);
             }
         default:

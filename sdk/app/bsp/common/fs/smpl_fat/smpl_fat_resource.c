@@ -35,9 +35,9 @@ u32 smpl_fat_openR_api(void *pfs, void **ppfile, const char *path)
 u32 smpl_fat_read_api(void *pfile, void *buff, u32 len)
 {
     u32 rlen = f_read(&pfi, buff, len);
-    if (rlen != len) {
-        return 0;
-    }
+    /* if (rlen != len) { */
+    /* return 0; */
+    /* } */
     return rlen;
 }
 

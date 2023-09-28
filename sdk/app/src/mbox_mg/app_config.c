@@ -11,6 +11,7 @@ const int IRQ_ENCODER_IP = 0;
 const int IRQ_TICKTMR_IP = 3;
 const int IRQ_USB_IP	 = 2;
 const int IRQ_SD_IP		 = 3;
+const int IRQ_PMU_TIMER1_IP = 0;
 //系统还未使用到的
 const int IRQ_UART0_IP   = 3;
 const int IRQ_UART1_IP   = 3;
@@ -80,6 +81,9 @@ const u8 is_sdx_active_cnt_max = 5;
 
 //内核异常打印
 const u8 config_asser = 1;
+//软件重采样quality影响运算速度,可选范围3~8,默认选8
+const u8 resample_quality  = 8;
+
 /**
  * @brief Bluetooth Controller Log
  */

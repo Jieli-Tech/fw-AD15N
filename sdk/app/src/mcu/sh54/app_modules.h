@@ -12,8 +12,10 @@
 //  MIO功能使能
 #define HAS_MIO_EN 0
 
+//  SRC变采样功能使能
+
 //  APP应用使能
-#define SIMPLE_DEC_EN 0 //  多路解码应用模式
+#define SIMPLE_DEC_EN 0 //  简单解码应用模式
 
 //  驱动使能
 
@@ -31,4 +33,6 @@
 //  驱动使能
 #define EXT_FLASH_EN 0 //  外挂资源flash使能
 #define TFG_SD_EN 0 //  SDMMC驱动使能
+
+//  文件系统
 #endif

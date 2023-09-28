@@ -106,6 +106,9 @@ void HWI_Install(unsigned char index, unsigned int isr, unsigned char priority);
 
 void bit_clr_ie(unsigned char index);
 void bit_set_ie(unsigned char index);
+void reg_set_ip(unsigned char index, unsigned char priority);
+void irq_unmask_set(u8 index);
+void irq_unmask_disable(u8 index);
 
 #ifdef IRQ_TIME_COUNT_EN
 void irq_handler_enter(int irq);

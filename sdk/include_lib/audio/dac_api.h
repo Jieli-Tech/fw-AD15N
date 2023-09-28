@@ -22,12 +22,12 @@ typedef enum {
 
 
 bool dac_mute(bool mute);
-void dac_mode_init(u16 vol);
+void dac_mode_init(u16 vol, void *phy_vol_set_func);
 void dac_init_api(u32 sr, bool delay_flag);
 void dac_sr_api(u32 sr);
 void dac_off_api(void);
 // void dac_sr_api(u32 sr);
-void fill_dac_fill(u8 *buf, u32 len, AUDIO_TYPE type);
+u32 fill_dac_fill(u8 *buf, u32 len, AUDIO_TYPE type);
 u8 dac_vol(char set, u8 vol);
 void dac_usb_vol(u8 vol_r, u8 vol_l);
 bool regist_dac_channel(void *sound, void *kick);

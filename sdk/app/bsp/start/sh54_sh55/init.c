@@ -14,6 +14,7 @@
 #include "device.h"
 #include "ioctl_cmds.h"
 #include "vm_api.h"
+#include "vm_sfc.h"
 #include "nor_fs/nor_fs.h"
 #include "key.h"
 #include "init.h"
@@ -168,7 +169,7 @@ void system_init(void)
     midi_ctrl_decode_init();
 #endif
 
-    dac_mode_init(16);
+    dac_mode_init(16, 0);
     audio_adc_mode_init();
     dac_power_on(SR_DEFAULT, 1);
 
@@ -178,7 +179,9 @@ void system_init(void)
     devices_init();
     flash_info_init();
     vm_init_api();
+#if defined(NORFS_EN) && (NORFS_EN)
     norfs_init_api();
+#endif
     //----------------------
     d_mio_module_init();
     /* dac_vol(0, 16); */
