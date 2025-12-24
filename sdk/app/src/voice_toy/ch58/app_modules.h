@@ -35,6 +35,9 @@
 //  SRC变采样功能使能
 #define HAS_SW_SRC_EN 1 //  软件SRC
 
+//  ANS功能使能
+#define ANS_EN 0
+
 //  解码SPEED功能使能
 #define AUDIO_SPEED_EN 1
 

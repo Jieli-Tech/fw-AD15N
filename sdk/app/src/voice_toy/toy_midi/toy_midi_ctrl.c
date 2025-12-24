@@ -6,7 +6,7 @@
 #include "vfs.h"
 #include "MIDI_DEC_API.h"
 #include "midi_prog.h"
-#include "list/midi_ctrl_api.h"
+#include "list/midi_ctrl.h"
 #include "bsp_loop.h"
 #include "toy_main.h"
 #include "decoder_api.h"
@@ -124,7 +124,27 @@ static void toy_midi_ctrl_get_play_key(dec_obj *obj, u8 chn)
 }
 
 #if USER_CONFIG_LIMITER
-u16 ctl_work_buf[60 / 2] AT(.midi_ctrl_buf);
+u32 ctl_work_buf[0x4c / 4] AT(.midi_ctrl_buf);
+void midi_limiter(void)
+{
+    LimiterParam midi_ctrl_limiter;
+    memset(&midi_ctrl_limiter, 0, sizeof(LimiterParam));
+    midi_ctrl_limiter.attackTime = 5;
+    midi_ctrl_limiter.releaseTime = 300;
+    midi_ctrl_limiter.TargerLvl = -5000;
+    midi_ctrl_limiter.lookAheadTime = 0;
+    midi_ctrl_limiter.SampleRate = dac_sr_read();
+    midi_ctrl_limiter.nChannel = 1;
+    int bufsize = Limiter_QueryBufSize(&midi_ctrl_limiter);
+    log_info("limiter bufsize %d\n", bufsize);
+    if (bufsize > sizeof(ctl_work_buf)) {
+        log_error("limiter buf not enough ,need 0x%x\n", bufsize);
+        return;
+    }
+
+    Limiter_Init(ctl_work_buf, &midi_ctrl_limiter);
+    log_info("limiter init succ\n");
+}
 #endif
 void toy_midi_keyboard_app(void)
 {
@@ -135,15 +155,8 @@ void toy_midi_keyboard_app(void)
     u8 cur_channal = 0;
     u16 pitch_val = 256;
     midi_keyboard_idle_cnt = 0;
-#if USER_CONFIG_LIMITER //limiter
-    int bufsize = Limiter_QueryBufSize();
-    log_info("bufsize %d\n", bufsize);
-    int attacktime = 5;
-    int releasetime = 300;
-    int threshold = -40000;
-    int samplerate = 22050;
-    int channel = 1;
-    Limiter_Init(ctl_work_buf, attacktime, releasetime, threshold, samplerate, channel);
+#if USER_CONFIG_LIMITER
+    midi_limiter();
 #endif
     key_table_sel((void *)midi_keyboard_key_msg_filter);
     decoder_init();
@@ -328,3 +341,4 @@ static void midi_on_off_callback_init(dec_obj *obj, u32(*melody_callback)(void *
 }
 
 #endif
+

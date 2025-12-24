@@ -234,13 +234,13 @@ static void adc_sample(u16 real_ch, bool isr_flag)
         log_error("channle error\n");
         return;
     }
+    ADC_DEN(1);
+    CPND(1);
     if (isr_flag) {
         JL_ADC->CON |= BIT(1);  //IE
     } else {
         JL_ADC->CON &= ~BIT(1);
     }
-    ADC_DEN(1);
-    CPND(1);
 }
 
 int adc_kick_start(void (*adc_scan_over)(void))

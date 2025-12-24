@@ -29,6 +29,15 @@ SECTIONS
         *(.debug_data)
     } > ram0
 
+	.lowpower_overlay ALIGN(4):
+    {
+        power_driver_data_start = .;
+        *(.power_driver.data.overlay)
+        *(.power_driver.text.cache.L1.overlay)
+        *(.power_driver.data.bss.overlay)
+        power_driver_data_end = .;
+    } > ram0
+
     .bss (NOLOAD) : SUBALIGN(4)
     {
         PROVIDE(bss_buf_start = .);
@@ -56,7 +65,7 @@ SECTIONS
     /* _ram0_end = .; */
 
     /* . = ORIGIN(ram1); */
-    OVERLAY : AT(0x200000)
+    OVERLAY : AT(0x4000000)
     {
         .fat
         {
@@ -306,3 +315,7 @@ SECTIONS
     _sdk_data_size = data_size;
 }
 
+//================== power overlay Section Info Export ====================//
+lowpower_overlay_addr       = power_driver_data_start;
+lowpower_overlay_begin      = data_begin + data_size;
+lowpower_overlay_size       = power_driver_data_end - power_driver_data_start;

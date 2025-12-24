@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "app_modules.h"
 /* #include "vm.h" */
 /* #include "asm/power/virtual_rtc.h" */
 #if defined(VIRTUAL_RTC_EN) && (VIRTUAL_RTC_EN)
@@ -19,6 +20,7 @@
 #define rtc_read_api(...)   -1
 #endif
 
+/* rtc库调用的函数，不能if 0包住 */
 s32 rtc_mem_save(u32 index, u8 *data_buf, u16 len)
 {
     return rtc_save_api(index, data_buf, len);
@@ -29,7 +31,7 @@ s32 rtc_mem_read(u32 index, u8 *data_buf, u16 len)
 
 }
 
-#if 0
+#if defined(VIRTUAL_RTC_EN) && (VIRTUAL_RTC_EN)
 
 void alm_test_cbfun(void)
 {

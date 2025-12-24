@@ -16,4 +16,5 @@ extern BOOT_INFO boot_info;
 u32 efuse_get_wvdd_trim(void);
 
 u32 efuse_get_sfc_fast_boot(void);
+u32 get_chip_version();
 #endif

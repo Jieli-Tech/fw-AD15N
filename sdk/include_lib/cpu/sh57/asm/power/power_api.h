@@ -3,6 +3,10 @@
 
 #define AT_VOLATILE_RAM_CODE_POWER        AT(.power_driver.text.cache.L1)
 
+#define AT_VOLATILE_RAM_LOWPOWER       	  AT(.power_driver.data.overlay)
+#define AT_VOLATILE_RAM_BSS_LOWPOWER      AT(.power_driver.data.bss.overlay)
+#define AT_VOLATILE_RAM_CODE_LOWPOWER	  AT(.power_driver.text.cache.L1.overlay)
+
 //=========================电源参数配置==================================
 struct low_power_param {
     //---------------power_config
@@ -43,6 +47,11 @@ enum {
 
 //==============================电源接口============================
 void power_init(const struct low_power_param *param);
+
+void lowpower_init();
+
+void lowpower_uninit();
+
 
 //==========================lowpower===============================
 void power_config_vdc13_cap(u8 en);
@@ -202,6 +211,6 @@ void mask_softflag_config(struct boot_soft_flag_t *softflag);
 
 void soff_latch_release();
 
-
+#include "power_manage.h"
 
 #endif

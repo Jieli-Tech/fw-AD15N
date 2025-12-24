@@ -101,7 +101,10 @@
 #define E_NVM_DATA_TOO_LONG    (0x8300 + 0x0d)
 #define E_NVM_DATA_ADDR        (0x8300 + 0x0e)
 #define E_NVM_WRITE            (0x8300 + 0x0f)
-#define E_NVM_ID_OUTRANGED 	   (0x8300 + 0x10)
+#define E_NVM_ID_OUTRANGED     (0x8300 + 0x10)
+#define E_NVM_NO_IGNORE        (0x8300 + 0x11)
+#define E_NVM_WRITE_AREA_HEAD  (0x8300 + 0x12)
+#define E_NVM_READ_DATA        (0x8300 + 0x13)
 
 #define E_F1A_INDEX	  (0X9000 + 0)
 #define E_F1A_DBUF	  (0X9000 + 1)

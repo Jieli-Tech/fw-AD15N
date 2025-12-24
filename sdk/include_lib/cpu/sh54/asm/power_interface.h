@@ -11,6 +11,10 @@
 #define AT_NON_VOLATILE_RAM         AT(.non_volatile_ram)
 #define AT_NON_VOLATILE_RAM_CODE    AT(.non_volatile_ram_code)
 
+#define AT_VOLATILE_RAM_LOWPOWER       	  AT(.power_driver.data.overlay)
+#define AT_VOLATILE_RAM_BSS_LOWPOWER      AT(.power_driver.data.bss.overlay)
+#define AT_VOLATILE_RAM_CODE_LOWPOWER	  AT(.power_driver.text.cache.L1.overlay)
+
 /*复位原因*/
 enum {
     /*主系统*/
@@ -215,11 +219,11 @@ struct wakeup_param {
 };
 
 struct reset_param {
-    u8 en;
-    u8 mode;
-    u8 level;
-    u8 iomap;   //Port Group, Port Index
-    int hold_time;
+    u8 en; //使能
+    u8 mode;//0:等待io电平翻转后复位，1:长按时间到了立即复位
+    u8 level;//长按复位高低电平选择，0:低电平，1:高电平
+    u8 iomap;//长按复位io选择
+    int hold_time;//复位时间选择0:1s/1:2S/2:4S/3:8S/4-7:16S
 };
 
 struct low_power_operation {
@@ -250,6 +254,12 @@ u8 __power_is_poweroff(void);
 void poweroff_recover(void);
 
 void power_init(const struct low_power_param *param);
+
+void power_init(const struct low_power_param *param);
+
+void lowpower_init();
+
+void lowpower_uninit();
 
 u8 power_is_low_power_probe(void);
 

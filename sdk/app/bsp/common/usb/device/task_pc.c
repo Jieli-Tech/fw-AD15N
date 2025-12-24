@@ -147,6 +147,25 @@ static void usb_msd_free()
     /* }                                        */
 }
 
+#if USB_DEVICE_CLASS_CONFIG & CDC_CLASS
+#include "usb/device/cdc.h"
+static void usb_cdc_wakeup(struct usb_device_t *usb_device)
+{
+    //回调函数在中断里，正式使用不要在这里加太多东西阻塞中断，
+    //或者先post到任务，由任务调用cdc_read_data()读取再执行后续工作
+    const usb_dev usb_id = usb_device2id(usb_device);
+    u8 buf[64] = {0};
+    u32 rlen;
+
+    log_debug("cdc rx hook");
+    rlen = cdc_read_data(usb_id, buf, 64);
+
+    /* printf_buf(buf, rlen);//固件三部测试使用 */
+    /* cdc_write_data(usb_id, buf, rlen);//固件三部测试使用 */
+
+}
+#endif
+
 void usb_start()
 {
 
@@ -178,6 +197,10 @@ void usb_start()
     msd_set_wakeup_handle(usb_msd_wakeup);
     msd_set_reset_wakeup_handle(usb_msd_reset_wakeup);
     usb_msd_init();
+#endif
+
+#if USB_DEVICE_CLASS_CONFIG & CDC_CLASS
+    cdc_set_wakeup_handler(usb_cdc_wakeup);
 #endif
 }
 static void usb_remove_disk()

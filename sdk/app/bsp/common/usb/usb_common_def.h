@@ -17,6 +17,7 @@
 #define     SPEAKER_CLASS       BIT(1)
 #define     MIC_CLASS           BIT(2)
 #define     HID_CLASS           BIT(3)
+#define     CDC_CLASS           BIT(4)
 
 #define     AUDIO_CLASS         (SPEAKER_CLASS|MIC_CLASS)
 

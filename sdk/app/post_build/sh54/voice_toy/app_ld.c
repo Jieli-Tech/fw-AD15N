@@ -25,6 +25,7 @@ SECTIONS
     {
         PROVIDE(data_buf_start = .);
         *(.data*)
+		*(.*.data)
         *(.common)
         *(.mic_capless_tab)
         *(.ram_code)
@@ -34,6 +35,26 @@ SECTIONS
         *(.*.text.cache.L1)
         *(.*.text.cache.L2)
         *(.*.text.cache.L3)
+    } > ram0
+
+    .ans_data_sec ALIGN(4):
+    {
+        ans_data_start = .;
+        *(.aec_data)
+        *(.ns_data)
+        *(.nlp_data)
+        *(.fft_data)
+        *(.noisegate_data)
+        ans_data_end = .;
+    } > ram0
+
+    .lowpower_overlay ALIGN(4):
+    {
+        power_driver_data_start = .;
+        *(.power_driver.data.overlay)
+        *(.power_driver.text.cache.L1.overlay)
+        *(.power_driver.data.bss.overlay)
+        power_driver_data_end = .;
     } > ram0
 
 	.debug_data ALIGN(4):
@@ -75,6 +96,19 @@ SECTIONS
         *(.usb_h_dma)
         *(.DAC_BUFFER)
         *(.AUDIO_ADC_BUFFER)
+
+        . = ALIGN(32);
+    } > ram0
+
+    .ans_bss_sec ALIGN(4):
+    {
+        ans_bss_start = .;
+        . = ALIGN(32);
+        *(.aec_bss)
+        *(.ns_bss)
+        *(.nlp_bss)
+        *(.fft_bss)
+        ans_bss_end = .;
     } > ram0
 
     /* OVERLAY : */
@@ -97,7 +131,7 @@ SECTIONS
     /* } > ram0 */
 
     /* . = ORIGIN(ram1); */
-    OVERLAY : AT(0x200000)
+    OVERLAY : AT(0x4000000)
     {
         .d_toy_music
         {
@@ -165,6 +199,7 @@ SECTIONS
         .d_rec
         {
             *(.rec_data)
+            *(.ans_data)
             rec_data_end = .;
         }
         .d_enc_ima
@@ -273,11 +308,17 @@ SECTIONS
         *(.debug_const)
         *(.debug_code)
         *(.debug_string)
+        . = ALIGN(4);
+
+        *(.fft_const)
+        *(.fft_code)
         /* *memset.o(.text .rodata*) */
         /* *memcmp.o(.text .rodata*) */
         *(*.text.const)
+        *(.*.text.const)
         *(*.text)
         *(.text)
+        *(.text.*)
         *(.app_root)
         *(.vm)
         . = ALIGN(32);
@@ -340,3 +381,7 @@ SECTIONS
 
 }
 
+//================== power overlay Section Info Export ====================//
+lowpower_overlay_addr       = power_driver_data_start;
+lowpower_overlay_begin      = data_begin + data_size;
+lowpower_overlay_size       = power_driver_data_end - power_driver_data_start;

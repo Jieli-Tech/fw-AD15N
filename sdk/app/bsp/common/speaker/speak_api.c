@@ -164,7 +164,8 @@ void audio_adc_speaker_start(void)
 
 
     audio_adc_enable(MIC_PGA_G);
-    aa_speaker.sound.enable |= B_DEC_RUN_EN;
+    aa_speaker.sound.enable |= B_DEC_RUN_EN | B_DEC_FIRST;
+    p_curr_sound->enable |= B_DEC_RUN_EN | B_DEC_FIRST;
 }
 
 void audio_adc_speaker_reless(void)

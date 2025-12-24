@@ -28,9 +28,9 @@ EXT_CFLAGS  := # Windows 下不需要 -D__SHELL__
 export PATH:=$(TOOL_DIR);$(PATH)
 
 ## 后处理脚本
-FIXBAT          := tools\utils\fixbat.exe # 用于处理 utf8->gbk 编码问题
-POST_SCRIPT     := app\post_build\sh54\download.bat
-RUN_POST_SCRIPT := $(POST_SCRIPT)
+FIXBAT          := tools/utils/fixbat.exe # 用于处理 utf8->gbk 编码问题
+POST_SCRIPT     := app/post_build/sh54/download.bat
+RUN_POST_SCRIPT := app\post_build\sh54\download.bat
 else
 # Linux 下工具链位置
 TOOL_DIR := /opt/jieli/pi32/bin
@@ -192,6 +192,8 @@ INCLUDES := \
 	-Iapp/bsp/common/vo_pitch \
 	-Iinclude_lib/vo_pitch \
 	-Iinclude_lib/vo_changer \
+	-Iapp/bsp/common/midi_open/midi_2byte \
+	-Iapp/bsp/common/midi_open/pi32_lto \
 	-Iapp/bsp/common/usb \
 	-Iapp/bsp/common/usb/device \
 	-Iapp/bsp/common/usb/host \
@@ -234,6 +236,9 @@ c_SRC_FILES := \
 	app/bsp/common/key/key_ir.c \
 	app/bsp/common/key/key_matrix.c \
 	app/bsp/common/key/key_touch.c \
+	app/bsp/common/midi_open/midi_2byte/midi_dec.c \
+	app/bsp/common/midi_open/midi_2byte/midi_event.c \
+	app/bsp/common/midi_open/midi_2byte/midi_play.c \
 	app/bsp/common/msg/msg.c \
 	app/bsp/common/norflash/norflash.c \
 	app/bsp/common/power_manage/app_power_mg.c \
@@ -246,8 +251,10 @@ c_SRC_FILES := \
 	app/bsp/common/sound_effect_list/speed_api.c \
 	app/bsp/common/sound_effect_list/vo_pitch_api.c \
 	app/bsp/common/sound_effect_list/voicechanger.c \
+	app/bsp/common/sound_mge/sound_mge.c \
 	app/bsp/common/speaker/speak_api.c \
 	app/bsp/common/uart_update/uart_update.c \
+	app/bsp/common/usb/device/cdc.c \
 	app/bsp/common/usb/device/descriptor.c \
 	app/bsp/common/usb/device/hid.c \
 	app/bsp/common/usb/device/msd.c \
@@ -354,8 +361,11 @@ LFLAGS := \
 	--gc-sections \
 	include_lib/liba/sh54/mbox_mg/old_vm_lib.a \
 	include_lib/liba/sh54/mbox_mg/new_vm_lib.a \
+	include_lib/liba/ARCH/pi32_lto/lib_midi_synth.a \
+	include_lib/liba/ARCH/pi32_lto/lib_limiter.a \
 	--start-group \
 	include_lib/liba/sh54/mbox_mg/cpu_lib.a \
+	include_lib/liba/sh54/mbox_mg/address_lib.a \
 	include_lib/liba/sh54/mbox_mg/efuse_trim_value_lib.a \
 	include_lib/liba/sh54/mbox_mg/fs_lib.a \
 	include_lib/liba/sh54/mbox_mg/audio_lib.a \
@@ -378,8 +388,6 @@ LFLAGS := \
 	include_lib/liba/ARCH/pi32_lto/lib_mp3_standard_decode.a \
 	include_lib/liba/ARCH/pi32_lto/lib_wav_decode.a \
 	include_lib/liba/ARCH/pi32_lto/lib_f1a_decode.a \
-	include_lib/liba/ARCH/pi32_lto/lib_midi_decode.a \
-	include_lib/liba/ARCH/pi32_lto/lib_limiter.a \
 	include_lib/liba/ARCH/pi32_lto/lib_a_decode.a \
 	include_lib/liba/ARCH/pi32_lto/lib_mp2standard_encode.a \
 	include_lib/liba/sh54/mbox_mg/periphy_lib.a \
@@ -480,37 +488,31 @@ endif
 $(BUILD_DIR)/%.c.o : %.c
 	$(info +CC $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.S.o : %.S
 	$(info +AS $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.s.o : %.s
 	$(info +AS $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.cpp.o : %.cpp
 	$(info +CXX $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.cxx.o : %.cxx
 	$(info +CXX $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.cc.o : %.cc
 	$(info +CXX $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 -include $(DEP_FILES)

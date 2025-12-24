@@ -108,11 +108,13 @@
 <Unit filename="include_lib/common/log.h" />
 <Unit filename="include_lib/common/printf.h" />
 <Unit filename="include_lib/common/wdt.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power/lib_power_config.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/p33_access.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/p33_api.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/p33_sfr.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/power_api.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/power_app.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power/power_manage.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/power_port.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/power_reset.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/power_trim.h" />

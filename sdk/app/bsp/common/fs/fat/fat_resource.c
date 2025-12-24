@@ -20,7 +20,7 @@
 extern u32 __dev_read(void *p, u8 *buf, u32 addr);
 extern u32 __dev_write(void *p, u8 *buf, u32 addr);
 #define LOG_TAG_CONST       NORM
-#define LOG_TAG             "[normal]"
+#define LOG_TAG             "[fat_res]"
 #include "log.h"
 
 /****************resource manage*****************/
@@ -31,12 +31,33 @@ extern u32 __dev_write(void *p, u8 *buf, u32 addr);
 /* static SWIN_BUF g_sector_buffer[MAX_DEEPTH]; */
 
 /**************************************************
-//       以下宏定义需要对应库修改
+//        文件系统功能
 **************************************************/
 #define FOPEN_LONG 0 //长文件名打开方式
 #define RENAME_ENABLE 0 //重命名使能
 #define W_WOL_ENABLE 0 //写卷标使能
 //////////////////////////////////////////////////
+//
+//================================================//
+//                  FS功能控制 					  //
+//================================================//
+#if FOPEN_LONG
+const int FATFS_LONG_NAME_ENABLE = 1; //是否支持长文件名
+#else
+const int FATFS_LONG_NAME_ENABLE = 0; //是否支持长文件名
+#endif
+
+#if RENAME_ENABLE
+const int FATFS_RENAME_ENABLE = 1; //是否支持重命名
+#else
+const int FATFS_RENAME_ENABLE = 0; //是否支持重命名
+#endif
+
+#if W_WOL_ENABLE
+const int FATFS_WRITE_VOL_ENABLE = 1; //是否支持重命名
+#else
+const int FATFS_WRITE_VOL_ENABLE = 0; //是否支持重命名
+#endif
 
 #if FOPEN_LONG
 static char lfn_buffer[LFN_MAX_SIZE] AT(.fat_buf);
@@ -313,6 +334,11 @@ int fat_sel_api(struct vfscan *fsn, void *pfs, int sel_mode, void **ppfile, int 
     return fat_fsel(fsn, pfs, sel_mode, ppfile, arg);
 }
 
+int fat_format_api(void **p_fs_hdl, void *device, u32 clust_size, u8 create_new)
+{
+    return fat_format_deal(p_fs_hdl, device, clust_size, create_new);
+}
+
 int fat_ioctl_api(void *pfile, int cmd, int arg)
 {
     switch (cmd) {
@@ -336,6 +362,7 @@ const struct vfs_operations fat_vfs_ops sec_used(.vfs_operations) = {
     .createfile  = fat_openW_api,
     .read        = fat_read_api,
     .write       = fat_write_api,
+    .format      = fat_format_api,
     .seek        = fat_seek_api,
     .close_fs 	 = fat_fs_close_api,
     .close_file  = fat_file_close_api,

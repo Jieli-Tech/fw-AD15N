@@ -18,9 +18,9 @@
 #define FS_DIRINFO_SAVE_ENABLE 0 //文件搜索加速处理
 #define FS_WRITE_VOL_ENABLE 1 //写卷标
 #define FS_BPINFO_SET 0 //断点加速
-#define FS_FOPEN_LONG 0 //长文件名打开方式
+#define FS_FOPEN_LONG 1 //长文件名打开方式
 #define FS_USE_SIMPLE_MODE 1 //fselect 文件系统简单处理模式
-#define FS_RENAME_ENABLE 0 //重命名使能
+#define FS_RENAME_ENABLE 1 //重命名使能
 #define FS_FORMAT_ENABLE 1 //格式化功能使能
 #define FS_FGET_PATH_ENABLE 1 //获取路径使能
 
@@ -150,6 +150,7 @@ struct _FATFS {
     char 	*ext_type;
     char    *lfn;
     u8      lfn_len;
+    u32     free_space; //空闲空间
 };
 typedef struct _FATFS FATFS;
 

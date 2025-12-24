@@ -14,6 +14,9 @@
 
 //  SRC变采样功能使能
 
+//  ANS功能使能
+#define ANS_EN 0
+
 //  APP应用使能
 #define SIMPLE_DEC_EN 0 //  简单解码应用模式
 

@@ -52,6 +52,7 @@ void uart_sync_demo_start(void)
         log_error("init error %d", r);
     }
     uart_dma_init(UART_DEMO_NUM, &dma);
+    uart_dump();
 }
 
 void uart_sync_demo_run(void)

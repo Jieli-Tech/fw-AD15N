@@ -749,6 +749,11 @@ enum {
 //是否需要保持强LDO判断宏
 #define IS_NEED_KEEP_POWER()    (IS_CHARGE_EN() || LVCMP_DET_GET())
 
+/*
+ *-------------------P3_PCNT_VLUE
+ */
+#define EXP_NUM()               p33_rx_1byte(P3_PCNT_VLUE)
+
 
 /*******************************************************************/
 

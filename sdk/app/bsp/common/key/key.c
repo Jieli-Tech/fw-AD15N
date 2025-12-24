@@ -172,6 +172,19 @@ void key_scan()
         }
     } else { //cur_key = NO_KEY, 抬键
         last_key = cur_key;
+#if 1
+        if ((key_press_counter > KEY_SHORT_CNT) && (key_press_counter < KEY_LONG_CNT)) {    //短按抬起
+            key_press_counter = 0;
+            key_status = KEY_SHORT_UP;
+        } else if ((cur_key == NO_KEY) && (key_press_counter >= KEY_LONG_CNT)) { //长按抬起
+            key_press_counter = 0;
+            key_status = KEY_LONG_UP;
+            //puts("[UP]");
+        } else {
+            key_press_counter = 0;
+            return;
+        }
+#else
         if ((key_press_counter > KEY_SHORT_CNT) && (key_press_counter < KEY_LONG_CNT) && (cur_key == NO_KEY)) {   //短按抬起
             key_press_counter = 0;
             key_status = KEY_SHORT_UP;
@@ -183,6 +196,8 @@ void key_scan()
             key_press_counter = 0;
             return;
         }
+
+#endif
     }
 
 #if (KEY_DOUBLE_CLICK_EN)

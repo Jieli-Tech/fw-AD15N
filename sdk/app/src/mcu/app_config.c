@@ -61,10 +61,11 @@ const char MIO_ENABLE = 0;
 const char GPIO_CRITICAL_OPT = TRUE; //TRUE:有关中断临界保护    FALSE:没有关中断临界保护
 
 #if (DECODER_MIDI_EN | DECODER_MIDI_KEYBOARD_EN)
-const int MAINTRACK_USE_CHN = 0;    //0:用track号来区分  1:用channel号来区分。
-const int MAX_DEC_PLAYER_CNT = 8;   //midi乐谱解码最大同时发声的key数,范围[1,31]
-const int MAX_CTR_PLAYER_CNT = 15;  //midi琴最大同时发声的key数,范围[1,31]
-const int NOTE_OFF_TRIGGER = 0;     //midi琴note_off回调 1：time传0时，不会回调 0：time传0时，回调
+const int MAINTRACK_USE_CHN  = 0;    //0:用track号来区分  1:用channel号来区分。
+const int MAX_DEC_PLAYER_CNT = 8;    //midi乐谱解码最大同时发声的key数,范围[1,31]
+const int MAX_CTR_PLAYER_CNT = 8;    //midi琴最大同时发声的key数,范围[1,31]
+const int NOTE_OFF_TRIGGER   = 0;    //midi琴note_off回调 1：time传0时，不会回调 0：time传0时，回调
+/* const int MIDI_MAX_MARK_CNT  = 8;    //midi解码最大支持的mark数 */
 #endif
 
 //升级使用的区域，0：VM区， 1：eeprom区
@@ -80,11 +81,12 @@ const u8 is_sdx_active_cnt_max = 20;
 
 //浮点打印，仅仅作用在AD17N,AD18N
 const int printf_support_float = 0;
-//内核异常打印
-const u8 config_asser = 1;
+//内核异常打印,为1时会断言，量产请配置到0
+const u8 config_asser = 0;
 //软件重采样quality影响运算速度,可选范围3~8,默认选8
 const u8 resample_quality  = 8;
 
+const u8 pdown_safe_mode = 0; //防止power_down ram掉数据，如power_down的ram有掉数据风险可打开
 /**
  * @brief Bluetooth Controller Log
  */

@@ -53,6 +53,8 @@ enum {
     FS_IOCTL_FILE_INDEX,
     FS_IOCTL_FS_INDEX,
     FS_IOCTL_RESET_VFSCAN,
+    FS_IOCTL_GET_PARTITION_INFO,  //获取分区信息，簇大小，容量
+    FS_IOCTL_GET_FREE_SPACE, //获取剩余空间
 };
 
 
@@ -83,6 +85,7 @@ struct vfs_operations {
     void (*fscan_release)(struct vfscan *);
     int (*fsel)(struct vfscan *, void *, int sel_mode, void **, int);
     int (*file_crc)(void *pfile);
+    int (*format)(void **p_fs_hdl, void *device, u32 clust_size, u8 create_new);
 
 
 
@@ -126,6 +129,14 @@ struct imount {
 
 
 
+
+extern struct vfs_operations vfs_ops_begin[];
+extern struct vfs_operations vfs_ops_end[];
+
+#define list_for_each_vfs_operation(ops) \
+	for (ops=vfs_ops_begin; ops<vfs_ops_end; ops++)
+
+
 struct imount *vfs_hdl_malloc(void);
 struct imount *vfs_fhdl_free(struct imount *pvfs);
 
@@ -145,6 +156,7 @@ u32 vfs_fs_close(void **ppvfs);
 u32 vfs_file_name(void *pvfile, void *name, u32 len);
 int vfs_get_attrs(void *pvfile, void *pvfs_attr);
 int vfs_ioctl(void *pvfile, int cmd, int arg);
+int vfs_delete_dir(void *pvfs, char *path);
 
 #define VFS_FILE_NAME_LEN			16
 extern char g_file_sname[VFS_FILE_NAME_LEN];

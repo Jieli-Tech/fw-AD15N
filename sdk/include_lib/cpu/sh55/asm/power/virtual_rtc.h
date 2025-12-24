@@ -17,6 +17,9 @@ struct vir_rtc_data {
     void (*cbfun)(void);				//闹钟响应函数
 };
 
+#define PRD_DEFAULT_NUM 0xffffffff
+#define RSC_DEFAULT_NUM 0xfffffffd
+
 s32 rtc_mem_read(u32 index, u8 *data_buf, u16 len);
 s32 rtc_mem_save(u32 index, u8 *data_buf, u16 len);
 

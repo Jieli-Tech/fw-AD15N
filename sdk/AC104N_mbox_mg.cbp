@@ -110,6 +110,8 @@
 <Add directory="app/bsp/common/vo_pitch" />
 <Add directory="include_lib/vo_pitch" />
 <Add directory="include_lib/vo_changer" />
+<Add directory="app/bsp/common/midi_open/midi_2byte" />
+<Add directory="app/bsp/common/midi_open/pi32_lto" />
 <Add directory="app/bsp/common/usb" />
 <Add directory="app/bsp/common/usb/device" />
 <Add directory="app/bsp/common/usb/host" />
@@ -120,8 +122,11 @@
 <Add option="--gc-sections" />
 <Add option="include_lib/liba/sh54/mbox_mg/old_vm_lib.a" />
 <Add option="include_lib/liba/sh54/mbox_mg/new_vm_lib.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_midi_synth.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_limiter.a" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/sh54/mbox_mg/cpu_lib.a" />
+<Add option="include_lib/liba/sh54/mbox_mg/address_lib.a" />
 <Add option="include_lib/liba/sh54/mbox_mg/efuse_trim_value_lib.a" />
 <Add option="include_lib/liba/sh54/mbox_mg/fs_lib.a" />
 <Add option="include_lib/liba/sh54/mbox_mg/audio_lib.a" />
@@ -144,8 +149,6 @@
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_mp3_standard_decode.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_wav_decode.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_f1a_decode.a" />
-<Add option="include_lib/liba/ARCH/pi32_lto/lib_midi_decode.a" />
-<Add option="include_lib/liba/ARCH/pi32_lto/lib_limiter.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_a_decode.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_mp2standard_encode.a" />
 <Add option="include_lib/liba/sh54/mbox_mg/periphy_lib.a" />
@@ -216,6 +219,11 @@
 <Unit filename="app/bsp/common/key/key_matrix.h" />
 <Unit filename="app/bsp/common/key/key_touch.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/key/key_touch.h" />
+<Unit filename="app/bsp/common/midi_open/midi_2byte/MIDIDefs.h" />
+<Unit filename="app/bsp/common/midi_open/midi_2byte/midi_dec.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/midi_open/midi_2byte/midi_dec.h" />
+<Unit filename="app/bsp/common/midi_open/midi_2byte/midi_event.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/midi_open/midi_2byte/midi_play.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/msg/msg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/norflash/norflash.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/norflash/norflash.h" />
@@ -232,10 +240,14 @@
 <Unit filename="app/bsp/common/sound_effect_list/speed_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sound_effect_list/vo_pitch_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sound_effect_list/voicechanger.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/sound_mge/sound_mge.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/speaker/speak_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/spi_soft/spi_soft.h" />
 <Unit filename="app/bsp/common/uart_update/uart_update.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/uart_update/uart_update.h" />
+<Unit filename="app/bsp/common/usb/device/cdc.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/usb/device/cdc.h" />
+<Unit filename="app/bsp/common/usb/device/cdc_defs.h" />
 <Unit filename="app/bsp/common/usb/device/descriptor.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/usb/device/hid.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/usb/device/msd.c"><Option compilerVer="CC"/></Unit>
@@ -419,7 +431,7 @@
 <Unit filename="include_lib/decoder/list/a_api.h" />
 <Unit filename="include_lib/decoder/list/f1a_api.h" />
 <Unit filename="include_lib/decoder/list/midi_api.h" />
-<Unit filename="include_lib/decoder/list/midi_ctrl_api.h" />
+<Unit filename="include_lib/decoder/list/midi_ctrl.h" />
 <Unit filename="include_lib/decoder/list/mio_api.h" />
 <Unit filename="include_lib/decoder/list/mp3_standard_api.h" />
 <Unit filename="include_lib/decoder/list/ump3_api.h" />

@@ -106,6 +106,8 @@
 <Add directory="app/bsp/common/vo_pitch" />
 <Add directory="include_lib/vo_pitch" />
 <Add directory="include_lib/vo_changer" />
+<Add directory="app/bsp/common/midi_open/midi_2byte" />
+<Add directory="app/bsp/common/midi_open/pi32_lto" />
 </Compiler>
 <Linker>
 <Add option="--plugin-opt=save-temps" />
@@ -113,9 +115,12 @@
 <Add option="--gc-sections" />
 <Add option="include_lib/liba/ch58/voice_toy/old_vm_lib.a" />
 <Add option="include_lib/liba/ch58/voice_toy/new_vm_lib.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_midi_synth.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_limiter.a" />
 <Add option="include_lib/liba/ch58/voice_toy/printf_lib.a" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/ch58/voice_toy/cpu_lib.a" />
+<Add option="include_lib/liba/ch58/voice_toy/address_lib.a" />
 <Add option="include_lib/liba/ch58/voice_toy/fs_lib.a" />
 <Add option="include_lib/liba/ch58/voice_toy/audio_lib.a" />
 <Add option="include_lib/liba/ch58/voice_toy/software_src_lib.a" />
@@ -129,8 +134,6 @@
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_mp3_standard_decode.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_wav_decode.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_f1a_decode.a" />
-<Add option="include_lib/liba/ARCH/pi32_lto/lib_midi_decode.a" />
-<Add option="include_lib/liba/ARCH/pi32_lto/lib_limiter.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_a_decode.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_vopitch_cal.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_voiceChanger_va.a" />
@@ -184,6 +187,11 @@
 <Unit filename="app/bsp/common/key/key_ir.h" />
 <Unit filename="app/bsp/common/key/key_touch.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/key/key_touch.h" />
+<Unit filename="app/bsp/common/midi_open/midi_2byte/MIDIDefs.h" />
+<Unit filename="app/bsp/common/midi_open/midi_2byte/midi_dec.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/midi_open/midi_2byte/midi_dec.h" />
+<Unit filename="app/bsp/common/midi_open/midi_2byte/midi_event.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/midi_open/midi_2byte/midi_play.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/msg/msg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/norflash/norflash.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/norflash/norflash.h" />
@@ -196,6 +204,7 @@
 <Unit filename="app/bsp/common/sound_effect_list/speed_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sound_effect_list/vo_pitch_api.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sound_effect_list/voicechanger.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/sound_mge/sound_mge.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/spi_soft/spi_soft.h" />
 <Unit filename="app/bsp/common/usb/usr/usb_audio_interface.h" />
 <Unit filename="app/bsp/common/vm/new_vm/nvm_api.c"><Option compilerVer="CC"/></Unit>
@@ -220,9 +229,6 @@
 <Unit filename="app/bsp/cpu/ch58/spi1.h" />
 <Unit filename="app/bsp/cpu/ch58/timer_drv.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/ch58/uart.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/cpu/ch58/uart_types.h" />
-<Unit filename="app/bsp/cpu/ch58/uart_v2.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/cpu/ch58/uart_v2.h" />
 <Unit filename="app/bsp/lib/audio.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/lib/common.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/lib/dac_api.c"><Option compilerVer="CC"/></Unit>
@@ -346,7 +352,9 @@
 <Unit filename="include_lib/cpu/ch58/timer_drv.h" />
 <Unit filename="include_lib/cpu/ch58/typedef.h" />
 <Unit filename="include_lib/cpu/ch58/uart.h" />
+<Unit filename="include_lib/cpu/ch58/uart_types.h" />
 <Unit filename="include_lib/cpu/tick_timer_driver.h" />
+<Unit filename="include_lib/cpu/uart_v2.h" />
 <Unit filename="include_lib/decoder/Limiter.h" />
 <Unit filename="include_lib/decoder/MIDI_CTRL_API.h" />
 <Unit filename="include_lib/decoder/MIDI_DEC_API.h" />
@@ -358,7 +366,7 @@
 <Unit filename="include_lib/decoder/list/a_api.h" />
 <Unit filename="include_lib/decoder/list/f1a_api.h" />
 <Unit filename="include_lib/decoder/list/midi_api.h" />
-<Unit filename="include_lib/decoder/list/midi_ctrl_api.h" />
+<Unit filename="include_lib/decoder/list/midi_ctrl.h" />
 <Unit filename="include_lib/decoder/list/mio_api.h" />
 <Unit filename="include_lib/decoder/list/mp3_standard_api.h" />
 <Unit filename="include_lib/decoder/list/ump3_api.h" />

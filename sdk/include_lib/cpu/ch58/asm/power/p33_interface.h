@@ -7,8 +7,8 @@
 #ifndef __P33_INTERFACE_
 #define __P33_INTERFACE_
 
-#define p33_cs_h(addr)            JL_PMU->SPI_CON  |= BIT(0)
-#define p33_cs_l                  JL_PMU->SPI_CON  &= ~BIT(0)
+#define p33_cs_h(addr)            do{local_irq_disable();JL_PMU->SPI_CON  |= BIT(0);}while(0)
+#define p33_cs_l                  do{JL_PMU->SPI_CON  &= ~BIT(0);local_irq_enable();}while(0)
 #define LP_KST                    JL_PMU->PMU_CON   |= BIT(6)
 
 #define P33_OR              0b001

@@ -1,9 +1,10 @@
 #include "vfs_fat.h"
 #include "vfs.h"
 #include "errno-base.h"
+#include "device.h"
 
 #define LOG_TAG_CONST       NORM
-#define LOG_TAG             "[normal]"
+#define LOG_TAG             "[vffat]"
 #include "log.h"
 
 int vfs_get_fsize(void *pvfile, void *parm)
@@ -388,4 +389,169 @@ int vfs_set_vol(void *pvfs, u8 *name)
     return 0;
 }
 #endif
+
+
+/* --------------------------------------------------------------------------*/
+/**
+ * @brief    文件删除统一处理
+ *
+ * @param pvfs 文件系统挂载后的句柄
+ * @param path 扫描路径名
+ * @param param 配置参数
+ * @param dir_flag 是否删除文件夹标志
+ * @note 加速处理:(删除文件的时候使用)从前往后依次删除. 文件夹必须从后往前删。
+ *
+ * @return  0成功， 其他失败
+ */
+/* ----------------------------------------------------------------------------*/
+static int vfs_delete_deal(void *pvfs, char *path, char *param, u8 dir_flag)
+{
+    u16 folder_total_file = 0;
+    int d_err = 0;
+    struct vfscan *fsn = NULL;
+    void *pvfile = NULL;
+
+    fsn = vfs_fscan(pvfs, path, param, 9, NULL);
+    if (fsn == NULL) {
+        r_printf(">>>[test]:err!!!!!! fsacn fsn fail\n");
+        return 1;
+    }
+    folder_total_file = fsn->file_number;
+    y_printf(">>>[test]:total = %d\n", folder_total_file);
+    for (int i = folder_total_file; i >= 1; i--) {
+        if (!dir_flag) {
+            d_err = vfs_select(pvfs, &pvfile, fsn, FSEL_BY_NUMBER, folder_total_file - i + 1); //加速处理，不用找到最后一个文件。
+        } else {
+            d_err = vfs_select(pvfs, &pvfile, fsn, FSEL_BY_NUMBER, i);
+        }
+        if (pvfile == NULL) {
+            r_printf(">>>[test]:err!! select file err\n");
+            return 1;
+        }
+        putchar('D');
+        d_err = vfs_file_delete(pvfile);
+        if (d_err || pvfile == NULL) {
+            r_printf(">>>[test]:err!! delete file err\n");
+            return 1;
+        }
+        vfs_file_close(&pvfile);
+        pvfile = NULL;
+    }
+    return 0;
+}
+
+
+/* --------------------------------------------------------------------------*/
+/** @brief:文件夹删除处理
+ *
+ * @param pvfs 文件系统挂载后的句柄
+ * @param path 需要删除的文件夹的路径
+ * @author:phewlee
+ * @note:
+ * @date: 2024-09-05,10:16
+ * @return
+ */
+/* ----------------------------------------------------------------------------*/
+int vfs_delete_dir(void *pvfs, char *path)
+{
+    int err = 0;
+    struct __dev *dev;
+    void *pvfile = NULL;
+    /* char path[128] = {0}; */
+
+    static const u8 delete_file_param[] = "-t"
+                                          "ALL"
+                                          " -sn -r";
+
+    static const u8 delete_folder_param[] = "-t"
+                                            "ALL"
+                                            " -sn -d -r";
+
+#if 0
+    dev = dev_manager_find_spec(dev_logo, 0);
+    if (dev == NULL) {
+        r_printf(">>>[test]:errr!!!!!!!!! not find dev\n");
+        return 1;
+    }
+    char *root_path = dev_manager_get_root_path(dev);
+    memcpy(path, root_path, strlen(root_path));
+    memcpy(path + strlen(root_path), folder, folder_len);
+#endif
+    r_printf(">>>[test]:path = %s\n", path);
+    err = vfs_delete_deal(pvfs, path, (char *)delete_file_param, 0);
+    if (err) {
+        r_printf(">>>[test]:errr!!!!!!!!! delete file deal fail\n");
+        return 1;
+    }
+    err = vfs_delete_deal(pvfs, path, (char *)delete_folder_param, 1);
+    if (err) {
+        r_printf(">>>[test]:errr!!!!!!!!! delete folder  deal fail\n");
+        return 1;
+    }
+    err = vfs_openbypath(pvfs, &pvfile, path);
+    if (pvfile == NULL) {
+        r_printf(">>>[test]:err open folder\n");
+        return 1;
+    }
+    err = vfs_file_delete(pvfile);
+    vfs_file_close(&pvfile);
+    return err;
+}
+
+int vfs_format(void **ppvfs, const char *dev_name, const char *type, u32 clust_size, u8 create_new)
+{
+    if ((void *)NULL == *ppvfs) {
+        if (clust_size == 0) {
+            return E_NO_VFS;
+        }
+        *ppvfs = vfs_hdl_malloc();
+        if ((void *)NULL == *ppvfs) {
+            return E_NO_VFS;
+        }
+    }
+    int err;
+    void *device = dev_open(dev_name, NULL);
+    if (device == NULL) {
+        log_info("dev null !!!! \n");
+        return E_DEV_NULL;
+    }
+
+    struct vfs_operations *ops;
+    struct imount *pvfs = *ppvfs;
+    list_for_each_vfs_operation(ops) {
+        //log_info("%s, %s", ops->fs_type, type);
+        if (0 == strcmp(ops->fs_type, type)) {
+            pvfs->ops = ops;
+            break;
+        }
+    }
+    if (pvfs->ops == NULL) {
+        return E_NO_FS;
+    }
+
+    ops = pvfs->ops;
+    if (NULL != ops->format) {
+        err = ops->format(&(pvfs->pfs), device, clust_size, create_new);
+    } else {
+        err = E_VFS_OPS;
+    }
+    if (err) {
+        log_info("f_format: err = %x\n", err);
+    }
+
+    if (device) {
+        dev_ioctl(device, IOCTL_FLUSH, 0);
+    }
+
+    //全部释放，format之后需要使用mount
+    if (pvfs->pfs) {
+        pvfs->pfs = fat_fshdl_free(pvfs->pfs);
+    }
+    if (pvfs->pfile) {
+        pvfs->pfile = fat_fhdl_free(pvfs->pfile);
+    }
+    *ppvfs = vfs_fhdl_free(*ppvfs);
+    dev_close(device);
+    return err;
+}
 

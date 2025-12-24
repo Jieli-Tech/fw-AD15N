@@ -9,18 +9,25 @@
 #include "circular_buf.h"
 #include "a_encoder.h"
 #include "mp3_encoder.h"
+#include "app_modules.h"
 
 
 #define LOG_TAG_CONST       NORM
 #define LOG_TAG             "[normal]"
 #include "log.h"
 
+#if (defined(ANS_EN) && (ANS_EN))
+#include "ans_api.h"
+cbuffer_t cbuf_ans AT(.ans_data);
+u32 ans_buff[512 * 5 / 4] AT(.ans_data);
+#endif
 
 cbuffer_t cbuf_adc AT(.rec_data);
-u8 adc_buff[512 * 10] AT(.rec_data) ;
+u32 adc_buff[512 * 10 / 4] AT(.rec_data) ;
 
 #if (0 == FPGA)
 sound_out_obj rec_sound;
+sound_out_obj enc_in_sound;
 
 #define START_ADC_RUN  rec_sound.enable |= (B_DEC_RUN_EN | B_REC_RUN)
 #define STOP_ADC_RUN  rec_sound.enable &= ~(B_DEC_RUN_EN | B_REC_RUN)
@@ -29,12 +36,28 @@ sound_out_obj rec_sound;
 void rec_phy_init(void)
 {
     memset(&rec_sound, 0, sizeof(rec_sound));
+    memset(&enc_in_sound, 0, sizeof(enc_in_sound));
     cbuf_init(&cbuf_adc, &adc_buff[0], sizeof(adc_buff));
+    enc_in_sound.p_obuf = &cbuf_adc;
     rec_sound.p_obuf = &cbuf_adc;
-    regist_audio_adc_channel(&rec_sound, (void *) kick_encode_api); //注册到DAC;
+
+#if (defined(ANS_EN) && (ANS_EN))
+    cbuf_init(&cbuf_ans, &ans_buff[0], sizeof(ans_buff));
+    enc_in_sound.p_obuf = &cbuf_ans;
+
+    ans_init(&cbuf_adc, &cbuf_ans, kick_encode_api);
+    regist_audio_adc_channel(&rec_sound, (void *) ans_check_kick_start); //注册到ADC;
+#else
+    regist_audio_adc_channel(&rec_sound, (void *) kick_encode_api); //注册到ADC;
+
+#endif
 }
 void rec_phy_suspend(void)
 {
+
+#if (defined(ANS_EN) && (ANS_EN))
+    ans_deinit();
+#endif
     unregist_audio_adc_channel(&rec_sound);
 }
 

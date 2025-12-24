@@ -27,6 +27,7 @@ static Encode_Control record_obj;
 
 void toy_record_app(void)
 {
+    log_info("toy_record mode\n");
     int msg[2];
     u32 err = 0;
     dec_obj *p_dec_obj = 0;

@@ -28,9 +28,9 @@ EXT_CFLAGS  := # Windows 下不需要 -D__SHELL__
 export PATH:=$(TOOL_DIR);$(PATH)
 
 ## 后处理脚本
-FIXBAT          := tools\utils\fixbat.exe # 用于处理 utf8->gbk 编码问题
-POST_SCRIPT     := app\post_build\sh55\download.bat
-RUN_POST_SCRIPT := $(POST_SCRIPT)
+FIXBAT          := tools/utils/fixbat.exe # 用于处理 utf8->gbk 编码问题
+POST_SCRIPT     := app/post_build/sh55/download.bat
+RUN_POST_SCRIPT := app\post_build\sh55\download.bat
 else
 # Linux 下工具链位置
 TOOL_DIR := /opt/jieli/pi32/bin
@@ -180,6 +180,8 @@ INCLUDES := \
 	-Iinclude_lib/ex_mcu \
 	-Iinclude_lib/agreement \
 	-Iapp/src/voice_toy/sh55 \
+	-Iapp/bsp/common/midi_open/midi_2byte \
+	-Iapp/bsp/common/midi_open/pi32_lto \
 	-I$(SYS_INC_DIR) \
 
 
@@ -205,10 +207,14 @@ c_SRC_FILES := \
 	app/bsp/common/key/key_drv_ad.c \
 	app/bsp/common/key/key_drv_io.c \
 	app/bsp/common/key/key_ir.c \
+	app/bsp/common/midi_open/midi_2byte/midi_dec.c \
+	app/bsp/common/midi_open/midi_2byte/midi_event.c \
+	app/bsp/common/midi_open/midi_2byte/midi_play.c \
 	app/bsp/common/msg/msg.c \
 	app/bsp/common/norflash/norflash.c \
 	app/bsp/common/power_manage/app_power_mg.c \
 	app/bsp/common/rtc/rtc.c \
+	app/bsp/common/sound_mge/sound_mge.c \
 	app/bsp/common/uart_update/uart_update.c \
 	app/bsp/common/vm/new_vm/nvm_api.c \
 	app/bsp/common/vm/old_vm/ovm_api.c \
@@ -221,12 +227,14 @@ c_SRC_FILES := \
 	app/bsp/cpu/sh55/irflt.c \
 	app/bsp/cpu/sh55/led_spi.c \
 	app/bsp/cpu/sh55/mcpwm.c \
+	app/bsp/cpu/sh55/pl_cnt.c \
 	app/bsp/cpu/sh55/port_init.c \
 	app/bsp/cpu/sh55/port_wkup.c \
 	app/bsp/cpu/sh55/power_api.c \
 	app/bsp/cpu/sh55/spi1.c \
 	app/bsp/cpu/sh55/uart.c \
 	app/bsp/cpu/sh55/uart_dev.c \
+	app/bsp/cpu/sh55/vddio_trim.c \
 	app/bsp/lib/audio.c \
 	app/bsp/lib/common.c \
 	app/bsp/lib/dac_api.c \
@@ -293,8 +301,11 @@ LFLAGS := \
 	--gc-sections \
 	include_lib/liba/sh55/voice_toy/old_vm_lib.a \
 	include_lib/liba/sh55/voice_toy/new_vm_lib.a \
+	include_lib/liba/ARCH/pi32_lto/lib_midi_synth.a \
+	include_lib/liba/ARCH/pi32_lto/lib_limiter.a \
 	--start-group \
 	include_lib/liba/sh55/voice_toy/cpu_lib.a \
+	include_lib/liba/sh55/voice_toy/address_lib.a \
 	include_lib/liba/sh55/voice_toy/efuse_trim_value_lib.a \
 	include_lib/liba/sh55/voice_toy/fs_lib.a \
 	include_lib/liba/sh55/voice_toy/audio_lib.a \
@@ -306,8 +317,6 @@ LFLAGS := \
 	include_lib/liba/sh55/voice_toy/uart_update_lib.a \
 	include_lib/liba/sh55/voice_toy/agreement.a \
 	include_lib/liba/ARCH/pi32_lto/lib_f1a_decode.a \
-	include_lib/liba/ARCH/pi32_lto/lib_midi_decode.a \
-	include_lib/liba/ARCH/pi32_lto/lib_limiter.a \
 	include_lib/liba/ARCH/pi32_lto/lib_a_decode.a \
 	include_lib/liba/sh55/voice_toy/sdmmc_lib.a \
 	include_lib/liba/sh55/voice_toy/dual_bank_lib.a \
@@ -401,37 +410,31 @@ endif
 $(BUILD_DIR)/%.c.o : %.c
 	$(info +CC $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.S.o : %.S
 	$(info +AS $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.s.o : %.s
 	$(info +AS $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.cpp.o : %.cpp
 	$(info +CXX $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.cxx.o : %.cxx
 	$(info +CXX $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 $(BUILD_DIR)/%.cc.o : %.cc
 	$(info +CXX $<)
 	$(QUITE) $(MKDIR) $(@D)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MM -MT $@ $< -o $(@:.o=.d)
-	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+	$(QUITE) $(CXX) $(CXXFLAGS) $(CFLAGS) $(DEFINES) $(INCLUDES) -MMD -MF $(@:.o=.d) -c $< -o $@
 
 -include $(DEP_FILES)

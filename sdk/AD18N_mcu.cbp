@@ -85,9 +85,6 @@
 <Unit filename="app/bsp/cpu/ch58/power_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/ch58/power_trim.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/ch58/uart.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/cpu/ch58/uart_types.h" />
-<Unit filename="app/bsp/cpu/ch58/uart_v2.c"><Option compilerVer="CC"/></Unit>
-<Unit filename="app/bsp/cpu/ch58/uart_v2.h" />
 <Unit filename="app/bsp/lib/common.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/start/ch58/init.h" />
 <Unit filename="app/src/mcu/app_config.c"><Option compilerVer="CC"/></Unit>
@@ -137,6 +134,8 @@
 <Unit filename="include_lib/cpu/ch58/sfr.h" />
 <Unit filename="include_lib/cpu/ch58/typedef.h" />
 <Unit filename="include_lib/cpu/ch58/uart.h" />
+<Unit filename="include_lib/cpu/ch58/uart_types.h" />
+<Unit filename="include_lib/cpu/uart_v2.h" />
 <Unit filename="include_lib/dev_mg/atomic.h" />
 <Unit filename="include_lib/dev_mg/dev_manage.h" />
 <Unit filename="include_lib/dev_mg/device.h" />

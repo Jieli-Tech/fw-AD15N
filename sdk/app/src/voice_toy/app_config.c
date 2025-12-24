@@ -37,6 +37,7 @@ const char MIC_RES_BUILT_IN = 1;
 //11000:NA;     11001:2.6; 11010:5.6; 11011:2.208; 11100:7.6; 11101:2.4;   11110:3.73;  11111:1.99;
 //000001:0.85k; 0000001:0.35k
 const char MIC_RES_IN       = 7;    //内置MIC的电阻,低3bit不能为0
+const char MIC_RES_OUT      = 8;    //外置MIC的电阻,低3bit不能为0
 const char MIC_0DB          = 1;    //MIC_0db_11V   0:6db   1:0db
 const char MIC_LDO_V        = 2;    //MICLDO_VOLSEL_11V   0:1.8V; 1:2.1V; 2:2.4V; 3:2.7V;
 //MIC_PGA_G_11V[4:0] x0000: 0dB x0001:2dB x0010:4db   .... x1110: 28db
@@ -62,10 +63,13 @@ const char GPIO_CRITICAL_OPT = TRUE; //TRUE:有关中断临界保护    FALSE:�
 
 #if (DECODER_MIDI_EN | DECODER_MIDI_KEYBOARD_EN)
 //midi主轨选择方式
-const int MAINTRACK_USE_CHN = 0;    //0:用track号来区分  1:用channel号来区分。
-const int MAX_DEC_PLAYER_CNT = 8;   //midi乐谱解码最大同时发声的key数,范围[1,31]
-const int MAX_CTR_PLAYER_CNT = 8;  //midi琴最大同时发声的key数,范围[1,31]
-const int NOTE_OFF_TRIGGER = 0;     //midi琴note_off回调 1：time传0时，不会回调 0：time传0时，回调
+#include "list/midi_api.h"
+#include "list/midi_ctrl.h"
+const int MAINTRACK_USE_CHN  = 0;    //0:用track号来区分  1:用channel号来区分。
+const int MAX_DEC_PLAYER_CNT = MIDI_DEC_MAX_KEY;    //midi乐谱解码最大同时发声的key数,范围[1,31]
+const int MAX_CTR_PLAYER_CNT = MIDI_CTRL_MAX_KEY;    //midi琴最大同时发声的key数,范围[1,31]
+const int NOTE_OFF_TRIGGER   = 0;    //midi琴note_off回调 1：time传0时，不会回调 0：time传0时，回调
+/* const int MIDI_MAX_MARK_CNT  = 0;    //midi解码最大支持的mark数 */
 #endif
 
 //升级使用的区域，0：VM区， 1：eeprom区
@@ -81,11 +85,12 @@ const u8 is_sdx_active_cnt_max = 20;
 
 //浮点打印，仅仅作用在AD17N,AD18N
 const int printf_support_float = 0;
-//内核异常打印
-const u8 config_asser = 1;
+//内核异常打印,为1时会断言，量产请配置到0
+const u8 config_asser = 0;
 //软件重采样quality影响运算速度,可选范围3~8,默认选8
 const u8 resample_quality  = 8;
 
+const u8 pdown_safe_mode = 0; //防止power_down ram掉数据，如power_down的ram有掉数据风险可打开
 /**
  * @brief Bluetooth Controller Log
  */

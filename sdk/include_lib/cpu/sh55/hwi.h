@@ -63,7 +63,7 @@ void bit_set_swi0(void);
 
 void interrupt_init();
 
-void irq_save(void);
+void irq_save(u32 bit_list);
 void irq_resume(void);
 void irq_enable(u8 index);
 void HWI_Install(unsigned char index, unsigned int isr, unsigned char priority);

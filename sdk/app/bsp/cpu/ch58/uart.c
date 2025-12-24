@@ -21,6 +21,9 @@
 #define     DEBUG_UART_INMAP    PFI_UART0_RX
 char ut_getchar(void)
 {
+    if (FALSE == libs_debug) {
+        return 0;
+    }
     char c;
     c = 0;
     if (DEBUG_UART->CON0 & BIT(14)) {
@@ -34,6 +37,9 @@ char ut_getchar(void)
 AT(..log_ut.text.cache.L2)
 void ut_putchar(char a)
 {
+    if (FALSE == libs_debug) {
+        return;
+    }
     u32 i = 0x10000;
     if (!(DEBUG_UART->CON0 & BIT(0))) {
         return;
@@ -49,6 +55,9 @@ void ut_putchar(char a)
 
 void uart_init(u32 fre)
 {
+    if (FALSE == libs_debug) {
+        return;
+    }
 
     SFR(JL_CLOCK->PRP_CON0, 16, 3, 0b001);
     if (UART_OUTPUT_CH_PORT < IO_PORT_MAX) {
@@ -100,6 +109,9 @@ static void uart_irq(uart_dev uart_num, enum uart_event event)
 #endif
 void uart_init(u32 freq)
 {
+    if (FALSE == libs_debug) {
+        return;
+    }
     struct uart_config debug_uart_config = {
         .baud_rate = freq/*TCFG_UART_BAUDRATE*/,
         .tx_pin = TCFG_UART_TX_PORT,
@@ -119,6 +131,9 @@ void uart_init(u32 freq)
 AT(..log_ut.text.cache.L2)
 static void ut_putchar(char a)
 {
+    if (FALSE == libs_debug) {
+        return;
+    }
 #if DEBUG_UART_DMA_EN
 
     debug_uart_buf[uart_buffer_index][pos] = a;
@@ -141,6 +156,9 @@ static void ut_putchar(char a)
 
 static char ut_getchar(void)
 {
+    if (FALSE == libs_debug) {
+        return 0;
+    }
     return uart_getbyte(DEBUG_UART_NUM);
 }
 #endif

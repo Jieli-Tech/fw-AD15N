@@ -3,16 +3,10 @@
 
 
 #define LOG_TAG_CONST       NORM
-#define LOG_TAG             "[normal]"
+#define LOG_TAG             "[vfs]"
 #include "log.h"
 
 
-
-extern struct vfs_operations vfs_ops_begin[];
-extern struct vfs_operations vfs_ops_end[];
-
-#define list_for_each_vfs_operation(ops) \
-	for (ops=vfs_ops_begin; ops<vfs_ops_end; ops++)
 
 
 

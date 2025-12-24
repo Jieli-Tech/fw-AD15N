@@ -12,13 +12,15 @@
 #if defined(PITCHSHIFT_HOWLING_EN) && (PITCHSHIFT_HOWLING_EN)
 /* sdk需要添加这个定义，代表滤波器阶数参数: 配置范围为2<=>8，它的大小跟运算量成正相关 */
 const int FRESHIFT_SPEED_MODE_QUALITY = 2;
+const int FRESHIFT_USE_LONG_FILTER = 1;
+const int FRESHIFT_USE_BAND_RESTICT = 1;
 u32 howling_work_buf[(1980 + 3) / 4] AT(.howling_data);
 
 void *pitchshift_howling_api(void *obuf, u32 sr, void **ppsound)
 {
     HOWLING_PITCHSHIFT_PARM phparm  = {0};
     phparm.ps_parm                  = -200; //等比移频，建议范围：-350到350，归一化系数为8192
-    phparm.fs_parm                  = -10;  //线性移频，建议范围：-10到10(Hz)
+    phparm.fs_parm                  = -10;  //线性移频，单位Hz，移频方式要选择FS，移动多少Hz就配多少Hz，向高频移取正数，向低频移取负数，配置的采样率要和声音输入源的采样率一致
     phparm.effect_v                 = EFFECT_HOWLING_PS; //选择需要的移频方式
 
     HOWLING_PITCHSHIFT_FUNC_API *ops;
@@ -49,6 +51,12 @@ void *link_pitchshift_howling_sound(void *p_sound_out, void *p_dac_cbuf, void **
         log_info("echo init fail\n");
     }
     return p_curr_sound;
+}
+
+/* 动态更新线性移频参数 */
+void update_howling_parm_fs_api(u32 sr, s16 new_fs)
+{
+    update_howling_parm_fs(&howling_work_buf[0], sr, new_fs);
 }
 #endif
 

@@ -3,6 +3,7 @@
 #include "usb/device/msd.h"
 #include "usb/scsi.h"
 #include "usb/device/hid.h"
+#include "usb/device/cdc.h"
 #include "usb/device/uac_audio.h"
 #include "irq.h"
 #include "gpio.h"
@@ -103,6 +104,13 @@ int usb_device_mode(const usb_dev usb_id, const u32 class)
         msd_register(usb_id);
         usb_add_desc_config(usb_id, class_index++, msd_desc_config);
         log_info("add desc msd");
+    }
+#endif
+#if USB_DEVICE_CLASS_CONFIG & CDC_CLASS
+    if ((class & CDC_CLASS) == CDC_CLASS) {
+        cdc_register(usb_id);
+        usb_add_desc_config(usb_id, class_index++, cdc_desc_config);
+        log_info("add desc std cdc");
     }
 #endif
 

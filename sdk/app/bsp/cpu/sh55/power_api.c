@@ -170,22 +170,38 @@ volatile extern u32 lowpower_usec;
    @return null
    @note
 */
+extern u8 pdown_wakeup_source;
 void sys_power_down(u32 usec)
 {
+    lowpower_init();
+
     /* 睡眠前vm预擦除 */
     vm_pre_erase();
     u8 temp_wdt_con = 0;
     u8 ret = 0;
     OS_ENTER_CRITICAL();
+__repdown:
     if (!sys_low_power_request) {
         temp_wdt_con = wdt_rx_con();
         if (usec == (u32) - 2) {
-            wdt_close();
+            if (pdown_safe_mode == 0) {
+                wdt_close();
+            }
         }
         lowpower_usec = usec;
         ret = low_power_sys_request(NULL);
-        wdt_tx_con(temp_wdt_con);
+        if (pdown_safe_mode == 0) {
+            wdt_tx_con(temp_wdt_con);
+        }
         wdt_clear();
+    }
+
+    //不是按键唤醒就重新进入休眠
+    if ((!(pdown_wakeup_source & BIT(1))) && pdown_safe_mode && usec == -2) {
+        pdown_wakeup_source = 0;
+        goto __repdown;
+    } else {
+        pdown_wakeup_source = 0;
     }
 
     if (ret == 0) {
@@ -203,10 +219,13 @@ void sys_power_down(u32 usec)
     }
 #endif
 
+    lowpower_uninit();
 }
 
 void sys_softoff()
 {
+    lowpower_init();
+
     /* 关机前vm预擦除 */
     vm_pre_erase();
     power_set_soft_poweroff();

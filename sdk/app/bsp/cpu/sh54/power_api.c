@@ -169,6 +169,8 @@ volatile extern u32 lowpower_usec;
 /*----------------------------------------------------------------------------*/
 void sys_power_down(u32 usec)
 {
+    lowpower_init();
+
     /* 睡眠前vm预擦除 */
     vm_pre_erase();
     u8 temp_wdt_con = 0;
@@ -213,10 +215,14 @@ void sys_power_down(u32 usec)
         dac_power_on(SR_DEFAULT, 0);
     }
 #endif
+
+    lowpower_uninit();
 }
 
 void sys_softoff()
 {
+    lowpower_init();
+
     /* 关机前vm预擦除 */
     vm_pre_erase();
     power_set_soft_poweroff();

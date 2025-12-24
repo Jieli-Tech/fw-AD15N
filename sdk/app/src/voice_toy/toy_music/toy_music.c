@@ -60,6 +60,7 @@ static const char dir_ext_vm_tab[EXT_DIR_NUM] = {
 
 void toy_music_app(void)
 {
+    log_info("toy_music mode\n");
 #if KEY_IR_EN
     Sys_IRInput = 1;
 #endif

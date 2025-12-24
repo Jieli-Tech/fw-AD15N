@@ -26,6 +26,9 @@
 //  SRC变采样功能使能
 #define HAS_HW_SRC_EN 1 //  硬件SRC
 
+//  ANS功能使能
+#define ANS_EN 0
+
 //  APP应用使能
 #define SIMPLE_DEC_EN 1 //  简单解码应用模式
 
@@ -46,4 +49,10 @@
 #define EXT_FLASH_EN 0 //  外挂资源flash使能
 
 //  文件系统
+#define MIDI_DEC_MAX_KEY 6
+#define MIDI_DEC_BUF_SIZE (3500 + 3)
+#define MIDI_CTRL_MAX_KEY 6
+#define MIDI_CTRL_BUF_SIZE 3596
+#define MARK_PLAY_ENABLE 0
+#define CHANNEL_PROG_SET 0
 #endif

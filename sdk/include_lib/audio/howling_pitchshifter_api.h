@@ -36,6 +36,7 @@ typedef struct _HOWLING_PITCHSHIFT_FUNC_API_ {
 extern HOWLING_PITCHSHIFT_FUNC_API *get_howling_ps_func_api();
 
 void *link_pitchshift_howling_sound(void *p_sound_out, void *p_dac_cbuf, void **pp_effect, u32 sr);
+void update_howling_parm_fs_api(u32 sr, s16 new_fs);
 
 #endif // reverb_api_h__
 

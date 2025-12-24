@@ -9,7 +9,7 @@
 #include "dac.h"
 #include "ump3_api.h"
 #include "midi_api.h"
-#include "list/midi_ctrl_api.h"
+#include "list/midi_ctrl.h"
 #include "f1a_api.h"
 #include "a_api.h"
 #include "mp3_standard_api.h"

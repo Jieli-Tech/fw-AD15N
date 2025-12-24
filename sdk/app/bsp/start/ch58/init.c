@@ -25,7 +25,7 @@
 #include "mio_api.h"
 #include "sine_play.h"
 #include "flash_wp.h"
-/* #include "list/midi_ctrl_api.h" */
+/* #include "list/midi_ctrl.h" */
 /* #include "efuse_trim_value.h" */
 
 #define LOG_TAG_CONST       NORM

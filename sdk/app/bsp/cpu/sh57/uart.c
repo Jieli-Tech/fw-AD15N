@@ -17,6 +17,9 @@
 AT(..log_ut.text.cache.L2)
 void ut_putchar(char a)
 {
+    if (FALSE == libs_debug) {
+        return;
+    }
     u32 i = 0x10000;
     if (!(DEBUG_UART->CON0 & BIT(0))) {
         return;
@@ -32,6 +35,9 @@ void ut_putchar(char a)
 
 char ut_getchar(void)
 {
+    if (FALSE == libs_debug) {
+        return 0;
+    }
     char c;
     c = 0;
     if (DEBUG_UART->CON0 & BIT(14)) {
@@ -45,6 +51,9 @@ char ut_getchar(void)
 
 void uart_init(u32 fre)
 {
+    if (FALSE == libs_debug) {
+        return;
+    }
 
     SFR(JL_CLOCK->CLK_CON3, 3, 2, 0b01);
 #if (UART_TX_OUTPUT_CH_EN == 1)

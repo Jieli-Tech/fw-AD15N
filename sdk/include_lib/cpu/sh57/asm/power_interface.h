@@ -21,4 +21,6 @@
 
 #include "power/rtc.h"
 
+#include "power/lib_power_config.h"
+
 #endif

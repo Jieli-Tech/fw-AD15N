@@ -48,8 +48,10 @@ extern adc_obj adc_hdl;
 #define REC_ADC_CBUF  adc_hdl.p_adc_cbuf
 
 #else
-extern sound_out_obj rec_sound;
-#define REC_ADC_CBUF  rec_sound.p_obuf
+extern sound_out_obj enc_in_sound;
+// #define REC_ADC_CBUF  rec_sound.p_obuf
+#define REC_ADC_CBUF  enc_in_sound.p_obuf
+
 #endif
 
 #endif

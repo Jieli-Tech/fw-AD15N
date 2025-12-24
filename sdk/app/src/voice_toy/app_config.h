@@ -82,13 +82,13 @@
 /*---------USB Configuration---------------*/
 #if HAS_USB_EN
 
-#define TCFG_PC_ENABLE						DISABLE  //PC模块使能
+#define TCFG_PC_ENABLE                      DISABLE  //PC模块使能
 #define TCFG_USB_MSD_CDROM_ENABLE           DISABLE
 #define TCFG_USB_EXFLASH_UDISK_ENABLE       DISABLE  //外掛FLASH UDISK
-#define TCFG_UDISK_ENABLE					DISABLE //U盘模块使能
-#define TCFG_HID_HOST_ENABLE				DISABLE
-#define TCFG_ADB_ENABLE      				DISABLE
-#define TCFG_AOA_ENABLE      				DISABLE
+#define TCFG_UDISK_ENABLE                   DISABLE //U盘模块使能
+#define TCFG_HID_HOST_ENABLE                DISABLE
+#define TCFG_ADB_ENABLE                     DISABLE
+#define TCFG_AOA_ENABLE                     DISABLE
 #define TCFG_PUSH_CODE_ENABLE               DISABLE  //该功能需要关闭OTG使能
 
 #else

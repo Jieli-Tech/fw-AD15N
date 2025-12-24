@@ -1174,6 +1174,12 @@ u32 uac_audio_desc_config(const usb_dev usb_id, u8 *ptr, u32 *cur_itf_num)
     u32 offset;
     u32 frame_len;
 
+    memcpy(tptr, (u8 *)uac_spk_interface_association, sizeof(uac_spk_interface_association));
+    tptr[2] = *cur_itf_num;
+    tptr[3] = 3;
+    tptr[5] = USB_SUBCLASS_AUDIOCONTROL;
+    tptr += sizeof(uac_spk_interface_association);//0x09
+
     memcpy(tptr, (u8 *)uac_ac_standard_interface_desc, sizeof(uac_ac_standard_interface_desc));
     tptr[2] = *cur_itf_num;
     tptr += sizeof(uac_ac_standard_interface_desc);//0x09

@@ -93,6 +93,8 @@
 <Add directory="include_lib/ex_mcu" />
 <Add directory="include_lib/agreement" />
 <Add directory="app/src/voice_toy/sh57" />
+<Add directory="app/bsp/common/midi_open/midi_2byte" />
+<Add directory="app/bsp/common/midi_open/pi32_lto" />
 </Compiler>
 <Linker>
 <Add option="--plugin-opt=save-temps" />
@@ -100,9 +102,12 @@
 <Add option="--gc-sections" />
 <Add option="include_lib/liba/sh57/voice_toy/old_vm_lib.a" />
 <Add option="include_lib/liba/sh57/voice_toy/new_vm_lib.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_midi_synth.a" />
+<Add option="include_lib/liba/ARCH/pi32_lto/lib_limiter.a" />
 <Add option="include_lib/liba/sh57/voice_toy/printf_lib.a" />
 <Add option="--start-group" />
 <Add option="include_lib/liba/sh57/voice_toy/cpu_lib.a" />
+<Add option="include_lib/liba/sh57/voice_toy/address_lib.a" />
 <Add option="include_lib/liba/sh57/voice_toy/fs_lib.a" />
 <Add option="include_lib/liba/sh57/voice_toy/audio_lib.a" />
 <Add option="include_lib/liba/sh57/voice_toy/src_lib.a" />
@@ -111,8 +116,6 @@
 <Add option="include_lib/liba/sh57/voice_toy/dev_mg_lib.a" />
 <Add option="include_lib/liba/sh57/voice_toy/malloc_lib.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_f1a_decode.a" />
-<Add option="include_lib/liba/ARCH/pi32_lto/lib_midi_decode.a" />
-<Add option="include_lib/liba/ARCH/pi32_lto/lib_limiter.a" />
 <Add option="include_lib/liba/ARCH/pi32_lto/lib_a_decode.a" />
 <Add option="include_lib/liba/sh57/voice_toy/dual_bank_lib.a" />
 <Add option="--end-group" />
@@ -154,6 +157,11 @@
 <Unit filename="app/bsp/common/key/key_ir.h" />
 <Unit filename="app/bsp/common/key/key_touch.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/key/key_touch.h" />
+<Unit filename="app/bsp/common/midi_open/midi_2byte/MIDIDefs.h" />
+<Unit filename="app/bsp/common/midi_open/midi_2byte/midi_dec.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/midi_open/midi_2byte/midi_dec.h" />
+<Unit filename="app/bsp/common/midi_open/midi_2byte/midi_event.c"><Option compilerVer="CC"/></Unit>
+<Unit filename="app/bsp/common/midi_open/midi_2byte/midi_play.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/msg/msg.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/norflash/norflash.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/norflash/norflash.h" />
@@ -161,6 +169,7 @@
 <Unit filename="app/bsp/common/power_manage/app_power_mg.h" />
 <Unit filename="app/bsp/common/rtc/rtc.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/sdk_cfg.h" />
+<Unit filename="app/bsp/common/sound_mge/sound_mge.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/common/spi_soft/spi_soft.h" />
 <Unit filename="app/bsp/common/usb/usr/usb_audio_interface.h" />
 <Unit filename="app/bsp/common/vm/new_vm/nvm_api.c"><Option compilerVer="CC"/></Unit>
@@ -173,6 +182,7 @@
 <Unit filename="app/bsp/cpu/sh57/iic_hw.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh57/irflt.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh57/irflt.h" />
+<Unit filename="app/bsp/cpu/sh57/lib_power_config.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh57/mcpwm.c"><Option compilerVer="CC"/></Unit>
 <Unit filename="app/bsp/cpu/sh57/mcpwm.h" />
 <Unit filename="app/bsp/cpu/sh57/pl_cnt.c"><Option compilerVer="CC"/></Unit>
@@ -272,11 +282,13 @@
 <Unit filename="include_lib/common/vm_sfc.h" />
 <Unit filename="include_lib/common/wdt.h" />
 <Unit filename="include_lib/cpu/sh57/adc_drv.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power/lib_power_config.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/p33_access.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/p33_api.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/p33_sfr.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/power_api.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/power_app.h" />
+<Unit filename="include_lib/cpu/sh57/asm/power/power_manage.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/power_port.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/power_reset.h" />
 <Unit filename="include_lib/cpu/sh57/asm/power/power_trim.h" />
@@ -312,7 +324,7 @@
 <Unit filename="include_lib/decoder/list/a_api.h" />
 <Unit filename="include_lib/decoder/list/f1a_api.h" />
 <Unit filename="include_lib/decoder/list/midi_api.h" />
-<Unit filename="include_lib/decoder/list/midi_ctrl_api.h" />
+<Unit filename="include_lib/decoder/list/midi_ctrl.h" />
 <Unit filename="include_lib/decoder/list/mio_api.h" />
 <Unit filename="include_lib/decoder/list/mp3_standard_api.h" />
 <Unit filename="include_lib/decoder/list/ump3_api.h" />

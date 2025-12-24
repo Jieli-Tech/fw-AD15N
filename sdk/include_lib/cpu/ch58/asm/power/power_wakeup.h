@@ -91,4 +91,6 @@ void p33_io_wkup_index_init(u8 index, const struct p33_io_wkup_config *port);
 void p33_io_wakeup_set_callback(void (*callback)(u8 index));
 
 void lvd_wakeup_set_callback(void (*callback)());
+
+u8 is_wakeup_source(enum WAKEUP_REASON index);
 #endif

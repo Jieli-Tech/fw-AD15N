@@ -83,6 +83,11 @@ void fill_audio_adc_fill(u8 *buf, u32 len)
         if (NULL !=  audio_adc_mge.kick[i]) {
             audio_adc_mge.kick[i](audio_adc_mge.sound[i]);
         }
+
+        /* 把adc采集到的数据和其长度传入分贝检测run函数 */
+        /* (使用前需要做分贝检测初始化) */
+        /* energe_run_api(buf, len); */
+
         /* kick_encode_api(); */
         /* } */
 

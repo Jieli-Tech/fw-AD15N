@@ -170,10 +170,10 @@ const u16 iokey_msg_midi_keyboard_table[][IO_KEY_MAX_NUM] = {
 
 #if KEY_AD_EN
 #define ADKEY_MIDI_CTRL_SHORT_UP \
-							/*00*/		NO_MSG,\
-							/*01*/		NO_MSG,\
-							/*02*/		NO_MSG,\
-							/*03*/		NO_MSG,\
+							/*00*/		MSG_MIDICTRL_NOTE_OFF_DO,\
+							/*01*/		MSG_MIDICTRL_NOTE_OFF_RE,\
+							/*02*/		MSG_MIDICTRL_NOTE_OFF_MI,\
+							/*03*/		MSG_MIDICTRL_NOTE_OFF_FA,\
 							/*04*/		MSG_VOL_DOWN,\
 							/*05*/		MSG_VOL_UP,\
 							/*06*/		MSG_MIDICTRL_CHANNAL_PREV,\

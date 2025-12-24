@@ -42,7 +42,7 @@ int c_main(int cfg_addr)
 
     log_init(1000000);
 
-    log_info("---------sh5x apps------------ \n");
+    log_info("----------sh5x apps------------\n");
 
     p33_tx_1byte(P3_PINR_CON, 0);
 

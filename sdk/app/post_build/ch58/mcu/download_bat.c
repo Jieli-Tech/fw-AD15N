@@ -34,7 +34,11 @@ isd_download.exe -tonorflash -dev cd09 -boot 0x3f01000 -div8 -wait 300 -uboot ub
 @rem -reboot 500
 
 @REM //烧写外置flash 命令说明：
-@rem -ex_flash
+@rem -ex_flash dir_song_ext
+@rem -ex_flash 烧写到外挂flash命令
+@rem dir_song_ext 经过两次打包的资源文件
+
+@rem 打包工具 ：packres.exe -n res -o dir_song_ext dir_song 0 -normal
 
 ping /n 2 127.1>null
 IF EXIST null del null
