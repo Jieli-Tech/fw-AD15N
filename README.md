@@ -51,6 +51,8 @@ AD14N-AD15N-AD17N-AD18N-AC104 系列通用MCU SDK 固件程序
 
 * FAE 支持文档 : [FAE支持](https://gitee.com/jieli-tech_fae/fw-jl)
 
+* MIDI 应用开发手册 : [MIDI应用开发手册](https://doc.zh-jieli.com/MIDI/zh-cn/master/index.html)
+
 
 
 编译工程
