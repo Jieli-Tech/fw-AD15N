@@ -87,6 +87,94 @@ Packaging, audio file conversion, midi and other general audio tools
 
 * [download link](https://pan.baidu.com/s/1ajzBF4BFeiRFpDF558ER9w#list/path=%2F) code: `3jey`
   
+SDK Framework
+-------------
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                        Application Layer                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                   │
+│  │  voice_toy   │  │     mcu      │  │   mbox_mg    │                   │
+│  │  (Voice Toy) │  │ (Generic MCU)│  │ (Music Box)  │                   │
+│  │              │  │              │  │              │                   │
+│  │ toy_music    │  │ mcu_app      │  │ music        │                   │
+│  │ toy_midi     │  │              │  │ fm           │                   │
+│  │ toy_record   │  │              │  │ rec          │                   │
+│  │ toy_linein   │  │              │  │ line_in      │                   │
+│  │ toy_speaker  │  │              │  │ loudspeaker  │                   │
+│  │ toy_idle     │  │              │  │ usb_device   │                   │
+│  │ toy_usb_slave│  │              │  │              │                   │
+│  │ toy_softoff  │  │              │  │              │                   │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘                   │
+└─────────┼─────────────────┼─────────────────┼───────────────────────────┘
+          │                 │                 │
+┌─────────┴─────────────────┴─────────────────┴───────────────────────────┐
+│                     BSP Layer (Board Support Package)                    │
+│  ┌─────────────────────────────────────────────────────────────────┐    │
+│  │                   Common Modules (common/)                      │    │
+│  │                                                                 │    │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐          │    │
+│  │  │ decoder  │ │ encoder  │ │   VFS    │ │   key    │          │    │
+│  │  │ A/F1A/   │ │ A/MP3/   │ │(Virtual  │ │ IO/AD/   │          │    │
+│  │  │ MP3/MIDI │ │ UMP3     │ │FS: FAT/  │ │ Matrix/  │          │    │
+│  │  │ WAV/F1X  │ │          │ │ NORFS/   │ │ IR/Touch │          │    │
+│  │  │          │ │          │ │ SYDF     │ │          │          │    │
+│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘          │    │
+│  │                                                                 │    │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐          │    │
+│  │  │   msg    │ │ norflash │ │   USB    │ │  sound   │          │    │
+│  │  │ (Message)│ │(Ext Flash)│ │(device/  │ │  effect  │          │    │
+│  │  │          │ │          │ │ host/usr)│ │(Howling/ │          │    │
+│  │  │          │ │          │ │          │ │ Echo/EQ) │          │    │
+│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘          │    │
+│  │                                                                 │    │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐          │    │
+│  │  │ midi_open│ │    VM    │ │    FM    │ │ speaker  │          │    │
+│  │  │(MIDI src)│ │(Virtual  │ │(FM Radio)│ │ (PA spk) │          │    │
+│  │  │          │ │ Memory)  │ │          │ │          │          │    │
+│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘          │    │
+│  └─────────────────────────────────────────────────────────────────┘    │
+│                                                                         │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐                  │
+│  │   sh54   │ │   sh55   │ │   sh57   │ │   ch58   │                  │
+│  │ (AD14N)  │ │ (AD15N)  │ │ (AD17N)  │ │ (AD18N)  │                  │
+│  │ CPU Drv: │ │ CPU Drv: │ │ CPU Drv: │ │ CPU Drv: │                  │
+│  │ SPI/IIC/ │ │ SPI/IIC/ │ │ SPI/IIC/ │ │ SPI/IIC/ │                  │
+│  │ UART/ADC │ │ UART/ADC │ │ UART/ADC │ │ UART/ADC │                  │
+│  │ DAC/PWM  │ │ DAC/PWM  │ │ DAC/PWM  │ │ LCD      │                  │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘                  │
+└─────────────────────────────────────────────────────────────────────────┘
+          │
+┌─────────┴───────────────────────────────────────────────────────────────┐
+│                       Library Layer (include_lib)                        │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐                  │
+│  │  audio   │ │ decoder  │ │ encoder  │ │    fs    │                  │
+│  │ (Audio)  │ │(Decoder) │ │(Encoder) │ │(FS: FAT/ │                  │
+│  │ howling  │ │ MIDI/A/  │ │          │ │ NORFS/   │                  │
+│  │ echo/eq  │ │ MP3/F1A  │ │          │ │ SYDF)    │                  │
+│  │ speed/ans│ │ WAV/Lim  │ │          │ │          │                  │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘                  │
+│                                                                         │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐                  │
+│  │  device  │ │  update  │ │   cpu    │ │   msg    │                  │
+│  │ SDMMC/USB│ │(USB Dev  │ │(CPU Reg) │ │(Message) │                  │
+│  │          │ │ Upgrade) │ │          │ │          │                  │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘                  │
+│                                                                         │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │               liba/ Prebuilt Libraries (.a files)                │   │
+│  │  lib_midi_decode.a / lib_midi_synth.a / lib_howling_fs.a / ...  │   │
+│  └──────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────┘
+          │
+┌─────────┴───────────────────────────────────────────────────────────────┐
+│                       Hardware Layer                                     │
+│  RISC Core @160MHz  │  2Mbit Flash  │ 20K+8K RAM  │  DAC/ADC/PWM      │
+│  UART×2 / IIC / SPI×2 / SDIO / IR / Timer×3 / GPIO                    │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+
 SDK function
 -------------
 * Supports decoding and playback of built-in FLASH
