@@ -425,7 +425,7 @@ A: Use the `-j` flag for parallel compilation, e.g. `make -j4` (the number speci
 | 🎵 **MIDI Development Manual** | [MIDI Application Development Guide](https://doc.zh-jieli.com/MIDI/zh-cn/master/index.html) |
 | 📦 **FAE Support** | [FAE Support Repository](https://gitee.com/jieli-tech_fae/fw-jl) |
 | 🛒 **Dev Board / Flashing Tool Purchase** | [Jieli Official Store](https://shop321455197.taobao.com/) |
-| 🐛 **Issue Tracker** | [Gitee Issues](https://github.com/Jieli-Tech/fw-AD15N/issues) |
+| 🐛 **Issue Tracker** | [Github Issues](https://github.com/Jieli-Tech/fw-AD15N/issues) |
 
 ---
 
